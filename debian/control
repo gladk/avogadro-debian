@@ -6,7 +6,7 @@ Uploaders: Michael Banck <mbanck@debian.org>
 Build-Depends: cmake (>> 2.6.0),
                debhelper (>> 7.0.50~),
                libboost-python-dev,
-               libeigen3-dev,
+               libeigen2-dev (>> 2.0~beta6),
                libgl2ps-dev,
                libglew-dev,
                libopenbabel-dev (>> 2.2.0),
@@ -22,8 +22,8 @@ Build-Depends: cmake (>> 2.6.0),
 Standards-Version: 3.9.4
 X-Python-Version: current
 Homepage: http://avogadro.sourceforge.net/
-Vcs-Browser: http://anonscm.debian.org/viewvc/debichem/unstable/avogadro/
-Vcs-Svn: svn://anonscm.debian.org/debichem/unstable/avogadro/
+Vcs-Browser: http://anonscm.debian.org/viewvc/debichem/experimental/avogadro/
+Vcs-Svn: svn://anonscm.debian.org/debichem/experimental/avogadro/
 
 Package: avogadro
 Architecture: any
@@ -79,7 +79,7 @@ Architecture: any
 Section: libdevel
 Priority: extra
 Depends: libavogadro1 (= ${binary:Version}),
-         libeigen3-dev,
+         libeigen2-dev (>= 2.0~beta6),
          libglew-dev,
          libopenbabel-dev (>= 2.2.0),
          libqt4-dev (>= 4.4.0),
@@ -112,3 +112,18 @@ Description: Molecular Graphics and Modelling System (Python module)
  electrostatic potentials and features an intuitive molecular builder.
  .
  This package provides the Python module.
+
+Package: avogadro-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: avogadro (= ${binary:Version}),
+         libavogadro1 (= ${binary:Version}),
+         ${misc:Depends}
+Description: Molecular Graphics and Modelling System (debugging symbols)
+ Avogadro is a molecular graphics and modelling system targeted at small
+ to medium molecules.  It can visualize properties like molecular orbitals or
+ electrostatic potentials and features an intuitive molecular builder.
+ .
+ This package provides the debugging symbols for the library, the application
+ and modules.

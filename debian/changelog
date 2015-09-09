@@ -1,56 +1,51 @@
-avogadro (1.0.3-10.1) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * Replace eigen2 by eigen3. (Closes: #728610)
-
- -- Anton Gladky <gladk@debian.org>  Sun, 03 Nov 2013 16:28:19 +0100
-
-avogadro (1.0.3-10) unstable; urgency=low
+avogadro (1.1.0-4) experimental; urgency=low
 
   [ Daniel Leidert ]
   * debian/rules (override_dh_auto_configure): Drop setting of
-    -DPYTHON_INCLUDE_DIRS. This didn't work on other architectures than amd64.
+    -DPYTHON_INCLUDE_DIRS and fix the FTBFS too (really closes: #710703).
+  * debian/patches/use_python_include_dirs.patch: Reverted to 1.1.0-2.
   * debian/patches/series: Don't use the use_python_include_dirs.patch patch.
 
- -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sun, 02 Jun 2013 14:55:17 +0200
+ -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sun, 02 Jun 2013 21:39:03 +0200
 
-avogadro (1.0.3-9) unstable; urgency=low
-
-  [ Daniel Leidert ]
-  * debian/rules (override_dh_auto_configure): Try to fix the recently
-    introduced FTBFSes (really closes: #710703).
-  * debian/patches/use_python_include_dirs.patch: Reverted to 1.0.3-7.
-
- -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sun, 02 Jun 2013 02:30:46 +0200
-
-avogadro (1.0.3-8) unstable; urgency=low
+avogadro (1.1.0-3) experimental; urgency=low
 
   [ Daniel Leidert ]
   * debian/control (Vcs-Browser, Vcs-Svn): Fixed vcs-field-not-canonical.
   * debian/rules: Try to fix an FTBFS if several Python versions are installed
     (closes: Bug#710703) and don't FTBFS if there is no multi-arch Python.
-  * debian/patches/use_python_include_dirs.patch: Updated.
-    - Removed patch to cmake/modules/PythonDeps.cmake.
 
- -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sat, 01 Jun 2013 23:28:47 +0200
+ -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sat, 01 Jun 2013 23:50:49 +0200
 
-avogadro (1.0.3-7) unstable; urgency=low
+avogadro (1.1.0-2) experimental; urgency=low
 
   [ Daniel Leidert ]
-  * Ack NMU.
-  * debian/rules: Prepare for Python multiarch.
-    (override_dh_auto_configure): Adjusted likewise.
-  * debian/patches/use_python_include_dirs.patch: Enabled (closes: #708639).
-  * debian/patches/series: Adjusted.
+  * debian/rules (CPPFLAGS, LDFLAGS): Added -fPIC to fix FTBFS.
+  * debian/patches/use_python_include_dirs.patch: Minor fix to FindSIP.cmake
+    to fix FTBFS.
 
- -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Thu, 30 May 2013 00:04:44 +0200
+ -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Thu, 30 May 2013 00:09:24 +0200
 
-avogadro (1.0.3-6.1) unstable; urgency=low
+avogadro (1.1.0-1) experimental; urgency=low
 
-  * Non maintainer upload.
-  * Fix to build with the libpython multiarch location.
+  * New upstream release (LP: #1155529).
 
- -- Matthias Klose <doko@debian.org>  Fri, 17 May 2013 14:40:59 +0200
+  [ Daniel Leidert ]
+  * debian/avogadro-data.install: Added crystals directory.
+  * debian/control: Added a package for debugging symbols.
+    (Vcs-Browser, Vcs-Svn): Fixed location.
+  * debian/libavogadro-dev.install: Added pkg-config file.
+  * debian/rules: Enable debug package and remove python specific stuff.
+  * debian/watch: Catch experimental releases.
+  * debian/patches/hurd_ftbfs.patch: Removed (not applicable).
+  * debian/patches/nwchem_input_ccsd.patch: Dropped (applied upstream).
+  * debian/patches/boost148.patch: Updated.
+  * debian/patches/link_to_libgl2ps.patch: Updated.
+  * debian/patches/use_python_include_dirs.diff: Renamed to 
+    debian/patches/use_python_include_dirs.patch, updated and enabled.
+  * debian/patches/series: Updated.
+
+ -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Mon, 13 May 2013 23:06:32 +0200
 
 avogadro (1.0.3-6) unstable; urgency=low
 

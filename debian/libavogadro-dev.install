@@ -4,3 +4,4 @@ usr/lib/*.so
 usr/lib/avogadro/*.cmake
 usr/lib/avogadro/*/*.cmake
 usr/lib/avogadro/*/cmake
+usr/lib/pkgconfig
