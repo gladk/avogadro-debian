@@ -204,42 +204,31 @@ Origin: http://patches.ubuntu.com/a/avogadro/avogadro_1.0.3-5ubuntu5.patch
 -  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
 -
 -ENDFUNCTION(PYTHON_WRITE_MODULES_HEADER)
---- a/cmake/modules/PythonDeps.cmake
-+++ b/cmake/modules/PythonDeps.cmake
-@@ -56,7 +56,7 @@
- 
-   # SIP
-   message(STATUS "[5/5] SIP Module")
--  if (EXISTS ${PYTHON_INCLUDE_PATH}/sip.h)
-+  if (EXISTS ${PYTHON_INCLUDE_DIR}/sip.h)
-     message(STATUS "Found sip.h header...")
-   else ()
-     message(STATUS "sip.h header NOT found - Python support disabled")
 --- a/libavogadro/src/CMakeLists.txt
 +++ b/libavogadro/src/CMakeLists.txt
-@@ -119,7 +119,7 @@
- if(ENABLE_PYTHON AND ALL_PYTHON_FOUND)
+@@ -182,7 +182,7 @@
+   message(STATUS "Setting new boost python libraries")
    include_directories(
      ${Boost_INCLUDE_DIRS}
 -    ${PYTHON_INCLUDE_PATH})
 +    ${PYTHON_INCLUDE_DIRS})
    qt4_add_resources(pythontool_RC_SRCS pythontool.qrc)
-   # The Python headers, only installed if Python is enabled
-   set(python_HDRS
+   list(APPEND AVO_LINK_LIBRARIES ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+   list(APPEND libavogadro_HDRS
 --- a/libavogadro/src/python/CMakeLists.txt
 +++ b/libavogadro/src/python/CMakeLists.txt
-@@ -4,7 +4,7 @@
+@@ -3,7 +3,7 @@
    ${CMAKE_CURRENT_BINARY_DIR}
    ${OPENBABEL2_INCLUDE_DIR}
    ${BOOST_PYTHON_INCLUDES}
 -  ${PYTHON_INCLUDE_PATH}
 +  ${PYTHON_INCLUDE_DIRS}
    ${NUMPY_INCLUDE_DIR}
+   ${SIP_INCLUDE_DIR}
  )
- 
 --- a/libavogadro/tests/CMakeLists.txt
 +++ b/libavogadro/tests/CMakeLists.txt
-@@ -17,7 +17,7 @@
+@@ -16,7 +16,7 @@
    ${EIGEN2_INCLUDE_DIR}
    ${OPENBABEL2_INCLUDE_DIR}
    ${BOOST_PYTHON_INCLUDES}
@@ -248,3 +237,17 @@ Origin: http://patches.ubuntu.com/a/avogadro/avogadro_1.0.3-5ubuntu5.patch
  )
  
  link_directories(
+--- a/cmake/modules/FindSIP.cmake
++++ b/cmake/modules/FindSIP.cmake
+@@ -22,9 +22,9 @@
+   # search for sip.h
+   if(SIP_INCLUDE_DIR)
+     set(SIP_FOUND TRUE)
+-  elseif(EXISTS ${PYTHON_INCLUDE_PATH}/sip.h)
++  elseif(EXISTS ${PYTHON_INCLUDE_DIR}/sip.h)
+     # The SIP headers are often packaged in the Python include directory
+-    set(SIP_INCLUDE_DIR ${PYTHON_INCLUDE_PATH})
++    set(SIP_INCLUDE_DIR ${PYTHON_INCLUDE_DIR})
+   else()
+     # Attempt to find the SIP headers in the normal system path
+     find_path(SIP_INCLUDE_DIR NAMES sip.h

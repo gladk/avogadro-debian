@@ -7,6 +7,19 @@ Bug-Debian: http://bugs.debian.org/653625
 Author: Tobias Frost <tobi@coldtobi.de>
 Reviewed-By: Steve Robbins <smr@debian.org>
 
+--- a/libavogadro/src/extensions/pythonterminal.h
++++ b/libavogadro/src/extensions/pythonterminal.h
+@@ -23,6 +23,10 @@
+ #ifndef PYTHONTERMINAL_H
+ #define PYTHONTERMINAL_H
+ 
++#ifdef Q_MOC_RUN
++#define BOOST_TT_HAS_OPERATOR_HPP_INCLUDED
++#endif
++
+ #include <avogadro/dockextension.h>
+ #include <avogadro/primitive.h>
+ #include <avogadro/glwidget.h>
 --- a/libavogadro/src/pythonengine_p.h
 +++ b/libavogadro/src/pythonengine_p.h
 @@ -25,6 +25,10 @@
@@ -46,16 +59,3 @@ Reviewed-By: Steve Robbins <smr@debian.org>
  #include <avogadro/global.h>
  #include <avogadro/tool.h>
  #include <boost/python.hpp>
---- a/libavogadro/src/extensions/pythonterminal.h
-+++ b/libavogadro/src/extensions/pythonterminal.h
-@@ -23,6 +23,10 @@
- #ifndef PYTHONTERMINAL_H
- #define PYTHONTERMINAL_H
- 
-+#ifdef Q_MOC_RUN
-+#define BOOST_TT_HAS_OPERATOR_HPP_INCLUDED
-+#endif
-+
- #include <avogadro/extension.h>
- #include <avogadro/primitive.h>
- #include <avogadro/glwidget.h>

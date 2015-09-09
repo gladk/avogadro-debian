@@ -2,10 +2,10 @@
 
 #export DH_VERBOSE=1
 
-export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS) -fPIC
 export CFLAGS   := $(CPPFLAGS) $(shell dpkg-buildflags --get CFLAGS)
 export CXXFLAGS := $(CPPFLAGS) $(shell dpkg-buildflags --get CXXFLAGS)
-export LDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS) -Wl,-z,defs -Wl,--as-needed
+export LDFLAGS  := -fPIC $(shell dpkg-buildflags --get LDFLAGS) -Wl,-z,defs -Wl,--as-needed
 
 DEB_HOST_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 PYTHON_VERSION     := $(shell pyversions -dv)
@@ -38,3 +38,6 @@ override_dh_python2:
 	dh_python2 -ppython-avogadro
 	dh_numpy -ppython-avogadro
 	dh_sip
+
+override_dh_strip:
+	dh_strip --dbg-package=avogadro-dbg

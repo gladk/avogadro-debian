@@ -1,0 +1,17 @@
+Description: probe X11 paths with find_package(X11)
+ cmake no longer automatically probes for X11 when probling for QT et al.
+ We now need to manually load X11 when needed.
+Author: Andy Whitcroft <apw@ubuntu.com>
+
+Index: avogadro-1.1.1/avogadro/src/CMakeLists.txt
+===================================================================
+--- avogadro-1.1.1.orig/avogadro/src/CMakeLists.txt
++++ avogadro-1.1.1/avogadro/src/CMakeLists.txt
+@@ -107,6 +107,7 @@ if(QtTesting)
+   target_link_libraries(avogadro-app QtTesting)
+ endif()
+ if(Q_WS_X11)
++  find_package(X11 REQUIRED)
+   target_link_libraries(avogadro-app ${X11_X11_LIB})
+ endif()
+ 
