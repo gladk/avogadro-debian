@@ -3,6 +3,8 @@
 
   Copyright (C) 2007 Donald Ephraim Curtis
   Copyright (C) 2007,2008 by Marcus D. Hanwell
+  Copyright (C) 2010 Konstantin Tokarev
+  Copyright (C) 2011 Geoffrey R. Hutchison
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -31,9 +33,9 @@
 
 #include <Eigen/Core>
 
-#include <QObject>
-#include <QString>
-#include <QPoint>
+#include <QtCore/QString>
+#include <QtCore/QPoint>
+#include <QtGui/QMenu>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -66,6 +68,7 @@ namespace Avogadro {
       virtual QUndoCommand* mousePressEvent(GLWidget *widget, QMouseEvent *event);
       virtual QUndoCommand* mouseReleaseEvent(GLWidget *widget, QMouseEvent *event);
       virtual QUndoCommand* mouseMoveEvent(GLWidget *widget, QMouseEvent *event);
+      virtual QUndoCommand* mouseDoubleClickEvent(GLWidget *widget, QMouseEvent *event);
       virtual QUndoCommand* wheelEvent(GLWidget *widget, QWheelEvent *event);
 
       virtual int usefulness() const;
@@ -78,12 +81,22 @@ namespace Avogadro {
 
     public Q_SLOTS:
       void selectionModeChanged( int index );
+      void defineCentroid(bool);
+      void defineCenterOfMass(bool);
+      void changeAtomColor();
+      void resetAtomColor();
+      void changeAtomLabel();
+      void resetAtomLabel();
+      void changeAtomRadius();
+      void resetAtomRadius();
 
     protected:
       void selectionBox(float sx, float sy, float ex, float ey);
 
       bool                m_leftButtonPressed;  // rotation
+      bool                m_rightButtonPressed;
       bool                m_movedSinceButtonPressed;
+      bool                m_doubleClick;
 
       //! Temporary var for adding selection box
       bool                m_selectionBox;
@@ -92,6 +105,7 @@ namespace Avogadro {
       QPoint              m_lastDraggingPosition;
 
       Eigen::Vector3d     m_selectedPrimitivesCenter;    // centroid of selected atoms
+      GLWidget           *m_widget; // for defining centroids
 
       int                 m_selectionMode;      // atom, residue, molecule
 
@@ -101,6 +115,9 @@ namespace Avogadro {
       QVBoxLayout        *m_layout;
 
       QWidget            *m_settingsWidget;
+      QMenu              *m_atomMenu;
+      QMenu              *m_bondMenu;
+      Primitive          *m_currentPrimitive;
 
     private Q_SLOTS:
       void settingsWidgetDestroyed();

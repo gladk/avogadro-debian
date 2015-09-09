@@ -73,6 +73,7 @@ namespace Avogadro {
       /*! Handle a mouse move (perhaps drawing a bond)
       */
       virtual QUndoCommand* mouseMoveEvent(GLWidget *widget, QMouseEvent *event);
+      virtual QUndoCommand* mouseDoubleClickEvent(GLWidget *widget, QMouseEvent *event) { return 0; }
       /*! Handle a scroll wheel (i.e., zooming in and out of the canvas)
       */
       virtual QUndoCommand* wheelEvent(GLWidget *widget, QWheelEvent *event);
@@ -135,7 +136,7 @@ namespace Avogadro {
       Bond *m_prevBond;
       int m_prevBondOrder;
 
-      int m_addHydrogens;
+      bool m_addHydrogens;
       QUndoCommand *m_hydrogenCommand;
 
       QList<GLHit> m_hits;

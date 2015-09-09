@@ -4,6 +4,8 @@
   Copyright (C) 2007 Benoit Jacob
   Copyright (C) 2007 Donald Ephraim Curtis
   Copyright (C) 2007-2009 Marcus D. Hanwell
+  Copyright (C) 2010 Konstantin Tokarev
+  Copyright (C) 2011 David C. Lonie
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -42,6 +44,12 @@
 #include <QColor>
 #include <QVarLengthArray>
 #include <Eigen/Geometry>
+
+#ifdef Q_WS_MAC
+# include <OpenGL/glu.h>
+#else
+# include <GL/glu.h>
+#endif
 
 namespace Avogadro
 {
@@ -93,7 +101,7 @@ namespace Avogadro
   const double   PAINTER_CYLINDERS_DETAIL_COEFF
   = static_cast<double> ( PAINTER_MAX_DETAIL_LEVEL - 1 )
     / ( PAINTER_CYLINDERS_SQRT_LIMIT_MAX_LEVEL - PAINTER_CYLINDERS_SQRT_LIMIT_MIN_LEVEL );
-  const double   PAINTER_FRUSTUM_CULL_TRESHOLD = -0.8;
+//  const double   PAINTER_FRUSTUM_CULL_TRESHOLD = -0.8;
 
   class GLPainterPrivate
   {
@@ -320,6 +328,11 @@ namespace Avogadro
     d->color.setFromRgba(red, green, blue, alpha);
   }
 
+  void GLPainter::setColor(QString name)
+  {
+    d->color.setFromQColor(QColor(name));
+  }
+
   void GLPainter::drawSphere (const Eigen::Vector3d &center, double radius)
   {
     if(!d->isValid())
@@ -328,7 +341,8 @@ namespace Avogadro
     // Default to the minimum detail level for this quality
     int detailLevel = PAINTER_MAX_DETAIL_LEVEL / 3;
 
-    if (m_dynamicScaling) {
+    if (d->widget->projection() != GLWidget::Orthographic &&
+        m_dynamicScaling) {
       double apparentRadius = radius / d->widget->camera()->distance(center);
       detailLevel = 1 + static_cast<int>(floor (PAINTER_SPHERES_DETAIL_COEFF
                         * (sqrt(apparentRadius) - PAINTER_SPHERES_SQRT_LIMIT_MIN_LEVEL)));
@@ -352,7 +366,8 @@ namespace Avogadro
     // Default to the minimum detail level for this quality
     int detailLevel = PAINTER_MAX_DETAIL_LEVEL / 3;
 
-    if (m_dynamicScaling) {
+    if (d->widget->projection() != GLWidget::Orthographic &&
+        m_dynamicScaling) {
       double apparentRadius = radius / d->widget->camera()->distance(end1);
       detailLevel = 1 + static_cast<int> ( floor (
                                                     PAINTER_CYLINDERS_DETAIL_COEFF
@@ -378,7 +393,8 @@ namespace Avogadro
     // Default to the minimum detail level for this quality
     int detailLevel = PAINTER_MAX_DETAIL_LEVEL / 3;
 
-    if (m_dynamicScaling) {
+    if (d->widget->projection() != GLWidget::Orthographic &&
+        m_dynamicScaling) {
       double apparentRadius = radius / d->widget->camera()->distance(end1);
       detailLevel = 1 + static_cast<int> ( floor (
                                                     PAINTER_CYLINDERS_DETAIL_COEFF
@@ -454,6 +470,7 @@ namespace Avogadro
     // Draw a line between two points of the specified thickness
     if(!d->isValid()) { return; }
 
+    glPushAttrib(GL_LIGHTING_BIT);
     glDisable(GL_LIGHTING);
 
     glLineWidth(lineWidth);
@@ -465,7 +482,7 @@ namespace Avogadro
     glVertex3dv(end.data());
     glEnd();
 
-    glEnable(GL_LIGHTING);
+    glPopAttrib();
   }
 
   void GLPainter::drawMultiLine(const Eigen::Vector3d &end1,
@@ -929,11 +946,8 @@ namespace Avogadro
   {
     assert( d->widget );
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glPushMatrix();
-    glLoadIdentity();
+    glPushAttrib(GL_LIGHTING_BIT);
     glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
 
     glLineWidth(lineWidth);
     d->color.apply();
@@ -945,7 +959,31 @@ namespace Avogadro
     glVertex3dv(point4.data());
     glEnd();
 
-    glPopMatrix();
+    glPopAttrib();
+  }
+
+  void GLPainter::drawLineLoop(const QList<Eigen::Vector3d> & points,
+                               const double lineWidth)
+  {
+    assert( d->widget );
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    glDisable(GL_LIGHTING);
+
+    glLineWidth(lineWidth);
+    d->color.apply();
+
+    glBegin(GL_LINE_LOOP);
+
+    for (QList<Eigen::Vector3d>::const_iterator
+           it = points.constBegin(),
+           it_end = points.constEnd();
+         it != it_end; ++it) {
+      glVertex3dv(it->data());
+    }
+
+    glEnd();
+
     glPopAttrib();
   }
 
@@ -1083,9 +1121,100 @@ namespace Avogadro
     return val;
   }
 
+  int GLPainter::drawText(const Eigen::Vector3d &pos, const QString &string, const QFont &font)
+  {
+    if(!d->isValid()) { return 0; }
+    d->widget->renderText(pos.x(), pos.y(), pos.z(), string, font);
+    return 0;
+  }
+
   void GLPainter::drawBox(const Eigen::Vector3d &,
                           const Eigen::Vector3d &)
   {
+  }
+
+  void GLPainter::drawBoxEdges(const Eigen::Vector3d &offset,
+                             const Eigen::Vector3d &v1,
+                             const Eigen::Vector3d &v2,
+                             const Eigen::Vector3d &v3,
+                             const double linewidth)
+  {
+    //       6------8  c1 = origin
+    //      /:     /|  c2 = origin + v1
+    //     / :    / |  c3 = origin + v2
+    //    /  4---/--7  c4 = origin + v3
+    //   /  /   /  /   c5 = origin + v1 + v2
+    //  3------5  /    c6 = origin + v2 + v3
+    //  | /    | /     c7 = origin + v1 + v3
+    //  |/     |/      c8 = origin + v1 + v2 + v3
+    //  1------2
+    const Eigen::Vector3d &c1 (offset);
+    const Eigen::Vector3d  c2 (c1 + v1);
+    const Eigen::Vector3d  c3 (c1 + v2);
+    const Eigen::Vector3d  c4 (c1 + v3);
+    const Eigen::Vector3d  c5 (c2 + v2);
+    const Eigen::Vector3d  c6 (c3 + v3);
+    const Eigen::Vector3d  c7 (c2 + v3);
+    const Eigen::Vector3d  c8 (c5 + v3);
+    this->drawBoxEdges(c1, c2, c3, c4, c5, c6, c7, c8, linewidth);
+  }
+
+  void GLPainter::drawBoxEdges(const Eigen::Vector3d &c1,
+                               const Eigen::Vector3d &c2,
+                               const Eigen::Vector3d &c3,
+                               const Eigen::Vector3d &c4,
+                               const Eigen::Vector3d &c5,
+                               const Eigen::Vector3d &c6,
+                               const Eigen::Vector3d &c7,
+                               const Eigen::Vector3d &c8,
+                               const double lineWidth)
+  {
+    if (!d->isValid()) {
+      return;
+    }
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    glDisable(GL_LIGHTING);
+
+    glLineWidth(lineWidth);
+    d->color.apply();
+
+    // Box is:
+    //      6------8
+    //     /:     /|
+    //    / :    / |
+    //   /  4---/--7
+    //  /  /   /  /
+    // 3------5  /
+    // | /    | /
+    // |/     |/
+    // 1------2
+
+    // Near "plane"
+    glBegin(GL_LINE_LOOP);
+    glVertex3dv(c1.data());
+    glVertex3dv(c2.data());
+    glVertex3dv(c5.data());
+    glVertex3dv(c3.data());
+    glEnd();
+
+    // Far "plane"
+    glBegin(GL_LINE_LOOP);
+    glVertex3dv(c4.data());
+    glVertex3dv(c7.data());
+    glVertex3dv(c8.data());
+    glVertex3dv(c6.data());
+    glEnd();
+
+    // Connect
+    glBegin(GL_LINES);
+    glVertex3dv(c1.data()); glVertex3dv(c4.data());
+    glVertex3dv(c2.data()); glVertex3dv(c7.data());
+    glVertex3dv(c5.data()); glVertex3dv(c8.data());
+    glVertex3dv(c3.data()); glVertex3dv(c6.data());
+    glEnd();
+
+    glPopAttrib();
   }
 
   void GLPainter::drawTorus(const Eigen::Vector3d &,
@@ -1172,12 +1301,12 @@ namespace Avogadro
       }
   }
 
-  inline void GLPainter::apply(const Color3f &color)
+  void GLPainter::apply(const Color3f &color)
   {
     glColor3fv(color.data());
   }
 
-  inline void GLPainter::applyAsMaterials(const Color3f &c, float alpha)
+  void GLPainter::applyAsMaterials(const Color3f &c, float alpha)
   {
     float color[] = {c.red(), c.green(), c.blue(), alpha};
     float ambientColor [] = {color[0] / 3.0f,

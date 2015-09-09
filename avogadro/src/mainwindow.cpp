@@ -21,6 +21,9 @@
   GNU General Public License for more details.
  ***********************************************************************/
 
+#include <avogadro/dockextension.h>
+#include <avogadro/dockwidget.h>
+
 #include "mainwindow.h"
 
 #include "config.h" // krazy:exclude=includes
@@ -49,9 +52,6 @@
 //#ifdef Q_WS_MAC
 //#include "macchempasteboard.h"
 //#endif
-
-// Include the GL2PS header
-#include "../gl2ps/gl2ps.h"
 
 #include <avogadro/pluginmanager.h>
 
@@ -92,6 +92,7 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPluginLoader>
+#include <QProcess>
 #include <QPushButton>
 #include <QSettings>
 #include <QStandardItem>
@@ -121,12 +122,115 @@
  void qt_mac_set_menubar_icons(bool enable);
 #endif
 
+#ifdef QTTESTING
+#include <pqTestUtility.h>
+#include <pqEventObserver.h>
+#include <pqEventSource.h>
+#include <QXmlStreamReader>
+#endif
+
 using namespace std;
 using namespace OpenBabel;
 using namespace Eigen;
 
 namespace Avogadro
 {
+#ifdef QTTESTING
+class XMLEventObserver : public pqEventObserver
+{
+  QXmlStreamWriter* XMLStream;
+  QString XMLString;
+
+public:
+  XMLEventObserver(QObject* p) : pqEventObserver(p)
+  {
+    this->XMLStream = NULL;
+  }
+  ~XMLEventObserver()
+  {
+    delete this->XMLStream;
+  }
+
+protected:
+  virtual void setStream(QTextStream* stream)
+  {
+    if (this->XMLStream) {
+      this->XMLStream->writeEndElement();
+      this->XMLStream->writeEndDocument();
+      delete this->XMLStream;
+      this->XMLStream = NULL;
+    }
+    if (this->Stream)
+      *this->Stream << this->XMLString;
+
+    this->XMLString = QString();
+    pqEventObserver::setStream(stream);
+    if (this->Stream) {
+      this->XMLStream = new QXmlStreamWriter(&this->XMLString);
+      this->XMLStream->setAutoFormatting(true);
+      this->XMLStream->writeStartDocument();
+      this->XMLStream->writeStartElement("events");
+    }
+  }
+
+  virtual void onRecordEvent(const QString& widget, const QString& command,
+                             const QString& arguments)
+  {
+    if(this->XMLStream) {
+      this->XMLStream->writeStartElement("event");
+      this->XMLStream->writeAttribute("widget", widget);
+      this->XMLStream->writeAttribute("command", command);
+      this->XMLStream->writeAttribute("arguments", arguments);
+      this->XMLStream->writeEndElement();
+    }
+  }
+};
+
+class XMLEventSource : public pqEventSource
+{
+  typedef pqEventSource Superclass;
+  QXmlStreamReader *XMLStream;
+
+public:
+  XMLEventSource(QObject* p): Superclass(p) { this->XMLStream = NULL;}
+  ~XMLEventSource() { delete this->XMLStream; }
+
+protected:
+  virtual void setContent(const QString& xmlfilename)
+  {
+    delete this->XMLStream;
+    this->XMLStream = NULL;
+
+    QFile xml(xmlfilename);
+    if (!xml.open(QIODevice::ReadOnly)) {
+      qDebug() << "Failed to load " << xmlfilename;
+      return;
+    }
+    QByteArray data = xml.readAll();
+    this->XMLStream = new QXmlStreamReader(data);
+  }
+
+  int getNextEvent(QString& widget, QString& command, QString& arguments)
+  {
+    if (this->XMLStream->atEnd())
+      return DONE;
+    while (!this->XMLStream->atEnd()) {
+      QXmlStreamReader::TokenType token = this->XMLStream->readNext();
+      if (token == QXmlStreamReader::StartElement) {
+        if (this->XMLStream->name() == "event")
+          break;
+      }
+    }
+    if (this->XMLStream->atEnd())
+      return DONE;
+
+    widget = this->XMLStream->attributes().value("widget").toString();
+    command = this->XMLStream->attributes().value("command").toString();
+    arguments = this->XMLStream->attributes().value("arguments").toString();
+    return SUCCESS;
+  }
+};
+#endif
 
   enum BuilderOption {
     AskUser = 0,
@@ -182,6 +286,9 @@ namespace Avogadro
     QVBoxLayout *centralLayout;
     QTabWidget *centralTab;
     FlatTabWidget *bottomFlat;
+
+    // Pointer to an action group for "View > Projection"
+    QActionGroup *projectionGroup;
 
     ToolGroup *toolGroup;
     QAction    *actionRecentFile[MainWindow::maxRecentFiles];
@@ -312,10 +419,71 @@ namespace Avogadro
     ui.menuOpenRecent->addAction( ui.actionClearRecent );
 
     QAction *undoAction = d->undoStack->createUndoAction( this );
-    undoAction->setIcon( QIcon( QLatin1String( ":/icons/edit-undo.png" ) ) );
-    undoAction->setShortcuts( QKeySequence::Undo );
     QAction *redoAction = d->undoStack->createRedoAction( this );
-    redoAction->setIcon( QIcon( QLatin1String( ":/icons/edit-redo.png" ) ) );
+    #if QT_VERSION >= QT_VERSION_CHECK(4, 6, 0)
+      // Load icons from desktop theme
+      // File
+      const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/icons/document-new.png"));
+      const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/icons/document-open.png"));
+      const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/icons/document-save.png"));
+      const QIcon saveAsIcon = QIcon::fromTheme("document-save-as", QIcon(":/icons/document-save-as.png"));
+      const QIcon revertIcon = QIcon::fromTheme("document-revert", QIcon(":/icons/document-revert.png"));
+      const QIcon closeIcon = QIcon::fromTheme("document-close", QIcon(":/icons/document-close.png"));
+      const QIcon importIcon = QIcon::fromTheme("document-import", QIcon(":/icons/document-import.png"));
+      const QIcon exportIcon = QIcon::fromTheme("document-export", QIcon(":/icons/document-export.png"));
+      const QIcon quitIcon = QIcon::fromTheme("application-exit", QIcon(":/icons/application-exit.png"));
+      // Edit
+      const QIcon undoIcon = QIcon::fromTheme("edit-undo", QIcon(":/icons/edit-undo.png"));
+      const QIcon redoIcon = QIcon::fromTheme("edit-redo", QIcon(":/icons/edit-redo.png"));
+      const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(":/icons/edit-cut.png"));
+      const QIcon copyIcon = QIcon::fromTheme("edit-copy", QIcon(":/icons/edit-copy.png"));
+      const QIcon pasteIcon = QIcon::fromTheme("edit-paste", QIcon(":/icons/edit-paste.png"));
+      const QIcon clearIcon = QIcon::fromTheme("edit-clear", QIcon(":/icons/edit-clear.png"));
+    #else
+      // Load icons
+      // File
+      const QIcon newIcon = QIcon(":/icons/document-new.png");
+      const QIcon openIcon = QIcon(":/icons/document-open.png");
+      const QIcon saveIcon = QIcon(":/icons/document-save.png");
+      const QIcon saveAsIcon = QIcon(":/icons/document-save-as.png");
+      const QIcon revertIcon = QIcon(":/icons/document-revert.png");
+      const QIcon closeIcon = QIcon(":/icons/document-close.png");
+      const QIcon importIcon = QIcon(":/icons/document-import.png");
+      const QIcon exportIcon = QIcon(":/icons/document-export.png");
+      const QIcon quitIcon = QIcon(":/icons/application-exit.png");
+      // Edit
+      const QIcon undoIcon = QIcon(":/icons/edit-undo.png");
+      const QIcon redoIcon = QIcon(":/icons/edit-redo.png");
+      const QIcon cutIcon = QIcon(":/icons/edit-cut.png");
+      const QIcon copyIcon = QIcon(":/icons/edit-copy.png");
+      const QIcon pasteIcon = QIcon(":/icons/edit-paste.png");
+      const QIcon clearIcon = QIcon(":/icons/edit-clear.png");
+    #endif
+    // Set toolbar icons
+    ui.actionNewTool->setIcon(newIcon);
+    ui.actionOpenTool->setIcon(openIcon);
+    ui.actionSaveTool->setIcon(saveIcon);
+    ui.actionCloseTool->setIcon(closeIcon);
+    ui.actionQuitTool->setIcon(quitIcon);
+    // Set file menu icons
+    ui.actionNew->setIcon(newIcon);
+    ui.actionOpen->setIcon(openIcon);
+    ui.actionClose->setIcon(closeIcon);
+    ui.actionSave->setIcon(saveIcon);
+    ui.actionSaveAs->setIcon(saveAsIcon);
+    ui.actionRevert->setIcon(revertIcon);
+    ui.actionImport_File->setIcon(importIcon);
+    ui.actionExportGraphics->setIcon(exportIcon);
+    ui.actionExportGL2PS->setIcon(exportIcon);
+    // Set edit menu icons
+    undoAction->setIcon(undoIcon);
+    redoAction->setIcon(redoIcon);
+    ui.actionCut->setIcon(cutIcon);
+    ui.actionCopy->setIcon(copyIcon);
+    ui.actionPaste->setIcon(pasteIcon);
+    ui.actionClear->setIcon(clearIcon);
+
+    undoAction->setShortcuts( QKeySequence::Undo );
     redoAction->setShortcuts( QKeySequence::Redo );
     ui.actionClear->setShortcuts( QList<QKeySequence>() << QKeySequence("Backspace") << QKeySequence("Del"));
     if ( ui.menuEdit->actions().count() ) {
@@ -336,6 +504,11 @@ namespace Avogadro
     // This will be enabled when the document is modified
     ui.actionRevert->setEnabled(false);
     ui.actionSave->setEnabled(false);
+
+    // Create and assign an action group for "View > Projection"
+    d->projectionGroup = new QActionGroup(this);
+    d->projectionGroup->addAction(ui.actionPerspective);
+    d->projectionGroup->addAction(ui.actionOrthographic);
 
 #ifdef Q_WS_MAC
     // Find the Avogadro global preferences action
@@ -410,16 +583,71 @@ namespace Avogadro
 #ifdef ENABLE_UPDATE_CHECKER
     m_updateCheck = UpdateCheck::getInstance(this);
 #endif
+
+    m_ignoreConfig = false;
+
+#ifdef QTTESTING
+    QAction *actionRecord = new QAction(this);
+    actionRecord->setText(tr("Record Test..."));
+    ui.menuSettings->addAction(actionRecord);
+    QAction *actionPlay = new QAction(this);
+    actionPlay->setText(tr("Play Test..."));
+    ui.menuSettings->addAction(actionPlay);
+
+    connect(actionRecord, SIGNAL(triggered()), this, SLOT(record()));
+    connect(actionPlay, SIGNAL(triggered()), this, SLOT(play()));
+    this->TestUtility = new pqTestUtility(this);
+    this->TestUtility->addEventObserver("xml", new XMLEventObserver(this));
+    this->TestUtility->addEventSource("xml", new XMLEventSource(this));
+#endif
+
+    static const QStringList searchDirs = pluginSearchDirs();
+    d->pluginManager.setPluginPath(searchDirs);
   }
+
+#ifdef QTTESTING
+  void MainWindow::record()
+  {
+    QString filename = QFileDialog::getSaveFileName (this, "Test File Name",
+      QString(), "XML Files (*.xml)");
+    if (!filename.isEmpty())
+      {
+      this->TestUtility->recordTests(filename);
+      }
+  }
+
+  void MainWindow::play()
+  {
+    QString filename = QFileDialog::getOpenFileName (this, "Test File Name",
+      QString(), "XML Files (*.xml)");
+    if (!filename.isEmpty())
+      {
+      this->TestUtility->playTests(filename);
+      }
+  }
+
+  void MainWindow::popup()
+  {
+    QDialog dialog;
+    QHBoxLayout* hbox = new QHBoxLayout(&dialog);
+    QPushButton button("Click to Close", &dialog);
+    hbox->addWidget(&button);
+    QObject::connect(&button, SIGNAL(clicked()), &dialog, SLOT(accept()));
+    dialog.exec();
+  }
+#endif
 
   bool MainWindow::event(QEvent *event)
   {
     // delayed initialization
     if(event->type() == QEvent::Polish) {
-      
+
+      // read settings
+      readSettings();
+
       reloadTools();
-      if (d->toolSettingsDock)
-        d->toolSettingsDock->hide();
+      //if (d->toolSettingsDock)
+      //  d->toolSettingsDock->hide();
       loadExtensions();
 
       // Check every menu for "extra" separators
@@ -457,8 +685,6 @@ namespace Avogadro
       if(!molecule())
         loadFile();
 
-      // read settings
-      readSettings();
       // if we don't have a molecule then load a blank file
       d->initialized = true;
     }
@@ -496,6 +722,21 @@ namespace Avogadro
     QMainWindow::show();
   }
 
+  GLWidget::ProjectionType MainWindow::projection() const
+  {
+     return d->glWidget->projection();
+  }
+
+  void MainWindow::setPerspective()
+  {
+    d->glWidget->setProjection(GLWidget::Perspective);
+  }
+
+  void MainWindow::setOrthographic()
+  {
+    d->glWidget->setProjection(GLWidget::Orthographic);
+  }
+
   bool MainWindow::renderAxes() const
   {
     return d->glWidget->renderAxes();
@@ -531,19 +772,6 @@ namespace Avogadro
       d->glWidget->setQuickRender(quick);
   }
 
-  bool MainWindow::renderUnitCellAxes() const
-  {
-    // Is the current widget showing a unit cell frame?
-    return d->glWidget->renderUnitCellAxes();
-  }
-
-  void MainWindow::setRenderUnitCellAxes(bool render)
-  {
-    ui.actionDisplayUnitCellAxes->setChecked(render);
-    if (d->glWidget && d->glWidget->renderUnitCellAxes() != render)
-      d->glWidget->setRenderUnitCellAxes(render);
-  }
-
   void MainWindow::showAllMolecules(bool)
   {
     if (!d->allMoleculesDialog)
@@ -571,9 +799,12 @@ namespace Avogadro
     /**
      * Engines: Clear all the EngineListViews and call GLWidget::reloadEngines()
      * for each GLWidget.
+    gl->setExtensions(d->pluginManager.extensions(this));
      */
-    foreach (GLWidget *glwidget, d->glWidgets)
+    foreach (GLWidget *glwidget, d->glWidgets) {
       glwidget->reloadEngines();
+      glwidget->setExtensions(d->pluginManager.extensions(this));
+    }
 
 
     int count = d->enginesStacked->count();
@@ -678,9 +909,14 @@ namespace Avogadro
     connect(displaySettings, SIGNAL(released()), this, SLOT(toggleEngineSettingsDock()));
     ui.toolBar->addWidget(displaySettings);
 
+    // Call GLWidget::setToolGroup which will store a pointer to the navigate tool
+    foreach(GLWidget *glWidget, d->glWidgets)
+      glWidget->setToolGroup(d->toolGroup);
+
     // Now, set the active tool
     if (d->molecule)
       d->toolGroup->setActiveTool("Navigate");
+
   } // end reloadTools
 
   void MainWindow::newFile()
@@ -932,13 +1168,16 @@ namespace Avogadro
         builder.Build(*obMolecule);
         obMolecule->AddHydrogens(); // Add some hydrogens before running force field
 
-        OBForceField* pFF =  OBForceField::FindForceField("MMFF94");
-        if (!pFF || !pFF->Setup(*obMolecule)) {
-          pFF = OBForceField::FindForceField("UFF");
+        OBForceField* pFF =  OBForceField::FindForceField("MMFF94")->MakeNewInstance();
+        if (pFF && !pFF->Setup(*obMolecule)) {
+          pFF = OBForceField::FindForceField("UFF")->MakeNewInstance();
           if (!pFF || !pFF->Setup(*obMolecule)) return; // can't do anything more
         }
-        pFF->ConjugateGradients(250, 1.0e-4);
-        pFF->UpdateCoordinates(*obMolecule);
+        if (pFF) {
+          pFF->ConjugateGradients(250, 1.0e-4);
+          pFF->UpdateCoordinates(*obMolecule);
+          delete pFF;
+        }
       } // building geometry
 
     } // check 3D coordinates
@@ -948,6 +1187,8 @@ namespace Avogadro
   {
     if (!d->moleculeFile)
       return; // nothing to do
+
+    qDebug() << " selectMolecule " << index;
 
     OBMol *obMolecule =  d->moleculeFile->OBMol(index);
     if (!obMolecule)
@@ -1033,6 +1274,13 @@ namespace Avogadro
 
       Molecule *mol = new Molecule;
       mol->setOBMol(obMolecule);
+      mol->setFileName(d->moleculeFile->fileName());
+      if (d->moleculeFile->isConformerFile()) {
+        // add in the conformers
+        mol->setAllConformers(d->moleculeFile->conformers());
+        qDebug() << " # of conformers " << mol->numConformers();
+      }
+
       setMolecule(mol);
       // Now unroll any settings we saved in the file
       // This is disabled for version 1.0-release
@@ -1059,17 +1307,6 @@ namespace Avogadro
       */
 
       QApplication::restoreOverrideCursor();
-
-      // If there's a unit cell, by default, draw the cell axes
-      if (d->molecule->OBUnitCell() != NULL) {
-        setRenderUnitCellAxes(true);
-      }
-      // Check if this is a PDB file -- by default we do not show the unit cell
-      QFileInfo info(d->moleculeFile->fileName());
-      if (d->moleculeFile->fileType().contains("PDB", Qt::CaseInsensitive)
-          || info.completeSuffix().contains("PDB", Qt::CaseInsensitive)) {
-        setRenderUnitCellAxes(false);
-      }
 
       QString status;
       QTextStream( &status ) << tr("Atoms: ") << d->molecule->numAtoms() <<
@@ -1176,7 +1413,7 @@ namespace Avogadro
   bool MainWindow::save()
   {
     // we can't safely save to a gzipped file
-    if ( !QFileInfo(d->fileName).isReadable() 
+    if ( !QFileInfo(d->fileName).isReadable()
         || isDefaultFileName(d->fileName)
         || d->fileName.endsWith(".gz", Qt::CaseInsensitive)) {
       return saveAs();
@@ -1251,7 +1488,7 @@ namespace Avogadro
       // just save this one molecule
       QString error;
       bool result = MoleculeFile::writeMolecule(d->molecule, fileName,
-                                                formatType.trimmed(),
+                                                formatType.trimmed(), "",
                                                 &error);
       if (!result) { // There was an error saving the file - inform the user
         QApplication::restoreOverrideCursor();
@@ -1402,6 +1639,11 @@ namespace Avogadro
     return false;
   }
 
+  void MainWindow::setIgnoreConfig(bool noConfig)
+  {
+    m_ignoreConfig = noConfig;
+  }
+
   void MainWindow::undoStackClean( bool clean )
   {
     ui.actionRevert->setEnabled(!clean);
@@ -1487,75 +1729,6 @@ namespace Avogadro
           tr( "Cannot save file %1." ).arg( fileName ) );
       return;
     }
-  }
-
-  void MainWindow::exportGL2PS()
-  {
-    QSettings settings;
-    QString selectedFilter = settings.value("Export GL2PS Filter", tr("PDF")
-                                            + " (*.pdf)").toString();
-    QStringList filters;
-// Omit "common image formats" on Mac
-#ifdef Q_WS_MAC
-    filters
-#else
-    filters << tr("Common vector image formats")
-              + " (*.pdf *.svg *.eps)"
-#endif
-            << tr("All files") + " (* *.*)"
-            << tr("PDF") + " (*.pdf)"
-            << tr("SVG") + " (*.svg)"
-            << tr("EPS") + " (*.eps)";
-
-    // Use QFileInfo to get the parts of the path we want
-    QFileInfo info(d->molecule->fileName());
-
-    QString fileName = SaveDialog::run(this,
-                                       tr("Export Bitmap Graphics"),
-                                       info.absolutePath(),
-                                       info.baseName(),
-                                       filters,
-                                       "pdf",
-                                       selectedFilter);
-
-    settings.setValue("Export GL2PS Filter", selectedFilter);
-
-    if(fileName.isEmpty())
-      return;
-
-    qDebug() << "Exported filename:" << fileName;
-    info.setFile(fileName);
-
-    // Just using the example right now, this is a C library but may be the
-    // file calls need cleaning up a little.
-    FILE *fp;
-    int state = GL2PS_OVERFLOW, buffsize = 8*1024*1024, fileType = GL2PS_PDF;
-
-    // Enumerate through the supported file types
-    if (info.suffix() == "pdf")
-      fileType = GL2PS_PDF;
-    else if (info.suffix() == "svg")
-      fileType = GL2PS_SVG;
-    else if (info.suffix() == "eps")
-      fileType = GL2PS_EPS;
-    else
-      return;
-
-    fp = fopen(QFile::encodeName(fileName), "wb");
-    qDebug() << "Writing out a vector graphics file...";
-    while(state == GL2PS_OVERFLOW) {
-      buffsize += 1024*1024;
-      gl2psBeginPage("test", "gl2psTestSimple", NULL, fileType, GL2PS_BSP_SORT,
-                     GL2PS_DRAW_BACKGROUND
-                     | GL2PS_USE_CURRENT_VIEWPORT | GL2PS_OCCLUSION_CULL
-                     | GL2PS_BEST_ROOT,
-                     GL_RGBA, 0, NULL, 0, 0, 0, buffsize, fp,
-                     info.baseName().toStdString().c_str());
-      d->glWidget->renderNow();
-      state = gl2psEndPage();
-    }
-    fclose(fp);
-    qDebug() << "Done...";
   }
 
   void MainWindow::revert()
@@ -1713,7 +1886,6 @@ namespace Avogadro
         int idx =d->glWidgets.indexOf(glWidget);
         d->enginesStacked->setCurrentIndex(idx);
         ui.actionDisplayAxes->setChecked(renderAxes());
-        ui.actionDisplayUnitCellAxes->setChecked(renderUnitCellAxes());
         ui.actionDebugInformation->setChecked(renderDebug());
         ui.actionQuickRender->setChecked(quickRender());
         break;
@@ -1731,7 +1903,6 @@ namespace Avogadro
     int index = d->glWidgets.indexOf(glWidget);
     d->enginesStacked->setCurrentIndex(index);
     ui.actionDisplayAxes->setChecked(renderAxes());
-    ui.actionDisplayUnitCellAxes->setChecked(renderUnitCellAxes());
     ui.actionDebugInformation->setChecked(renderDebug());
     ui.actionQuickRender->setChecked(quickRender());
   }
@@ -1797,16 +1968,18 @@ namespace Avogadro
     if (!validMol) { // We failed as an authentic format, try annulen's heuristics
       validMol = parseText(&newMol, QString(text));
     }
-    
+
     if (validMol && newMol.NumAtoms() == 0)
       return false;
 
     // We've got something we can paste
+    /*
     vector3 offset; // small offset so that pasted mols don't fall on top
     offset.randomUnitVector();
     offset *= 0.1;
-    
     newMol.Translate(offset);
+    */
+
     Molecule newMolecule;
     newMolecule.setOBMol(&newMol);
     PasteCommand *command = new PasteCommand(d->molecule, newMolecule, d->glWidget);
@@ -1822,18 +1995,18 @@ namespace Avogadro
       return 0;  // "D" ot "T"
     if (n != 0)
       return n;  // other element symbols
-    
+
     // not match => we've got IUPAC name
-    
+
     /*vector<OBElement*>::iterator i;
       for (i = _element.begin();i != _element.end();++i)
       if (name == (*i)->GetSymbol())
       return((*i)->GetAtomicNum());*/
-    
+
     for (unsigned int i=0; i<etab.GetNumberOfElements(); i++)
       if (!QString::compare(name.c_str(), etab.GetName(i).c_str(), Qt::CaseInsensitive))
 	      return i;
-	  
+
     if (!QString::compare(name.c_str(), "Deuterium", Qt::CaseInsensitive))
       {
         iso = 2;
@@ -1852,13 +2025,13 @@ namespace Avogadro
   bool MainWindow::parseText(OBMol *mol, const QString coord)
   {
     QStringList coordStrings = coord.split(QRegExp("\n"));
-	
+
     double k = 1.0; // ANGSTROM -- set to 0.529 for Bohr
-	
+
     // Guess format
-    
+
     // split on any non-word symbol, except '.'
-    QStringList data = coordStrings.at(0).trimmed().split(QRegExp("\\s+|,|;")); 
+    QStringList data = coordStrings.at(0).trimmed().split(QRegExp("\\s+|,|;"));
     //QList<double>
     // Format definition, will be used for parsing
     int NameCol=-1, Xcol=-1, Ycol=-1, Zcol=-1;
@@ -1869,14 +2042,14 @@ namespace Avogadro
     for (int i=0; i<data.size(); i++)
       {
         if (data.at(i) == "") continue;
-        
+
         a = data.at(i).toInt(&ok);
         if (ok)
           {
             format += "i";
             continue;
           }
-        
+
         b = data.at(i).toDouble(&ok);
         if (ok)
           {
@@ -1888,12 +2061,12 @@ namespace Avogadro
         else
           format += "s";
       }
-    
+
     qDebug() << "Format is: " << format;
-    
+
     if (format.length() < 4)
       return false; // invalid format
-    
+
     if (format == "iddd") // special XYZ variant
       {
         NameCol=0;
@@ -1907,7 +2080,7 @@ namespace Avogadro
           {
             //if (format.at(i) == 'i')
             //continue; // nothing valuable
-            
+
             if ((format.at(i)=='d') || (format.length()==4 && format.at(i)=='i'))
               {
                 // double
@@ -1934,7 +2107,7 @@ namespace Avogadro
                 // string
                 if (NameCol != -1)  // just found
                   continue;
-        
+
                 // Try to find element name or symbol inside it
                 int n,iso;
                 QString s = data.at(i);
@@ -1944,7 +2117,7 @@ namespace Avogadro
                     n = GetAtomicNum(s.toStdString(), iso);
                     if (iso != 0)
                       n = 1;
-            
+
                     if (n!=0)
                       {
                         NameCol=i;
@@ -1957,16 +2130,16 @@ namespace Avogadro
             continue;
           }
       }
-    
+
     if((NameCol==-1) || (Xcol==-1) || (Ycol==-1) || (Zcol==-1))
       return false;
-	  
+
     // Read and apply coordinates
     mol->BeginModify();
     for (int N=0; N<coordStrings.size(); N++)
       {
         if (coordStrings.at(N) == "") continue;
-        
+
         OBAtom *atom  = mol->NewAtom();
         QStringList s_data = coordStrings.at(N).trimmed().split(QRegExp("\\s+|,|;"));
         if (s_data.size() != data.size())
@@ -1986,17 +2159,17 @@ namespace Avogadro
               _n = s_data.at(i).toInt(&ok);
             else if (i == NameCol)
               {
-                
+
                 // Try to find element name or symbol inside it
-                
+
                 QString _s = s_data.at(i);
                 while (_s.length()!=0)  // recognize name with number
                   {
-                    _iso=0;  
+                    _iso=0;
                     _n = GetAtomicNum(_s.toStdString(), _iso);
                     if (_iso != 0)
                       _n = 1;
-                    
+
                     if (_n!=0)
                       break;
                     else
@@ -2006,7 +2179,7 @@ namespace Avogadro
                   return false;
               }
             if (!ok) return false;
-            
+
             atom->SetAtomicNum(_n);
             atom->SetVector(x*k,y*k,z*k); //set coordinates
           }
@@ -2014,11 +2187,173 @@ namespace Avogadro
     mol->EndModify();
     mol->ConnectTheDots();
     mol->PerceiveBondOrders();
-    
+
     //qDebug() << "molecule updated";
     return true;
   }
 
+  /// @todo this should live in a UnitCell class eventually
+  // Stable sort both ids and coords together to group all entries in
+  // ids together. Entries are not sorted in any particular order,
+  // just grouped. uniqIds and idCounts will contain a unique list of
+  // all ids in same order as in the sorted ids and a list containing
+  // how many of each id is in ids, respectively.
+  void poscarSort(QList<QString> *ids,
+                  QList<Eigen::Vector3d> *coords,
+                  QList<QString> *uniqueIds,
+                  QList<unsigned int> *idCounts)
+  {
+    Q_ASSERT(ids->size() == coords->size());
+    // Get unique list of ids and count them
+    uniqueIds->clear();
+    idCounts->clear();
+    for (QStringList::const_iterator
+           it = ids->constBegin(),
+           it_end = ids->constEnd();
+         it != it_end; ++it) {
+      int ind = uniqueIds->indexOf(*it);
+      if (ind != -1) {
+        ++((*idCounts)[ind]);
+      }
+      else {
+        uniqueIds->append(*it);
+        idCounts->append(1);
+      }
+    }
+
+    // Sort lists
+    QString curId;
+    QStringList::iterator idit;
+    QStringList::iterator idit_end = ids->end();
+    QList<Eigen::Vector3d>::iterator coordit;
+    QList<Eigen::Vector3d>::iterator coordit_end = coords->end();
+    unsigned int sorted = 0;
+    for (int uniqInd = 0; uniqInd < uniqueIds->size();
+         ++uniqInd) {
+      curId = (*uniqueIds)[uniqInd];
+      unsigned int found = 0;
+      unsigned int count = idCounts->at(uniqInd);
+      idit = ids->begin() + sorted;
+      coordit = coords->begin() + sorted;
+      while (found < count) {
+        // Should never reach the end
+        Q_ASSERT(idit != idit_end);
+        Q_ASSERT(coordit != coordit_end);
+        if (idit->compare(curId) == 0) {
+          qSwap(*idit, (*ids)[sorted]);
+          qSwap(*coordit, (*coords)[sorted]);
+          ++found;
+          ++sorted;
+        }
+        ++idit;
+        ++coordit;
+      }
+    }
+  }
+
+  /// @todo this should live in a UnitCell class eventually
+  QString getPOSCAR(Molecule *mol)
+  {
+    OBUnitCell *cell = mol->OBUnitCell();
+    if (!cell) {
+      return "";
+    }
+
+    QList<Atom*> atoms = mol->atoms();
+
+    // Atomic symbols:
+    QStringList ids;
+    for (QList<Atom*>::const_iterator it = atoms.constBegin(),
+           it_end = atoms.constEnd(); it != it_end; ++it) {
+      ids << OpenBabel::etab.GetSymbol((*it)->atomicNumber());
+    }
+
+    // Fractional coordinates
+    QList<Vector3d> fcoords;
+    const Vector3d *eigenptr;
+    vector3 obtmp;
+    for (QList<Atom*>::const_iterator it = atoms.begin(),
+           it_end = atoms.end(); it != it_end; ++it) {
+      // Convert eigen to OB
+      eigenptr = (*it)->pos();
+      obtmp.x() = eigenptr->x();
+      obtmp.y() = eigenptr->y();
+      obtmp.z() = eigenptr->z();
+      // Convert cartesian -> fractional
+      obtmp = cell->CartesianToFractional(obtmp);
+      // Back to eigen
+      fcoords << Vector3d(obtmp.x(), obtmp.y(), obtmp.z());
+    }
+
+    // For sorting
+    QStringList uniqueIds;
+    QList<unsigned int> idCounts;
+
+    Q_ASSERT(fcoords.size() == ids.size());
+
+    poscarSort(&ids, &fcoords, &uniqueIds, &idCounts);
+
+    Q_ASSERT(uniqueIds.size() == idCounts.size());
+
+    QString poscar;
+
+    // Comment line: composition
+    for (unsigned int i = 0;
+         i < static_cast<unsigned int>(uniqueIds.size());
+         ++i) {
+      poscar += QString("%1%2 ").arg(uniqueIds[i]).arg(idCounts[i]);
+    }
+    poscar += "\n";
+    // Scaling factor. Just 1.0
+    poscar += QString::number(1.0);
+    poscar += "\n";
+    // Unit Cell Vectors
+    std::vector< OpenBabel::vector3 > vecs = cell->GetCellVectors();
+    for (unsigned int i = 0; i < vecs.size(); i++) {
+      OpenBabel::vector3 &vec = vecs[i];
+      // Remove negative zeros
+      if (fabs(vec.x()) < 1e-10) {
+        vec.x() = 0.0;
+      }
+      if (fabs(vec.y()) < 1e-10) {
+        vec.y() = 0.0;
+      }
+      if (fabs(vec.z()) < 1e-10) {
+        vec.z() = 0.0;
+      }
+      poscar += QString("  %1 %2 %3\n")
+        .arg(vec.x(), 12, 'f', 8)
+        .arg(vec.y(), 12, 'f', 8)
+        .arg(vec.z(), 12, 'f', 8);
+    }
+    // Number of each type of atom
+    for (int i = 0; i < idCounts.size(); i++) {
+      poscar += QString::number(idCounts.at(i)) + " ";
+    }
+    poscar += "\n";
+    // Use fractional coordinates:
+    poscar += "Direct\n";
+    // Coordinates of each atom
+    for (int i = 0; i < fcoords.size(); i++) {
+      Eigen::Vector3d &fcoord = fcoords[i];
+      // Remove negative zeros
+      if (fabs(fcoord.x()) < 1e-10) {
+        fcoord.x() = 0.0;
+      }
+      if (fabs(fcoord.y()) < 1e-10) {
+        fcoord.y() = 0.0;
+      }
+      if (fabs(fcoord.z()) < 1e-10) {
+        fcoord.z() = 0.0;
+      }
+      poscar += QString("  %1 %2 %3\n")
+        .arg(fcoord.x(), 12, 'f', 8)
+        .arg(fcoord.y(), 12, 'f', 8)
+        .arg(fcoord.z(), 12, 'f', 8);
+    }
+
+    return poscar;
+  }
 
   // Helper function -- works for "cut" or "copy"
   // FIXME add parameter to set "Copy" or "Cut" in messages
@@ -2059,6 +2394,12 @@ namespace Avogadro
           bondCopy->setAtoms(posBegin->second, posEnd->second, bond->order());
         }
       } // end looping over bonds
+
+      // Copy unit cell, if available
+      if (d->molecule->OBUnitCell()) {
+        moleculeCopy->setOBUnitCell
+          (new OBUnitCell(*(d->molecule->OBUnitCell())));
+      }
     } // should now have a copy of our selected fragment
 
     OBConversion conv;
@@ -2090,12 +2431,20 @@ namespace Avogadro
       clipboardImage.setText("SMILES", copyData);
     }
 
-    // Copy XYZ coordinates to the text selection buffer
-    OBFormat *xyzFormat = conv.FindFormat("xyz");
-    if ( xyzFormat && conv.SetOutFormat(xyzFormat)) {
-      output = conv.WriteString(&obmol);
-      copyData = output.c_str();
-      mimeData->setText(QString(copyData));
+    // Copy XYZ coordinates to the text selection buffer for finite
+    // systems, or POSCAR if a unit cell is available
+    OBUnitCell *cell = moleculeCopy->OBUnitCell();
+    if (!cell) {
+      OBFormat *xyzFormat = conv.FindFormat("xyz");
+      if ( xyzFormat && conv.SetOutFormat(xyzFormat)) {
+        output = conv.WriteString(&obmol);
+        copyData = output.c_str();
+        mimeData->setText(QString(copyData));
+      }
+    }
+    else {
+      QString poscar = getPOSCAR(moleculeCopy);
+      mimeData->setText(poscar);
     }
 
     // need to free our temporary moleculeCopy
@@ -2126,6 +2475,10 @@ namespace Avogadro
 
     if ( mimeData ) {
       QApplication::clipboard()->setMimeData(mimeData, QClipboard::Clipboard);
+      // For X11 middle click
+      if (QApplication::clipboard()->supportsSelection()) {
+        QApplication::clipboard()->setMimeData(mimeData, QClipboard::Selection);
+      }
     }
   }
 
@@ -2200,7 +2553,6 @@ namespace Avogadro
     ui.actionCloseView->setEnabled(true);
     ui.actionDetachView->setEnabled(true);
     ui.actionDisplayAxes->setChecked(gl->renderAxes());
-    ui.actionDisplayUnitCellAxes->setChecked(gl->renderUnitCellAxes());
     ui.actionDebugInformation->setChecked(gl->renderDebug());
     ui.actionQuickRender->setChecked(gl->quickRender());
     writeSettings();
@@ -2233,7 +2585,6 @@ namespace Avogadro
     ui.actionCloseView->setEnabled(true);
     ui.actionDetachView->setEnabled(true);
     ui.actionDisplayAxes->setChecked(gl->renderAxes());
-    ui.actionDisplayUnitCellAxes->setChecked(gl->renderUnitCellAxes());
     ui.actionDebugInformation->setChecked(gl->renderDebug());
     ui.actionQuickRender->setChecked(gl->quickRender());
 
@@ -2419,6 +2770,71 @@ namespace Avogadro
     }
   }
 
+  void MainWindow::alignViewToAxes()
+  {
+    // do nothing if there is a timer running
+    if(d->centerTimer)
+      return;
+
+    Camera * camera = d->glWidget->camera();
+    if(!camera)
+      return;
+
+    // determine our goal matrix
+    Matrix3d linearGoal = Matrix3d::Identity();
+
+    // calculate the translation matrix
+    Transform3d goal(linearGoal);
+
+    goal.pretranslate(- 3.0 * (d->glWidget->radius() + CAMERA_NEAR_DISTANCE) * Vector3d::UnitZ());
+
+    // Support centering on a selection
+    QList<Primitive*> selectedAtoms = d->glWidget->selectedPrimitives().subList(Primitive::AtomType);
+    if (selectedAtoms.isEmpty()) { // no selected atoms, center on 0,0,0
+      goal.translate( Vector3d::Zero() );
+    } else {
+      // Calculate the centroid of the selection
+      Vector3d selectedCenter(0.0, 0.0, 0.0);
+      foreach(Primitive *item, selectedAtoms) {
+        // Atom::pos() returns a pointer to the position
+        selectedCenter += *(static_cast<Atom*>(item)->pos());
+      }
+      selectedCenter /= double(selectedAtoms.size());
+      goal.translate( -selectedCenter);
+    }
+
+    // if smooth transitions are disabled, center now and return
+    if( !d->molecule->numAtoms() >= 1000 ) {
+      camera->setModelview(goal);
+      d->glWidget->update();
+      return;
+    }
+
+    d->startTrans = camera->modelview().translation();
+    d->deltaTrans = goal.translation() - d->startTrans;
+
+    d->startOrientation = camera->modelview().linear();
+    d->endOrientation = goal.linear();
+
+    // Use QTimer for smooth transitions
+    d->centerTime = 0;
+
+    // use the rotation angle between the two orientations to calculate our animation time
+    double m = AngleAxisd(d->startOrientation.inverse() * d->endOrientation).angle();
+    d->rotationTime = int(m*300.0);
+
+    if(d->rotationTime < 300 && d->deltaTrans.squaredNorm() > 1)
+      d->rotationTime = 500;
+
+    // make sure we need to rotate
+    if(d->rotationTime > 0) {
+      d->centerTimer = new QTimer();
+      connect(d->centerTimer, SIGNAL(timeout()),
+          this, SLOT(centerStep()));
+      d->centerTimer->start(10);
+    }
+  }
+
   void MainWindow::showAndActivate()
   {
     setWindowState(windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
@@ -2429,7 +2845,11 @@ namespace Avogadro
   {
     if ( !this->isFullScreen() ) {
       ui.actionFullScreen->setText( tr( "Normal Size" ) );
-      ui.actionFullScreen->setIcon( QIcon( QLatin1String( ":/icons/view-restore.png" ) ) );
+      #if QT_VERSION >= QT_VERSION_CHECK(4, 6, 0)
+        ui.actionFullScreen->setIcon( QIcon::fromTheme("view-restore", QIcon( ":/icons/view-restore.png" )) );
+      #else
+        ui.actionFullScreen->setIcon( QIcon( ":/icons/view-restore.png" ) );
+      #endif
       d->fileToolbar = ui.fileToolBar->isVisible();
       d->statusBar = statusBar()->isVisible();
       ui.fileToolBar->hide();
@@ -2442,7 +2862,11 @@ namespace Avogadro
       //      this->showNormal();
       this->setWindowState(this->windowState() & ~Qt::WindowFullScreen);
       ui.actionFullScreen->setText( tr( "Full Screen" ) );
-
+      #if QT_VERSION >= QT_VERSION_CHECK(4, 6, 0)
+        ui.actionFullScreen->setIcon( QIcon::fromTheme("view-fullscreen", QIcon( ":/icons/view-fullscreen.png" )) );
+      #else
+        ui.actionFullScreen->setIcon( QIcon( ":/icons/view-fullscreen.png" ) );
+      #endif
       ui.fileToolBar->setVisible(d->fileToolbar);
       statusBar()->setVisible(d->statusBar);
     }
@@ -2516,7 +2940,6 @@ namespace Avogadro
              this, SLOT( importFile() ) );
     connect( ui.actionExportGraphics, SIGNAL( triggered() ),
              this, SLOT( exportGraphics() ) );
-    connect( ui.actionExportGL2PS, SIGNAL(triggered()), this, SLOT(exportGL2PS()));
 #ifdef Q_WS_MAC
     connect( ui.actionQuit, SIGNAL( triggered() ), this, SLOT( macQuit() ) );
     connect( ui.actionQuitTool, SIGNAL( triggered() ), this, SLOT( macQuit() ) );
@@ -2557,16 +2980,20 @@ namespace Avogadro
              this, SLOT( closeView() ) );
     connect( ui.actionCenter, SIGNAL( triggered() ),
              this, SLOT( centerView() ) );
+    connect( ui.actionAlignViewToAxes, SIGNAL( triggered() ),
+             this, SLOT( alignViewToAxes() ) );
     connect( ui.actionFullScreen, SIGNAL( triggered() ),
              this, SLOT( fullScreen() ) );
     connect( ui.actionResetDisplayTypes, SIGNAL( triggered() ),
              this, SLOT( resetDisplayTypes() ) );
     connect( ui.actionSetBackgroundColor, SIGNAL( triggered() ),
              this, SLOT( setBackgroundColor() ) );
+    connect( ui.actionPerspective, SIGNAL( triggered() ),
+             this, SLOT( setPerspective() ) );
+    connect( ui.actionOrthographic , SIGNAL( triggered() ),
+             this, SLOT( setOrthographic() ) );
     connect(ui.actionDisplayAxes, SIGNAL(triggered(bool)),
             this, SLOT(setRenderAxes(bool)));
-    connect(ui.actionDisplayUnitCellAxes, SIGNAL(triggered(bool)),
-            this, SLOT(setRenderUnitCellAxes(bool)));
     connect(ui.actionDebugInformation, SIGNAL(triggered(bool)),
             this, SLOT(setRenderDebug(bool)));
     connect(ui.actionQuickRender, SIGNAL(triggered(bool)),
@@ -2764,6 +3191,9 @@ namespace Avogadro
       settings.clear();
     }
 
+    if (m_ignoreConfig)
+      settings.clear();
+
     // Only remember a window if it is the first one - others will be offset
     if (getMainWindowCount() == 1) {
       QPoint originalPosition = pos();
@@ -2832,9 +3262,18 @@ namespace Avogadro
 
     // Set the view conditions for the initial view
     ui.actionDisplayAxes->setChecked(renderAxes());
-    ui.actionDisplayUnitCellAxes->setChecked(renderUnitCellAxes());
     ui.actionDebugInformation->setChecked(renderDebug());
     ui.actionQuickRender->setChecked(quickRender());
+
+    // Set the initial state of the action group for "View > Projection"
+    switch(projection()) {
+    case GLWidget::Perspective:
+      ui.actionPerspective->setChecked(true);
+      break;
+    case GLWidget::Orthographic:
+      ui.actionOrthographic->setChecked(true);
+      break;
+    }
 
     ui.actionCloseView->setEnabled(count > 1);
     ui.actionDetachView->setEnabled(count > 1);
@@ -2911,12 +3350,7 @@ namespace Avogadro
         QStringList menuPath = menuPathString.split( '>' );
         // Root menus are a special case, we need to check menuBar()
         foreach( QAction *menu, menuBar()->actions() ) {
-          // Strip "&" off of comparison to prevent "duplicate" menus.
-          QString cleanedExtensionMenu = menuPath.at(0);
-          QString cleanedMenu = menu->text();
-          cleanedExtensionMenu.remove('&');
-          cleanedMenu.remove('&');
-          if (cleanedMenu == cleanedExtensionMenu) {
+          if ( menu->text() == menuPath.at( 0 ) ) {
             path = menu->menu();
             break;
           }
@@ -2968,11 +3402,41 @@ namespace Avogadro
     foreach(Extension *extension, d->pluginManager.extensions(this)) {
       addActionsToMenu(extension);
 
-      QDockWidget *dockWidget = extension->dockWidget();
-      if(dockWidget) {
-        addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-        dockWidget->hide();
-        ui.menuToolbars->addAction(dockWidget->toggleViewAction());
+      // This is the preferred method for adding a dockwidget to the main
+      // window
+      if (extension->numDockWidgets() != 0) {
+        QList<DockWidget *> widgets = extension->dockWidgets();
+        for (QList<DockWidget*>::const_iterator it = widgets.constBegin(),
+             it_end = widgets.constEnd(); it != it_end; ++it) {
+          if (!this->restoreDockWidget(*it)) {
+            // No restore state -- use the preferred area
+            this->removeDockWidget((*it));
+            this->addDockWidget((*it)->preferredWidgetDockArea(), *it);
+          }
+          (*it)->hide();
+          ui.menuToolbars->addAction((*it)->toggleViewAction());
+        }
+      }
+      else {
+        // These are deprecated methods for adding dock widgets.
+        QDockWidget *dockWidget = extension->dockWidget();
+        if(dockWidget) {
+          Qt::DockWidgetArea area = Qt::RightDockWidgetArea;
+          DockExtension *dock = qobject_cast<DockExtension *>(extension);
+          if (dock) {
+            area = dock->preferredDockArea();
+          }
+          qDebug() << "dev warning: Extension" << extension->name()
+                   << "is using a deprecated DockWidget loading method. "
+                      "See Extension::dockWidgets() documentation.";
+          if (!restoreDockWidget(dockWidget)) {
+            // No restore state -- use the preferred area
+            removeDockWidget(dockWidget);
+            addDockWidget(area, dockWidget);
+          }
+          dockWidget->hide();
+          ui.menuToolbars->addAction(dockWidget->toggleViewAction());
+        }
       }
 
       connect(this, SIGNAL(moleculeChanged(Molecule*)),
@@ -3112,14 +3576,15 @@ namespace Avogadro
              gl, SLOT( setMolecule( Molecule * ) ) );
     connect(gl, SIGNAL(activated(GLWidget *)),
             this, SLOT(glWidgetActivated(GLWidget *)));
-    connect(gl, SIGNAL(unitCellAxesRenderChanged(bool)),
-            this, SLOT(setRenderUnitCellAxes(bool)));
 
     gl->setMolecule(d->molecule);
     gl->setObjectName(QString::fromUtf8("glWidget"));
     gl->setUndoStack( d->undoStack );
     gl->setToolGroup( d->toolGroup );
     d->glWidgets.append(gl);
+
+    // Set the extensions (needed for Extension::paint)
+    gl->setExtensions(d->pluginManager.extensions(this));
 
     // engine list wiget contains all the buttons too
     QWidget *engineListWidget = new QWidget(ui.enginesWidget);
@@ -3289,6 +3754,63 @@ namespace Avogadro
   void MainWindow::toggleEngineSettingsDock()
   {
     ui.enginesDock->setVisible(! ui.enginesDock->isVisible() );
+  }
+
+  QStringList MainWindow::pluginSearchDirs()
+  {
+    // This is where we compile a list of directories that will be searched
+    // for plugins. This is quite dependent up on operating system
+
+    // Environment variables can override default paths
+    foreach (const QString &variable, QProcess::systemEnvironment()) {
+      if(variable.startsWith("AVOGADRO_PLUGINS=")) {
+        QString path(variable);
+        path.remove(QRegExp("^AVOGADRO_PLUGINS="));
+        const QStringList searchDirs = path.split(':');
+        if(!searchDirs.isEmpty())
+          return searchDirs;
+      }
+    }
+
+    // Check if we are running in a build directory
+  #ifndef Q_WS_MAC
+    if (QFile::exists(QCoreApplication::applicationDirPath()
+                      + "/../CMakeCache.txt")) {
+      qDebug() << "In a build directory - loading alternative...";
+      return QStringList(QCoreApplication::applicationDirPath() + "/../lib");
+    }
+  #else
+    // If we are in a Mac build dir things are a little different - if the
+    // expected relative path does not exist try the build dir path
+    if (QFile::exists(QCoreApplication::applicationDirPath()
+                      + "/../../../../CMakeCache.txt")) {
+      return QStringList(QCoreApplication::applicationDirPath()
+                         + "/../../../../lib");
+    }
+  #endif
+    else {
+      QStringList searchDirs;
+      // If no environment variables are set then find the plugins
+      if (!searchDirs.size()) {
+        // Make it relative
+        searchDirs << QCoreApplication::applicationDirPath()
+                       + "/../" + QString(INSTALL_LIBDIR)
+                       + "/" + QString(INSTALL_PLUGIN_DIR);
+      }
+
+      // Now search for the plugins in home directories
+  #if defined(Q_WS_X11)
+      searchDirs << QDir::homePath() + "/."
+                     + QString(INSTALL_PLUGIN_DIR) + "/plugins";
+  #elif defined(Q_WS_MAC)
+      searchDirs << QDir::homePath() + "/Library/Application Support/"
+                     + QString(INSTALL_PLUGIN_DIR) + "/Plugins";
+  #elif defined(WIN32)
+      const QString appdata = qgetenv("APPDATA");
+      searchDirs << appdata + "/" + QString(INSTALL_PLUGIN_DIR);
+  #endif
+      return searchDirs;
+    }
   }
 
 } // end namespace Avogadro

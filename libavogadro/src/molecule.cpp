@@ -28,8 +28,10 @@
 #include "atom.h"
 #include "bond.h"
 #include "cube.h"
-#include "mesh.h"
 #include "fragment.h"
+#include "mesh.h"
+#include "obeigenconv.h"
+#include "primitivelist.h"
 #include "residue.h"
 #include "zmatrix.h"
 
@@ -46,9 +48,10 @@
 #include <openbabel/forcefield.h>
 #include <openbabel/obiter.h>
 
-#include <QDir>
-#include <QDebug>
-#include <QVariant>
+#include <QtCore/QDir>
+#include <QtCore/QDebug>
+#include <QtCore/QVariant>
+#include <QtCore/QVector>
 
 namespace Avogadro{
 
@@ -58,8 +61,11 @@ namespace Avogadro{
   class MoleculePrivate {
     public:
       MoleculePrivate() : farthestAtom(0), invalidGeomInfo(true),
-                          invalidRings(true), obmol(0), obunitcell(0),
-                          obvibdata(0) {}
+                          invalidRings(true), invalidGroupIndices(true),
+                          obmol(0), obunitcell(0),
+                          obvibdata(0), obdosdata(0),
+                          obelectronictransitiondata(0)
+    {}
     // These are logically cached variables and thus are marked as mutable.
     // Const objects should be logically constant (and not mutable)
     // http://www.highprogrammer.com/alan/rants/mutable.html
@@ -69,6 +75,7 @@ namespace Avogadro{
       mutable Atom *                farthestAtom;
       mutable bool                  invalidGeomInfo;
       mutable bool                  invalidRings;
+      mutable bool                  invalidGroupIndices;
       mutable std::vector<double>   energies;
 
       // std::vector used over QVector due to index issues, QVector uses ints
@@ -93,6 +100,9 @@ namespace Avogadro{
       // TODO: Cache an OBMol, in which case the vib. data (and others)
       //       won't be necessary
       OpenBabel::OBVibrationData *  obvibdata;
+      OpenBabel::OBDOSData *        obdosdata;
+      OpenBabel::OBElectronicTransitionData *
+                                    obelectronictransitiondata;
   };
 
   Molecule::Molecule(QObject *parent) : Primitive(MoleculeType, parent),
@@ -150,6 +160,8 @@ namespace Avogadro{
     // do some fancy footwork when we add an atom previously created
   Atom *Molecule::addAtom(unsigned long id)
   {
+    Q_D(const Molecule);
+    d->invalidGeomInfo = true;
     Atom *atom = new Atom(this);
 
     if (!m_atomPos) {
@@ -171,14 +183,39 @@ namespace Avogadro{
     atom->setIndex(m_atomList.size()-1);
     // now that the id is correct, emit the signal
     connect(atom, SIGNAL(updated()), this, SLOT(updateAtom()));
+    d->invalidGroupIndices = true;
     emit atomAdded(atom);
     return atom;
   }
 
+  Atom *Molecule::addAtom(int atomicNum, const Eigen::Vector3d &pos)
+  {
+    // Add a new atom with the next unique id
+    const unsigned long newId = m_atoms.size();
+    Atom *newAtom = this->addAtom(newId);
+
+    newAtom->m_atomicNumber = atomicNum;
+    (*m_atomPos)[newId] = pos;
+
+    return newAtom;
+  }
+
+  Atom *Molecule::addAtom(const Atom &other)
+  {
+    // Add a new atom with the next unique id
+    Atom *newAtom = this->addAtom(m_atoms.size());
+    *newAtom = other;
+
+    return newAtom;
+  }
+
   void Molecule::setAtomPos(unsigned long id, const Eigen::Vector3d& vec)
   {
-    if (m_atomPos && id < m_atomPos->size())
+    Q_D(const Molecule);
+    if (id < m_atomPos->size()) {
       (*m_atomPos)[id] = vec;
+      d->invalidGeomInfo = true;
+    }
   }
 
   void Molecule::setAtomPos(unsigned long id, const Eigen::Vector3d *vec)
@@ -189,6 +226,7 @@ namespace Avogadro{
 
   void Molecule::removeAtom(Atom *atom)
   {
+    Q_D(const Molecule);
     if(atom && atom->parent() == this) {
       // When deleting an atom this also implicitly deletes any bonds to the atom
       foreach (unsigned long bond, atom->bonds()) {
@@ -204,6 +242,7 @@ namespace Avogadro{
       atom->deleteLater();
 
       disconnect(atom, SIGNAL(updated()), this, SLOT(updateAtom()));
+      d->invalidGroupIndices = true;
       emit atomRemoved(atom);
     }
   }
@@ -237,6 +276,23 @@ namespace Avogadro{
     connect(bond, SIGNAL(updated()), this, SLOT(updateBond()));
     emit bondAdded(bond);
     return(bond);
+  }
+
+  Bond *Molecule::addBond(unsigned long beginAtomId, unsigned long endAtomId,
+                          short order)
+  {
+    // Add a new bond with the next unique id
+    Bond *newBond = this->addBond(m_bonds.size());
+    newBond->setAtoms(beginAtomId, endAtomId, order);
+    return newBond;
+  }
+
+  Bond *Molecule::addBond(Atom *beginAtom, Atom *endAtom, short order)
+  {
+    // Add a new bond with the next unique id
+    Bond *newBond = this->addBond(m_bonds.size());
+    newBond->setAtoms(beginAtom->m_id, endAtom->m_id, order);
+    return newBond;
   }
 
   void Molecule::removeBond(Bond *bond)
@@ -629,7 +685,7 @@ namespace Avogadro{
         obatom->SetImplicitValence(2);
         obatom->SetHyb(3);
         obmol.SetImplicitValencePerceived();
-        break;        
+        break;
 
       default: // do nothing
         break;
@@ -722,7 +778,7 @@ namespace Avogadro{
       // Calculate a new estimate (e.g., the geometry changed
       Vector3d dipoleMoment(0.0, 0.0, 0.0);
       // Use MMFF94 charges -- good estimate of dipole moment
-      OpenBabel::OBForceField *ff = OpenBabel::OBForceField::FindForceField("MMFF94");
+      OpenBabel::OBForceField *ff = OpenBabel::OBForceField::FindForceField("MMFF94")->MakeNewInstance();
       OpenBabel::OBMol obmol = OBMol();
       if (ff->Setup(obmol)) {
         ff->GetPartialCharges(obmol);
@@ -731,6 +787,7 @@ namespace Avogadro{
           if (chg)
             dipoleMoment += Vector3d(atom->GetVector().AsArray()) * atof(chg->GetValue().c_str());
         }
+        delete ff; // the new instance
         dipoleMoment *= 3.60; // fit from regression, R^2 = 0.769
       }
       else {
@@ -768,6 +825,53 @@ namespace Avogadro{
       bond(i)->setAromaticity(obmol.GetBond(i)->IsAromatic());
     }
     m_invalidAromaticity = false;
+  }
+
+  void Molecule::calculateGroupIndices() const
+  {
+    Q_D(const Molecule);
+    if(d->invalidGroupIndices) {
+      QVector<unsigned int> group_number;   // numbers of atoms in each group
+      QVector<int> group_ele;    // elements of each group
+      QVector<unsigned int> atomGroupNumber;
+      atomGroupNumber.resize(numAtoms());
+
+      for (unsigned int i = 0;
+           i < numAtoms() && static_cast<int>(i) < atomGroupNumber.size();
+           ++i) {
+        bool match = false;
+        for (int j=0; j < group_number.size(); ++j) {
+          if ((atom(i)->atomicNumber()) == group_ele.at(j)) {
+            group_number[j] += 1;
+            atomGroupNumber[i] = group_number[j];
+            match = true;
+          }
+        }
+        if (!match) {
+          group_ele.push_back(atom(i)->atomicNumber());
+          group_number.push_back(1);
+          atomGroupNumber[i] = 1;
+        }
+      }
+
+      for (unsigned int i = 0;
+           i < numAtoms() && static_cast<int>(i) < atomGroupNumber.size();
+           ++i) {
+        bool match = false;
+        for (int j=0; j<group_number.size(); ++j) {
+          if ((atom(i)->atomicNumber()) == group_ele.at(j) &&
+              (group_number.at(j) == 1)) {
+            match = true;
+          }
+        }
+        if (match) {
+          atom(i)->setGroupIndex(0);
+        } else {
+          atom(i)->setGroupIndex(atomGroupNumber.at(i));
+        }
+      }
+      d->invalidGroupIndices = false;
+    }
   }
 
   unsigned int Molecule::numAtoms() const
@@ -825,6 +929,7 @@ namespace Avogadro{
     Q_D(Molecule);
     Atom *atom = qobject_cast<Atom *>(sender());
     d->invalidGeomInfo = true;
+    d->invalidGroupIndices = true;
     emit atomUpdated(atom);
   }
 
@@ -994,7 +1099,7 @@ namespace Avogadro{
     Q_D(const Molecule);
     if (index == -1 && d->energies.size()) // if there are any...
       return d->energies[m_currentConformer];
-    else if (index < d->energies.size())
+    else if (index >= 0 && index < static_cast<int>(d->energies.size()))
       return d->energies[index];
     else
       return 0.0;
@@ -1012,7 +1117,7 @@ namespace Avogadro{
   void Molecule::setEnergy(int index, double energy)
   {
     Q_D(const Molecule);
-    if (index > numConformers() - 1 || index < 0)
+    if (index > static_cast<int>(numConformers() - 1) || index < 0)
       return;
     while (d->energies.size() != numConformers())
       d->energies.push_back(0.0);
@@ -1089,6 +1194,8 @@ namespace Avogadro{
       OpenBabel::OBAtom obatom = atom->OBAtom();
       *a = obatom;
     }
+    // we are copying partial charges above
+    obmol.SetPartialChargesPerceived();
     foreach(Bond *bond, m_bondList) {
       Atom *beginAtom = atomById(bond->beginAtomId());
       if (!beginAtom)
@@ -1100,6 +1207,14 @@ namespace Avogadro{
 
       obmol.AddBond(beginAtom->index() + 1,
                     endAtom->index() + 1, bond->order());
+
+      QString label = bond->customLabel();
+      if(!label.isEmpty()) {
+        OpenBabel::OBPairData *dp = new OpenBabel::OBPairData();
+        dp->SetAttribute("label");
+        dp->SetValue(label.toLatin1());
+        obmol.GetBond(obmol.NumBonds()-1)->SetData(dp);
+      }
     }
     // We're doing this after copying all atoms, so we can grab them ourselves
     foreach(Residue *residue, d->residueList) {
@@ -1146,6 +1261,9 @@ namespace Avogadro{
 
     obmol.EndModify();
 
+    // Copy energy
+    obmol.SetEnergy(this->energy() / KCAL_TO_KJ);
+
     // Copy unit cells
     if (d->obunitcell != NULL) {
       OpenBabel::OBUnitCell *obunitcell = new OpenBabel::OBUnitCell;
@@ -1167,6 +1285,16 @@ namespace Avogadro{
       obmol.SetData(d->obvibdata->Clone(&obmol));
     }
 
+    // Copy dos, if needed
+    if (d->obdosdata != NULL) {
+      obmol.SetData(d->obdosdata->Clone(&obmol));
+    }
+
+    // Copy excited states data, if needed
+    if (d->obelectronictransitiondata != NULL) {
+      obmol.SetData(d->obelectronictransitiondata->Clone(&obmol));
+    }
+
     return obmol;
   }
 
@@ -1174,7 +1302,6 @@ namespace Avogadro{
   {
     // Take an OBMol, copy everything we need and store this object
     Q_D(Molecule);
-    qDebug() << "setOBMol called.";
     clear();
     // Copy all the parts of the OBMol to our Molecule
     blockSignals(true);
@@ -1195,6 +1322,8 @@ namespace Avogadro{
       bond->setAtoms(obbond->GetBeginAtom()->GetIdx()-1,
                      obbond->GetEndAtom()->GetIdx()-1,
                      obbond->GetBondOrder());
+      if (obbond->HasData("label"))
+        bond->setCustomLabel(obbond->GetData("label")->GetValue().c_str());
     }
 
     // Now for the volumetric data
@@ -1253,21 +1382,48 @@ namespace Avogadro{
     }
     // (that could return NULL, but other methods know they could get NULL)
 
-    // Copy forces, if present and valid
-    if (obmol->HasData(OpenBabel::OBGenericDataType::ConformerData)) {
-    OpenBabel::OBConformerData *cd = static_cast<OpenBabel::OBConformerData*>(obmol->GetData(OpenBabel::OBGenericDataType::ConformerData));
-    if (cd) {
-      std::vector< std::vector<OpenBabel::vector3> > allForces = cd->GetForces();
+    // Copy conformers, if present
+    if (obmol->NumConformers() > 1) {
+      for (int i = 0; i < obmol->NumConformers(); ++i) {
+        obmol->SetConformer(i);
+        // copy the coordinates
+        double *coordPtr = obmol->GetCoordinates();
+        std::vector<Eigen::Vector3d> conformer;
+        foreach (Atom *atom, atoms()) {
+          while (conformer.size() < atom->id())
+            conformer.push_back(Eigen::Vector3d(0.0, 0.0, 0.0));
+          conformer.push_back(Eigen::Vector3d(coordPtr));
+          coordPtr += 3;
+        } // end foreach atom
+        addConformer(conformer, i);
+      } // end for(conformers)
+      setConformer(obmol->NumConformers() - 1);
+      // energies and forces will be set below
+    } else {
+      // one conformer, so use setEnergy
+      setEnergy(obmol->GetEnergy() * KCAL_TO_KJ);
+    }
 
-      // check for validity (i.e., we have some forces, one for each atom
-      if (allForces.size() && allForces[0].size() == numAtoms()) {
-        OpenBabel::vector3 force;
-        foreach (Atom *atom, m_atomList) { // loop through each atom
+    // Copy conformer data (e.g., energies, forces) if present and valid
+    if (obmol->HasData(OpenBabel::OBGenericDataType::ConformerData)) {
+      OpenBabel::OBConformerData *cd = static_cast<OpenBabel::OBConformerData*>(obmol->GetData(OpenBabel::OBGenericDataType::ConformerData));
+      if (cd) {
+        // copy energies -- should be one for each conformer
+        std::vector<double> energies = cd->GetEnergies();
+        for (unsigned int i = 0; i < energies.size(); ++i)
+          energies[i] *= KCAL_TO_KJ;
+        setEnergies(energies);
+
+        // check for validity (i.e., we have some forces, one for each atom
+        std::vector< std::vector<OpenBabel::vector3> > allForces = cd->GetForces();
+        if (allForces.size() && allForces[0].size() == numAtoms()) {
+          OpenBabel::vector3 force;
+          foreach (Atom *atom, m_atomList) { // loop through each atom
             force = allForces[0][atom->index()];
             atom->setForceVector(Eigen::Vector3d(force.x(), force.y(), force.z()));
           } // end setting forces on each atom
-        }
-      }
+        } // forces
+      } // end if (cd)
     }  // end HasData(ConformerData)
 
     // Copy any vibration data if possible
@@ -1276,8 +1432,56 @@ namespace Avogadro{
       d->obvibdata = vibData;
     }
 
-    // Copy energy
-    setEnergy(obmol->GetEnergy() * KCAL_TO_KJ);
+    // Copy DOS data
+    if (obmol->HasData(OpenBabel::OBGenericDataType::DOSData)) {
+      OpenBabel::OBDOSData *dosData = static_cast<OpenBabel::OBDOSData*>(obmol->GetData(OpenBabel::OBGenericDataType::DOSData));
+      d->obdosdata = dosData;
+    }
+
+    // Copy electronic transition data
+    if (obmol->HasData(OpenBabel::OBGenericDataType::ElectronicTransitionData)) {
+      OpenBabel::OBElectronicTransitionData *etd =
+        static_cast<OpenBabel::OBElectronicTransitionData*>
+        (obmol->GetData(OpenBabel::OBGenericDataType::ElectronicTransitionData));
+      d->obelectronictransitiondata = etd;
+    }
+
+    // Copy orbital energies, symbols, and occupations to dynamic properties (as QList<>)
+    if (obmol->HasData(OpenBabel::OBGenericDataType::ElectronicData)) {
+      OpenBabel::OBOrbitalData *od =
+        static_cast<OpenBabel::OBOrbitalData*>(obmol->GetData(OpenBabel::OBGenericDataType::ElectronicData));
+
+      // Source (from OBMol)
+      std::vector<OpenBabel::OBOrbital> alphaOrbitals, betaOrbitals;
+      std::vector<OpenBabel::OBOrbital>::iterator orbitalIter;
+      alphaOrbitals = od->GetAlphaOrbitals();
+
+      // Destinations
+      QList<QVariant> alphaEnergies, alphaOcc;
+      QStringList alphaSymmetries;
+      for (orbitalIter = alphaOrbitals.begin(); orbitalIter != alphaOrbitals.end(); ++orbitalIter) {
+        alphaEnergies.append(QVariant(orbitalIter->GetEnergy() * 27.21138)); // convert to eV
+        alphaSymmetries.append(orbitalIter->GetSymbol().c_str());
+        alphaOcc.append(QVariant(orbitalIter->GetOccupation()));
+      }
+      setProperty("alphaOrbitalEnergies", alphaEnergies);
+      setProperty("alphaOrbitalSymmetries", alphaSymmetries);
+      setProperty("alphaOrbitalOccupations", alphaOcc);
+
+      if (od->IsOpenShell()) { // Find and set the beta orbitals
+        betaOrbitals = od->GetBetaOrbitals(); // shouldn't be empty
+        QList<QVariant> betaEnergies, betaOcc;
+        QStringList betaSymmetries;
+        for (orbitalIter = betaOrbitals.begin(); orbitalIter != betaOrbitals.end(); ++orbitalIter) {
+          betaEnergies.append(QVariant(orbitalIter->GetEnergy() * 27.21138)); // convert to eV
+          betaSymmetries.append(orbitalIter->GetSymbol().c_str());
+          betaOcc.append(QVariant(orbitalIter->GetOccupation()));
+        }
+        setProperty("betaOrbitalEnergies", betaEnergies);
+        setProperty("betaOrbitalSymmetries", betaSymmetries);
+        setProperty("betaOrbitalOccupations", betaOcc);
+      }
+    }
 
     // Finally, sync OBPairData to dynamic properties
     OpenBabel::OBDataIterator dIter;
@@ -1302,7 +1506,11 @@ namespace Avogadro{
       m_estimatedDipoleMoment = false;
     }
 
+    // we set the partial charges above
+    m_invalidPartialCharges = false;
+
     blockSignals(false);
+    emit update();
     return true;
   }
 
@@ -1426,21 +1634,18 @@ namespace Avogadro{
   Molecule &Molecule::operator=(const Molecule& other)
   {
     // FIXME: Copy all the other stuff in the molecule!
-    //Q_D(Molecule);
     clear();
     //const MoleculePrivate *e = other.d_func();
     m_atoms.resize(other.m_atoms.size(), 0);
     if (other.m_atomPos) {
-      m_atomConformers.resize(1);
-      m_atomConformers[0] = new vector<Vector3d>;
-      m_atomPos = m_atomConformers[0];
-      m_atomPos->reserve(100);
-
-      m_atomPos->clear();
-      m_atomPos->resize(other.m_atomPos->size());
+      m_atomConformers.resize(other.m_atomConformers.size());
+      m_currentConformer = other.m_currentConformer;
+      for (size_t i = 0; i < m_atomConformers.size(); ++i) {
+        m_atomConformers[i] = new vector<Vector3d>;
+        *m_atomConformers[i] = *other.m_atomConformers[i];
+      }
+      m_atomPos = m_atomConformers[m_currentConformer];
     }
-    else
-      qDebug() << "Other atom has a position list of size zero!";
 
     m_bonds.resize(other.m_bonds.size(), 0);
 
@@ -1487,6 +1692,13 @@ namespace Avogadro{
       residue->setAtomIds(r->atomIds());
     }
 
+    // Copy unit cells
+    Q_D(Molecule);
+    if (other.OBUnitCell() != NULL) {
+      d->obunitcell = new OpenBabel::OBUnitCell;
+      *d->obunitcell = *(other.OBUnitCell()); // Copy the object not the pointer
+    }
+
     return *this;
   }
 
@@ -1525,13 +1737,117 @@ namespace Avogadro{
     return *this;
   }
 
+  PrimitiveList Molecule::copyAtomsAndBonds(const QList<Atom *> &atoms,
+                                            const QList<Bond *> &bonds)
+  {
+    PrimitiveList newPrimitives;
+
+    // Only need to check atoms: if bonds is not empty and atoms is, then
+    // those bonds are invalid anyway
+    if (atoms.isEmpty()) {
+      return newPrimitives;
+    }
+
+    // Build lookup table to map the old atom ids to the new atom ids so that
+    // we can get the bonding correct.
+    //
+    // The atomIdLUT vector is (maxId-minId) indices long, such that:
+    //
+    //   atomIdLUT.value(oldId - minId) = newId
+    //
+    // We've checked that atoms is not empty already, so use the first()
+    unsigned long minId = atoms.first()->id();
+    unsigned long maxId = minId;
+    unsigned long maxInd = 0;
+    QVector<unsigned long> atomIdLUT;
+    atomIdLUT.reserve(atoms.size());
+    // Initialize with an invalid value. This will be fixed in the first
+    // iteration of the loop below.
+    const unsigned long invalidId = std::numeric_limits<unsigned long>::max();
+    atomIdLUT.push_back(invalidId);
+
+    // Copy atomic information over, build LUT
+    for (QList<Atom*>::const_iterator it = atoms.constBegin(),
+         it_end = atoms.constEnd(); it != it_end; ++it) {
+      // Add atom
+      Atom *newAtom = this->addAtom(**it);
+      newPrimitives.append(newAtom);
+      const unsigned long oldId = (*it)->id();
+      const unsigned long newId = newAtom->id();
+
+      // Resize LUT if needed
+      if (oldId < minId) {
+        const unsigned long newIds = minId - oldId;
+        atomIdLUT.insert(0, newIds, invalidId);
+        maxInd += newIds;
+        minId = oldId;
+      }
+      else if (oldId > maxId) {
+        const unsigned long newIds = oldId - maxId;
+        atomIdLUT.insert(maxInd+1, newIds, invalidId);
+        maxInd += newIds;
+        maxId = oldId;
+      }
+
+      atomIdLUT[oldId - minId] = newId;
+    }
+
+    // Copy bond info
+    for (QList<Bond*>::const_iterator it = bonds.constBegin(),
+         it_end = bonds.constEnd(); it != it_end; ++it) {
+      // Fetch old ids
+      const unsigned long oldBeginId = (*it)->m_beginAtomId;
+      const unsigned long oldEndId   = (*it)->m_endAtomId;
+
+      // Lookup new ids
+      const unsigned long newBeginId = atomIdLUT[oldBeginId - minId];
+      const unsigned long newEndId   = atomIdLUT[oldEndId - minId];
+
+      // Verify ids
+      Q_ASSERT_X(newBeginId != invalidId && newEndId != invalidId, Q_FUNC_INFO,
+                 "An invalid ID was returned from the lookup table.");
+
+      // Create new bond. Don't use operator=, it will overwrite ids.
+      Bond *newBond = this->addBond(newBeginId,
+                                    newEndId,
+                                    (*it)->m_order);
+      newPrimitives.append(newBond);
+    }
+
+    return newPrimitives;
+  }
+
+  PrimitiveList Molecule::copyAtomsAndBonds(const PrimitiveList &atomsAndBonds)
+  {
+    QList<Atom*> atoms;
+    QList<Bond*> bonds;
+    QList<Primitive*> atomPrims = atomsAndBonds.subList(AtomType);
+    QList<Primitive*> bondPrims = atomsAndBonds.subList(BondType);
+#if QT_VERSION >= QT_VERSION_CHECK(4,7,0)
+    atoms.reserve(atomPrims.size());
+    atoms.reserve(atomPrims.size());
+#endif
+
+    for (QList<Primitive*>::const_iterator it = atomPrims.constBegin(),
+         it_end = atomPrims.constEnd(); it != it_end; ++it) {
+      atoms.append(static_cast<Atom*>(*it));
+    }
+
+    for (QList<Primitive*>::const_iterator it = bondPrims.constBegin(),
+         it_end = bondPrims.constEnd(); it != it_end; ++it) {
+      bonds.append(static_cast<Bond*>(*it));
+    }
+
+    return this->copyAtomsAndBonds(atoms, bonds);
+  }
+
   void Molecule::computeGeomInfo() const
   {
     Q_D(const Molecule);
     d->invalidGeomInfo = true;
     d->farthestAtom = 0;
     d->center.setZero();
-    d->normalVector.setZero();
+    d->normalVector = Vector3d::UnitZ();
     d->radius = 1.0;
 
     /// FIXME This leads to the dipole moment always getting invalidated
@@ -1544,36 +1860,112 @@ namespace Avogadro{
     }
 
     unsigned int nAtoms = numAtoms();
-    // In order to calculate many parameters we need at least two atoms
-    if(nAtoms > 1) {
-      // Compute the normal vector to the molecule's best-fitting plane
-      int i = 0;
-      Vector3d ** atomPositions = new Vector3d*[nAtoms];
-      // Calculate the center of the molecule too
-      foreach (Atom *atom, m_atomList) {
-        Vector3d *pos = &(*m_atomPos)[atom->id()];
-        d->center += *pos;
-        atomPositions[i++] = pos;
-      }
-      d->center /= static_cast<double>(nAtoms);
-      Eigen::Hyperplane<double, 3> planeCoeffs;
-      Eigen::fitHyperplane(numAtoms(), atomPositions, &planeCoeffs);
-      delete[] atomPositions;
-      d->normalVector = planeCoeffs.normal();
 
-      // compute radius and the farthest atom
-      d->radius = -1.0; // so that ( squaredDistanceToCenter > d->radius ) is true for at least one atom.
-      foreach (Atom *atom, m_atomList) {
-        double distanceToCenter = (*atom->pos() - d->center).norm();
-        if(distanceToCenter > d->radius) {
-          d->radius = distanceToCenter;
-          d->farthestAtom = atom;
+    // If a unit cell is present, combine it's center and radius with
+    // that of the molecule's atomic center/radius
+    if (d->obunitcell) {
+      this->computeGeomInfoFromUnitCell();
+    }
+    // If no unit cell, just compute the radius and farthest atom as normal.
+    else {
+      if (nAtoms > 1) {
+        // compute radius and the farthest atom
+        d->radius = std::numeric_limits<double>::min();
+        foreach (Atom *atom, m_atomList) {
+          double distanceToCenter = (*atom->pos() - d->center).squaredNorm();
+          if(distanceToCenter > d->radius) {
+            d->radius = distanceToCenter;
+            d->farthestAtom = atom;
+          }
         }
+        d->radius = sqrt(d->radius);
+
+        // Compute the normal vector to the molecule's best-fitting plane
+        int i = 0;
+        Vector3d ** atomPositions = new Vector3d*[nAtoms];
+        // Calculate the center of the molecule too
+        foreach (Atom *atom, m_atomList) {
+          Vector3d *pos = &(*m_atomPos)[atom->id()];
+          d->center += *pos;
+          atomPositions[i++] = pos;
+        }
+        d->center /= static_cast<double>(nAtoms);
+        Eigen::Hyperplane<double, 3> planeCoeffs;
+        Eigen::fitHyperplane(numAtoms(), atomPositions, &planeCoeffs);
+        delete[] atomPositions;
+        d->normalVector = planeCoeffs.normal();
       }
     }
+
     d->invalidGeomInfo = false;
   }
 
-} // End namespace Avogadro
+  inline void Molecule::computeGeomInfoFromUnitCell() const
+  {
+    Q_D(const Molecule);
+    const Eigen::Matrix3d ucRowMatrix =
+        OB2Eigen(d->obunitcell->GetCellMatrix());
+    const Eigen::Vector3d ucCenter = 0.5 * (ucRowMatrix.row(0) +
+                                            ucRowMatrix.row(1) +
+                                            ucRowMatrix.row(2));
+    // Exploit symmetry and only calculate distance to four of the corners
+    double ucSqRadii[4];
+    ucSqRadii[0] = ((Eigen::Vector3d::Zero()) - ucCenter).squaredNorm();
+    ucSqRadii[1] = (ucRowMatrix.row(0).transpose() - ucCenter).squaredNorm();
+    ucSqRadii[2] = (ucRowMatrix.row(1).transpose() - ucCenter).squaredNorm();
+    ucSqRadii[3] = (ucRowMatrix.row(2).transpose() - ucCenter).squaredNorm();
 
-#include "molecule.moc"
+    // Select the largest radius
+    double ucRadius = ucSqRadii[0];
+    if (ucRadius > ucSqRadii[1])
+      ucRadius = ucSqRadii[1];
+    if (ucRadius > ucSqRadii[2])
+      ucRadius = ucSqRadii[2];
+    if (ucRadius > ucSqRadii[3])
+      ucRadius = ucSqRadii[3];
+    ucRadius = sqrt(ucRadius);
+
+    // The normal will lie in the direction of the shortest cell vector
+    const double aSqNorm = ucRowMatrix.row(0).squaredNorm();
+    const double bSqNorm = ucRowMatrix.row(1).squaredNorm();
+    const double cSqNorm = ucRowMatrix.row(2).squaredNorm();
+    if (aSqNorm < bSqNorm) {
+      if (aSqNorm < cSqNorm) // a < (b ? c)
+        d->normalVector = -ucRowMatrix.row(0).normalized();
+      else                   // c < a < b
+        d->normalVector = -ucRowMatrix.row(2).normalized();
+    }
+    else { // b < a
+      if (bSqNorm < cSqNorm) // b < (a ? c)
+        d->normalVector = -ucRowMatrix.row(1).normalized();
+      else                   // c < b < a
+        d->normalVector = -ucRowMatrix.row(2).normalized();
+    }
+
+    // If there are no atoms, just use the cell geometry:
+    if (this->numAtoms() == 0) {
+      d->radius = ucRadius;
+      d->center = ucCenter;
+    }
+    // Otherwise set the center only and calculate the radius and farthest
+    // atom
+    else {
+      // Calculate the center between the molecule and uc centers:
+      d->center = ucCenter;
+
+      // Discover the farthestAtom info and radius
+      double farthestAtomSqDistance = std::numeric_limits<double>::min();
+      d->farthestAtom = NULL;
+      foreach (Atom *atom, m_atomList) {
+        double distanceToCenter = (*atom->pos() - d->center).squaredNorm();
+        if(distanceToCenter > farthestAtomSqDistance) {
+          farthestAtomSqDistance = distanceToCenter;
+          d->farthestAtom = atom;
+        }
+      }
+      const double moleculeRadius = sqrt(farthestAtomSqDistance);
+      d->radius = (moleculeRadius > ucRadius) ? moleculeRadius : ucRadius;
+    }
+  }
+
+} // End namespace

@@ -422,13 +422,14 @@ namespace Avogadro {
   void SurfaceEngine::setMolecule(const Molecule *molecule)
   {
     Engine::setMolecule(molecule);
-
-    connect(m_molecule, SIGNAL(primitiveAdded(Primitive*)),
+    if (m_molecule) {
+      connect(m_molecule, SIGNAL(primitiveAdded(Primitive*)),
             this, SLOT(addPrimitive(Primitive*)));
-    connect(m_molecule, SIGNAL(primitiveUpdated(Primitive*)),
+      connect(m_molecule, SIGNAL(primitiveUpdated(Primitive*)),
             this, SLOT(updatePrimitive(Primitive*)));
-    connect(m_molecule, SIGNAL(primitiveRemoved(Primitive*)),
+      connect(m_molecule, SIGNAL(primitiveRemoved(Primitive*)),
             this, SLOT(removePrimitive(Primitive*)));
+    }
 
     updateOrbitalCombo();
   }
@@ -436,13 +437,14 @@ namespace Avogadro {
   void SurfaceEngine::setMolecule(Molecule *molecule)
   {
     Engine::setMolecule(molecule);
-
-    connect(m_molecule, SIGNAL(primitiveAdded(Primitive*)),
+    if (m_molecule) {
+      connect(m_molecule, SIGNAL(primitiveAdded(Primitive*)),
             this, SLOT(addPrimitive(Primitive*)));
-    connect(m_molecule, SIGNAL(primitiveUpdated(Primitive*)),
+      connect(m_molecule, SIGNAL(primitiveUpdated(Primitive*)),
             this, SLOT(updatePrimitive(Primitive*)));
-    connect(m_molecule, SIGNAL(primitiveRemoved(Primitive*)),
+      connect(m_molecule, SIGNAL(primitiveRemoved(Primitive*)),
             this, SLOT(removePrimitive(Primitive*)));
+    }
 
     updateOrbitalCombo();
   }
@@ -458,16 +460,28 @@ namespace Avogadro {
       settings.setValue("mesh1Id", static_cast<int>(m_mesh1->id()));
     if (m_mesh2)
       settings.setValue("mesh2Id", static_cast<int>(m_mesh2->id()));
-//    settings.setValue("posColor", m_posColor);
-//    settings.setValue("posColor", m_negColor);
+    settings.setValue("posColor/r", m_posColor.red());
+    settings.setValue("posColor/g", m_posColor.green());
+    settings.setValue("posColor/b", m_posColor.blue());
+    settings.setValue("negColor/r", m_negColor.red());
+    settings.setValue("negColor/g", m_negColor.green());
+    settings.setValue("negColor/b", m_negColor.blue());
   }
 
   void SurfaceEngine::readSettings(QSettings &settings)
   {
     Engine::readSettings(settings);
     m_alpha = settings.value("alpha", 0.5).toDouble();
-    m_posColor.setAlpha(m_alpha);
-    m_negColor.setAlpha(m_alpha);
+    // Default: Positive = blue
+    m_posColor.setFromRgba(settings.value("posColor/r", 0.0).toDouble(),
+                           settings.value("posColor/g", 0.0).toDouble(),
+                           settings.value("posColor/b", 1.0).toDouble(),
+                           m_alpha);
+    // Default: Negative = red
+    m_negColor.setFromRgba(settings.value("negColor/r", 1.0).toDouble(),
+                           settings.value("negColor/g", 0.0).toDouble(),
+                           settings.value("negColor/b", 0.0).toDouble(),
+                           m_alpha);
     m_renderMode = settings.value("renderMode", 0).toInt();
     m_colored = settings.value("colorMode", false).toBool();
     m_drawBox = settings.value("drawBox", false).toBool();

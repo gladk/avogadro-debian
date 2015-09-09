@@ -50,8 +50,6 @@ for line in fin:
     # The sign off line is ignored too
     elif re.search('Signed-off-by', line) >= 0:
         continue
-    elif re.search('Change-Id:', line) >= 0:
-        continue
     # Extract the actual commit message for this commit
     elif authorFound & dateFound & messageFound == False:
         # Find the commit message if we can

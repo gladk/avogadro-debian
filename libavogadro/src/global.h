@@ -26,8 +26,19 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <QTranslator>
-#include <QPointer>
+#include <QtCore/QTranslator>
+#include <QtCore/QPointer>
+
+/**
+ * Version check macro. Intended to be used in constructions like
+ * @code
+ * #if (LIBAVOGADRO_VERSION >= LIBAVOGADRO_VERSION_CHECK(1, 1, 0))
+ * @endcode
+ */
+#define LIBAVOGADRO_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
+
+// LIBAVOGADRO_VERSION is (major << 16) + (minor << 8) + patch
+#define LIBAVOGADRO_VERSION LIBAVOGADRO_VERSION_CHECK(@Avogadro_VERSION_MAJOR@, @Avogadro_VERSION_MINOR@, @Avogadro_VERSION_PATCH@)
 
 #define EIGEN_WORK_AROUND_QT_BUG_CALLING_WRONG_OPERATOR_NEW_FIXED_IN_QT_4_5
 
@@ -94,7 +105,7 @@ namespace Avogadro
   const double   ROTATION_SPEED                    = 0.005;
   const double   ZOOM_SPEED                        = 0.02;
   const double   MOUSE_WHEEL_SPEED                 = 0.1;
-  const double   CAMERA_MOL_RADIUS_MARGIN          = 10.0;
+  const double   CAMERA_MOL_RADIUS_MARGIN          = 3.0;
   const double   CAMERA_NEAR_DISTANCE              = 2.0;
   const int      SEL_BUF_MAX_SIZE                  = 262144;
   const int      SEL_BUF_MARGIN                    = 128;

@@ -28,6 +28,8 @@
 
 namespace Avogadro {
 
+  class Primitive;
+
   class InsertFragmentExtension : public Extension
   {
     Q_OBJECT
@@ -49,15 +51,25 @@ namespace Avogadro {
     void writeSettings(QSettings &settings) const;
     void readSettings(QSettings &settings);
 
+    QList<int> findSelectedForInsert(QList<Primitive*> selectedAtomList) const;
+
   public Q_SLOTS:
-    void performInsert();
+    void insertCrystal();
+    void insertFragment();
+
+    // With the "grow selected atoms," feature, we need a delay timer
+    void resetTimer();
 
   private:
+
     QList<QAction *> m_actions;
     GLWidget* m_widget;
-    InsertFragmentDialog *m_dialog;
+    InsertFragmentDialog *m_fragmentDialog;
+    InsertFragmentDialog *m_crystalDialog;
     QString   m_smilesString;
     Molecule *m_molecule;
+
+    bool     m_justFinished;
   };
 
   class InsertFragmentExtensionFactory : public QObject, public PluginFactory

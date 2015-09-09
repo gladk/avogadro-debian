@@ -42,7 +42,7 @@ class Animation;
 
   private:
     static double getAspectRatio(GLWidget* widget);
-    static void runPovRay(QString directory, QString povFileName);
+    static bool runPovRay(QString directory, QString povFileName);
 
     template <class QStringIterator>
     static void runMencoder(QString pngFileDirectory, QString videoFileName,

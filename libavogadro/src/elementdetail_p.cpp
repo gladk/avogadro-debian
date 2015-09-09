@@ -25,8 +25,7 @@
  **********************************************************************/
 
 #include "elementdetail_p.h"
-
-#include <avogadro/elementtranslator.h>
+#include "elementtranslator.h"
 
 #include <openbabel/mol.h>
 
@@ -131,6 +130,4 @@ namespace Avogadro{
     emit update();
   }
 
-} // End namespace Avogadro
-
-#include "elementdetail_p.moc"
+} // End namespace

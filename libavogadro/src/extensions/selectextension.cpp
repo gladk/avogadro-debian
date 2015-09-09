@@ -38,6 +38,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QAction>
+#include <QApplication>
 #include <QDockWidget>
 #include <QDebug>
 

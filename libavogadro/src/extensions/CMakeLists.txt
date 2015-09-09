@@ -4,138 +4,124 @@ ADD_DEFINITIONS(-DQT_SHARED)
 
 set(DESTINATION_DIR ${Avogadro_PLUGIN_INSTALL_DIR}/extensions)
 
-include_directories(
-  ../
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${ZLIB_INCLUDE_DIR}
+include_directories(${CMAKE_CURRENT_BINARY_DIR}
+  "${CMAKE_CURRENT_SOURCE_DIR}/gl2ps"
 )
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
 
-set(LINK_LIBS "avogadro")
+set(LINK_LIBS avogadro)
+set(PLUGIN_LABEL extensions)
+set(PLUGIN_TARGET extensions)
+add_custom_target(extensions COMMENT "Meta target to build all Avogadro extensions.")
 
 ### Template extension - template for extensions
 #avogadro_plugin(templateextension templateextension.cpp)
 
-### Input File Extension
-set(inputfileextension_SRCS inputfileextension.cpp
-#    daltoninputdialog.cpp
-    gaussianinputdialog.cpp
-    molproinputdialog.cpp
-    mopacinputdialog.cpp
-    nwcheminputdialog.cpp
-    qcheminputdialog.cpp)
-avogadro_plugin(inputfileextension "${inputfileextension_SRCS}"
- "gaussianinputdialog.ui;molproinputdialog.ui;mopacinputdialog.ui;nwcheminputdialog.ui;qcheminputdialog.ui")
-
-### gamess
-set(gamessextension_SRCS gamessextension.cpp
-  gamessinputdialog.cpp
-  gamessinputdata.cpp
-  gamesshighlighter.cpp
-  gamessefpmatchdialog.cpp)
-avogadro_plugin(gamessextension
-  "${gamessextension_SRCS}"
-  "gamessinputdialog.ui;gamessefpmatchdialog.ui")
-
 ### Properties
-avogadro_plugin(propextension
-   "../tools/skeletontree.cpp;propmodel.cpp;propextension.cpp")
+avogadro_plugin_nogl(propextension
+  "../tools/skeletontree.cpp;propmodel.cpp;propextension.cpp")
 
-avogadro_plugin(molecularpropextension
-        "molecularpropextension.cpp"
-        molecularpropdialog.ui)
+avogadro_plugin_nogl(cartesianextension
+  cartesianextension.cpp
+  cartesianeditor.ui
+  cartesianextension.qrc)
+
+avogadro_plugin_nogl(molecularpropextension
+  molecularpropextension.cpp
+  molecularpropdialog.ui)
+target_link_libraries(molecularpropextension ${QT_QTNETWORK_LIBRARY})
 
 ### Molecular Mechanics force fields
 set(forcefieldextension_SRCS forcefieldextension.cpp forcefielddialog.cpp
   constraintsdialog.cpp constraintsmodel.cpp conformersearchdialog.cpp)
-avogadro_plugin(forcefieldextension
+avogadro_plugin_nogl(forcefieldextension
   "${forcefieldextension_SRCS}"
   "forcefielddialog.ui;constraintsdialog.ui;conformersearchdialog.ui")
+if(${CMAKE_CXX_COMPILER_ID} MATCHES Intel AND UNIX)
+  set_target_properties(forcefieldextension PROPERTIES COMPILE_FLAGS "-fvisibility=default")
+endif()
 
 ### hydrogens
-avogadro_plugin(hydrogenextension hydrogensextension.cpp)
+avogadro_plugin_nogl(hydrogensextension hydrogensextension.cpp)
+
+### invertchirality
+avogadro_plugin_nogl(invertchiralextension invertchiralextension.cpp)
 
 ### Selections
-avogadro_plugin(selectextension selectextension.cpp)
-
-### unit cells
-avogadro_plugin(unitcellextension
-  "unitcellextension.cpp;unitcellparamdialog.cpp"
-  unitcellparamdialog.ui)
+avogadro_plugin_nogl(selectextension selectextension.cpp)
 
 ### insert fragment
-avogadro_plugin(insertfragmentextension
-"insertfragmentextension.cpp;insertfragmentdialog.cpp;insertcommand.cpp"
+avogadro_plugin_nogl(insertfragmentextension
+  "insertfragmentextension.cpp;insertfragmentdialog.cpp;insertcommand.cpp;sortfiltertreeproxymodel.cpp"
   insertfragmentdialog.ui)
 
 ### insert peptide (builder)
-avogadro_plugin(insertpeptideextension
+avogadro_plugin_nogl(insertpeptideextension
   "insertpeptideextension.cpp;insertcommand.cpp"
   insertpeptidedialog.ui)
 
 ### h->methyl
-avogadro_plugin(h2methylextension h2methylextension.cpp)
-
-### Surfaces
-set(surfaceextension_SRCS surfaceextension.cpp surfacedialog.cpp
-  basisset.cpp gaussianfchk.cpp slaterset.cpp mopacaux.cpp molpro.cpp
-  vdwsurface.cpp ../../qtiocompressor/qtiocompressor.cpp)
-avogadro_plugin(surfaceextension "${surfaceextension_SRCS}" surfacedialog.ui)
-target_link_libraries(surfaceextension ${LINK_LIBS} ${ZLIB_LIBRARIES})
-
-### Vibrations
-avogadro_plugin(vibrationextension
-  "vibrationextension.cpp;vibrationdialog.cpp"
-  vibrationdialog.ui)
-
-### Spectra
-avogadro_plugin(spectraextension
-  "spectraextension.cpp;spectradialog.cpp;spectratype.cpp;spectratype_ir.cpp;spectratype_nmr.cpp"
-  "spectradialog.ui;spectratabir.ui;spectratabnmr.ui")
+avogadro_plugin_nogl(h2methylextension h2methylextension.cpp)
 
 if(ENABLE_PYTHON AND ALL_PYTHON_FOUND)
   ### python terminal
   message(STATUS "Enabled python terminal")
-  avogadro_plugin(pythonterminal
+  avogadro_plugin_nogl(pythonterminal
     "pythonterminal.cpp;highlighter.cpp"
     pythonterminalwidget.ui)
+  target_link_libraries(pythonterminal ${PYTHON_LIBRARIES})
 
   file(GLOB python_SCRIPTS "python/*.py")
   install(FILES ${python_SCRIPTS} DESTINATION share/libavogadro/extensionScripts)
-endif(ENABLE_PYTHON AND ALL_PYTHON_FOUND)
+endif()
 
 ### Animation
 set(animationextension_SRCS animationextension.cpp animationdialog.cpp
   povpainter.cpp trajvideomaker.cpp)
-avogadro_plugin(animationextension
+avogadro_plugin_nogl(animationextension
   "${animationextension_SRCS}"
   animationdialog.ui
-  animation.qrc)
+  animationextension.qrc)
 
 ### POV-Ray extension
-avogadro_plugin("povrayextension"
+avogadro_plugin_nogl(povrayextension
   "povrayextension.cpp;povpainter.cpp;povraydialog.cpp"
-  "povraydialog.ui")
+  povraydialog.ui)
 
 ### File import extension
-avogadro_plugin(fileimportextension fileimportextension.cpp fileimportdialog.ui)
+avogadro_plugin_nogl(fileimportextension fileimportextension.cpp fileimportdialog.ui)
 
 ### Shader extension
 if(GLEW_FOUND)
   avogadro_plugin(shaderextension
     shaderextension.cpp
     shaderdialog.ui)
+  target_link_libraries(shaderextension ${GLEW_LIBRARY})
   file(GLOB shader_VERT "shaders/*.vert")
   file(GLOB shader_FRAG "shaders/*.frag")
   file(GLOB shader_PARAMS "shaders/*.params")
   install(FILES ${shader_VERT} ${shader_FRAG} ${shader_PARAMS}
-          DESTINATION share/libavogadro/shaders)
-endif(GLEW_FOUND)
+    DESTINATION share/libavogadro/shaders)
+endif()
 
 ### super cells
-avogadro_plugin(supercellextension
+avogadro_plugin_nogl(supercellextension
   "supercellextension.cpp;supercelldialog.cpp"
   supercelldialog.ui)
 
-avogadro_plugin(networkfetchextension networkfetchextension.cpp)
+# Network fetch
+avogadro_plugin_nogl(networkfetchextension networkfetchextension.cpp)
+target_link_libraries(networkfetchextension ${QT_QTNETWORK_LIBRARY})
 
+# GL2PS
+avogadro_plugin(gl2psextension
+  "gl2psextension.cpp;gl2ps/gl2ps.c")
+
+# Subdirs
+add_subdirectory(crystallography)
+add_subdirectory(spectra)
+add_subdirectory(surfaces)
+add_subdirectory(swcntbuilder)
+if (NOT WIN32)
+  add_subdirectory(qtaim)
+endif(NOT WIN32)
+add_subdirectory(quantuminput)

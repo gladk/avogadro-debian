@@ -5,6 +5,7 @@
   Copyright (C) 2006,2007 Donald Ephraim Curtis
   Copyright (C) 2007      Benoit Jacob
   Copyright (C) 2007-2009 Marcus D. Hanwell
+  Copyright (C) 2011      David C. Lonie
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -28,40 +29,59 @@
 // krazy:excludeall=includes
 #include "config.h"
 
-#include "glwidget.h"
 #include "camera.h"
+#include "glwidget.h"
 #include "glpainter_p.h"
 #include "glhit.h"
 
+#include <QtGui/QMessageBox>
+#include <QtGui/QPen>
+#include <QtGui/QPainter>
+#include <QtGui/QPaintEngine>
+#include <QtGui/QUndoStack>
+#include <QtGui/QLabel>
+
+#ifdef Q_WS_MAC
+# include <OpenGL/glu.h>
+#else
+# include <GL/glu.h>
+#endif
+
 #ifdef ENABLE_PYTHON
   #include "pythonthread_p.h"
+  #include "pythonextension_p.h"
 #endif
 
 #include <avogadro/painterdevice.h>
 #include <avogadro/tool.h>
 #include <avogadro/toolgroup.h>
+#include <avogadro/extension.h>
 #include <avogadro/atom.h>
 #include <avogadro/bond.h>
 #include <avogadro/residue.h>
 #include <avogadro/molecule.h>
 #include <avogadro/color.h>
-
-// Include static engine headers
-#include "engines/bsdyengine.h"
+#include <avogadro/engine.h>
 
 #include "pluginmanager.h"
 
-#include <QDebug>
-#include <QUndoStack>
-#include <QDir>
-#include <QPluginLoader>
-#include <QTime>
-#include <QReadWriteLock>
-#include <QMessageBox>
+#include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QPluginLoader>
+#include <QtCore/QPointer>
+#include <QtCore/QReadWriteLock>
+#include <QtCore/QTime>
+#include <QtCore/QMutex>
 
 #ifdef ENABLE_THREADED_GL
-#include <QWaitCondition>
-#include <QMutex>
+  #include <QtCore/QWaitCondition>
+  #include <QtCore/QThread>
+#endif
+
+#include <Eigen/Geometry>
+
+#ifdef ENABLE_GLSL
+  #include <GL/glew.h>
 #endif
 
 #include <cstdio>
@@ -138,6 +158,8 @@ namespace Avogadro {
   public:
     GLWidgetPrivate() : background( 0,0,0,0 ),
                         aCells( 1 ), bCells( 1 ), cCells( 1 ),
+                        onlyRenderOriginalUnitCell(false),
+                        cellColor( 255,255,255 ),
                         molecule( 0 ),
                         camera( new Camera ),
                         tool( 0 ),
@@ -160,6 +182,7 @@ namespace Avogadro {
                         fogLevel(0),
                         renderAxes(false),
                         renderDebug(false),
+                        renderModelViewDebug(false),
                         dlistQuick(0), dlistOpaque(0), dlistTransparent(0),
                         pd(0)
     {
@@ -195,12 +218,19 @@ namespace Avogadro {
     unsigned char          bCells;
     unsigned char          cCells;
 
+    bool onlyRenderOriginalUnitCell;
+
+    GLWidget::ProjectionType projection;
+
+    QColor                 cellColor;
+
     Molecule              *molecule;
 
     Camera                *camera;
 
     Tool                  *tool;
     ToolGroup             *toolGroup;
+    QList<Extension*>     extensions;
 
     GLuint                *selectBuf;
     int                    selectBufSize;
@@ -229,11 +259,14 @@ namespace Avogadro {
     int                    fogLevel;    // The level of fog to use (0=none, 9=max)
     bool                   renderAxes;  // Should the x, y, z axes be rendered?
     bool                   renderDebug; // Should the debug information be shown?
+    bool                   renderModelViewDebug; // Should the modelview matrix be shown?
 
     GLuint                 dlistQuick;
     GLuint                 dlistOpaque;
     GLuint                 dlistTransparent;
 
+    QMutex                 textOverlayMutex; // Protects textOverlayLabels
+    QList<QPointer<QLabel> > textOverlayLabels; // List of labels to render
     /**
       * Member GLPainterDevice which is passed to the engines.
       */
@@ -527,7 +560,7 @@ namespace Avogadro {
     // setup the OpenGL projection matrix using the camera
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    d->camera->applyPerspective();
+    d->camera->applyProjection();
 
     // setup the OpenGL modelview matrix using the camera
     glMatrixMode( GL_MODELVIEW );
@@ -545,7 +578,7 @@ namespace Avogadro {
     glMatrixMode( GL_PROJECTION );
     glPushMatrix();
     glLoadIdentity();
-    d->camera->applyPerspective();
+    d->camera->applyProjection();
 
     // setup the OpenGL modelview matrix using the camera
     glMatrixMode( GL_MODELVIEW );
@@ -695,6 +728,17 @@ namespace Avogadro {
     return d->renderDebug;
   }
 
+  void GLWidget::setRenderModelViewDebug(bool renderModelViewDebug)
+  {
+    d->renderModelViewDebug = renderModelViewDebug;
+    update();
+  }
+
+  bool GLWidget::renderModelViewDebug() const
+  {
+    return d->renderModelViewDebug;
+  }
+
   void GLWidget::render()
   {
     if (!d->molecule) {
@@ -774,6 +818,22 @@ namespace Avogadro {
         d->tool->paint( this );
       }
 
+#ifdef ENABLE_PYTHON
+      // Render the extensions (for now: python only)
+      qRegisterMetaType<GLWidget*>("GLWidget*");
+      foreach (Extension *extension, d->extensions) {
+        PythonExtension *pyext = qobject_cast<PythonExtension*>(extension);
+        if (pyext) {
+          // If threaded GL is on, we are in the rendering thread. pyext
+          // needs to acquire GIL, but it's already acquired by the GLWidget
+          // constructor. That's why we use an indirect queued call to
+          // PythonExtension::paint() here
+          QMetaObject::invokeMethod(pyext, "paint", Qt::QueuedConnection,
+                                    Q_ARG(GLWidget*, this));
+        }
+      }
+#endif
+
       // Now render transparent
       glEnable(GL_BLEND);
       if (hasUnitCell)
@@ -808,8 +868,8 @@ namespace Avogadro {
     // If enabled draw the axes
     if (d->renderAxes) renderAxesOverlay();
 
-    // If enabled show debug information
-    if (d->renderDebug) renderDebugOverlay();
+    // Render text overlay
+    renderTextOverlay();
 
     d->painter->end();
     d->molecule->lock()->unlock();
@@ -844,110 +904,730 @@ namespace Avogadro {
       renderCrystalAxes();
   }
 
-  // Render the unit cell axes, indicating the frame of the cell
-  //       4---5
-  //      /   /|
-  //     /   / |    (0 is the "origin" for this unit cell)
-  //    3---2  6    (7 is in the back corner = cellVector[2])
-  //    |   | /     (3 is cellVector[1])
-  //    |   |/      (1 is cellVector[0])
-  //    0---1
   void GLWidget::renderCrystalAxes()
   {
-    std::vector<vector3> cellVectors = d->molecule->OBUnitCell()->GetCellVectors();
-    vector3 v0(0.0, 0.0, 0.0);
-    vector3 v1(cellVectors[0]);
-    vector3 v3(cellVectors[1]);
-    vector3 v7(cellVectors[2]);
-    vector3 v2, v4, v5, v6;
-    v2 = v1 + v3;
-    v4 = v3 + v7;
-    v6 = v1 + v7;
-    v5 = v4 + v1;
+    const matrix3x3 obmat (d->molecule->OBUnitCell()->GetCellMatrix());
 
-    glDisable(GL_LIGHTING);
-    glColor4f(1.0, 1.0, 1.0, 0.7);
-    glLineWidth(2.0);
-    for (int a = 0; a < d->aCells; a++) {
-      for (int b = 0; b < d->bCells; b++)  {
-        for (int c = 0; c < d->cCells; c++)  {
-          glPushMatrix();
-          glTranslated(
-                       cellVectors[0].x() * a
-                       + cellVectors[1].x() * b
-                       + cellVectors[2].x() * c,
-                       cellVectors[0].y() * a
-                       + cellVectors[1].y() * b
-                       + cellVectors[2].y() * c,
-                       cellVectors[0].z() * a
-                       + cellVectors[1].z() * b
-                       + cellVectors[2].z() * c );
+    const Vector3d v1 (obmat(0,0), obmat(0,1), obmat(0,2));
+    const Vector3d v2 (obmat(1,0), obmat(1,1), obmat(1,2));
+    const Vector3d v3 (obmat(2,0), obmat(2,1), obmat(2,2));
+    Vector3d offset;
 
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v0.AsArray());
-          glVertex3dv(v1.AsArray());
-          glEnd();
+    d->painter->setColor(&d->cellColor);
 
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v0.AsArray());
-          glVertex3dv(v3.AsArray());
-          glEnd();
+    if (d->onlyRenderOriginalUnitCell) {
+      offset << 0.0, 0.0, 0.0;
+      renderClippedBox(offset, v1, v2, v3, 2.0);
+    }
+    else
+      for (int a = 0; a < d->aCells; a++) {
+        for (int b = 0; b < d->bCells; b++)  {
+          for (int c = 0; c < d->cCells; c++)  {
+            // Calculate offset for this cell
+            offset = (a * v1 + b * v2 + c * v3);
 
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v0.AsArray());
-          glVertex3dv(v7.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v1.AsArray());
-          glVertex3dv(v2.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v3.AsArray());
-          glVertex3dv(v2.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v3.AsArray());
-          glVertex3dv(v4.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v5.AsArray());
-          glVertex3dv(v4.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v5.AsArray());
-          glVertex3dv(v2.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v5.AsArray());
-          glVertex3dv(v6.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v1.AsArray());
-          glVertex3dv(v6.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v6.AsArray());
-          glVertex3dv(v7.AsArray());
-          glEnd();
-
-          glBegin(GL_LINE_STRIP);
-          glVertex3dv(v4.AsArray());
-          glVertex3dv(v7.AsArray());
-          glEnd();
-
-          glPopMatrix();
+            // Draw the clipped box with a linewidth of 2.0
+            renderClippedBox(offset, v1, v2, v3, 2.0);
+          }
         }
       }
-    } // end of for loops
-    glEnable(GL_LIGHTING);
+    }
+  }
+
+// Use anonymous namespace for renderClippedBox helper functions
+namespace {
+  // Given two points a and b, and a plane defined by normal vector n
+  // and point p, does the plane intersect the line segment formed by
+  // ab? If so, intersection is overwritten with the point of
+  // intersection and the function returns true.
+  static inline bool isPlaneBetweenPoints(const Vector3d &a,
+                                          const Vector3d &b,
+                                          const Vector3d &n,
+                                          const Vector3d &p,
+                                          Vector3d *intersection)
+  {
+    // Resource:
+    // http://paulbourke.net/geometry/planeline/
+
+    const double denom = n.dot(b - a);
+
+    // Parallel (in or out of plane)
+    if (fabs(denom) < 1e-8)
+      return false;
+
+    // Otherwise it intersects the line ab. To find out if it
+    // intersects the line segment ab, more calcs are needed:
+    const double u = ( n.dot(p - a) ) / ( denom );
+
+    // if u is between (0,1], it intersects segment ab. Otherwise
+    // return false.
+    if (u <= 0 || u > 1)
+      return false;
+
+    // If we don't need to calculate the intersection, return true here
+    if (!intersection)
+      return true;
+
+    // Calculate intersection, return true
+    *intersection = a + u * (b - a);
+    return true;
+  }
+
+  // Adapted from Malcolm McLean's example at
+  // http://bytes.com/topic/c/answers/621985-print-binary-representation
+  char* debug16bit(const quint16 x) {
+    static char buff[sizeof(quint16) * CHAR_BIT + 1];
+    unsigned int i;
+    int j = sizeof(int) * CHAR_BIT - 1;
+
+    buff[j] = 0;
+    for(i=0;i<sizeof(int) * CHAR_BIT; i++)
+      {
+        if(x & (1 << i))
+          buff[j] = '1';
+        else
+          buff[j] = '0';
+        j--;
+      }
+    return buff;
+  }
+}
+
+namespace Avogadro {
+  bool GLWidget::renderClippedBox(const Eigen::Vector3d &origin,
+                                  const Eigen::Vector3d &v1,
+                                  const Eigen::Vector3d &v2,
+                                  const Eigen::Vector3d &v3,
+                                  double lineWidth)
+  {
+    // Create points from vectors:
+    //
+    //         6------8  c1 = origin
+    //        /:     /|  c2 = origin + v1
+    //       / :    / |  c3 = origin + v2
+    //      /  4---/--7  c4 = origin + v3
+    //     /  /   /  /   c5 = origin + v1 + v2
+    //    3------5  /    c6 = origin + v2 + v3
+    //    | /    | /     c7 = origin + v1 + v3
+    //    |/     |/      c8 = origin + v1 + v2 + v3
+    //    1------2
+    //
+    // Edges are defined as:
+    // edge = pts, hexID   edge = pts, hexID
+    //  e1  = 1 2  0x1      e7  = 3 6  0x12
+    //  e2  = 1 3  0x2      e8  = 4 6  0x14
+    //  e3  = 1 4  0x4      e9  = 4 7  0x18
+    //  e4  = 2 5  0x8      e10 = 5 8  0x20
+    //  e5  = 2 7  0x10     e11 = 6 8  0x21
+    //  e6  = 3 5  0x11     e12 = 7 8  0x22
+
+    // Create all points
+    const Eigen::Vector3d &c1 = origin;
+    const Eigen::Vector3d  c2 = origin + v1;
+    const Eigen::Vector3d  c3 = origin + v2;
+    const Eigen::Vector3d  c4 = origin + v3;
+    const Eigen::Vector3d  c5 = c2 + v2;
+    const Eigen::Vector3d  c6 = c3 + v3;
+    const Eigen::Vector3d  c7 = c2 + v3;
+    const Eigen::Vector3d  c8 = c5 + v3;
+
+    d->painter->drawBoxEdges(c1, c2, c3, c4, c5, c6, c7, c8, lineWidth);
+
+    // Now for the clipping part. We will find all intersections of
+    // the viewing volume's near-plane cell edges, and draw an
+    // appropriate polygon that highlights where the clipping
+    // occurs. This prevents odd "missing corners" that are visually
+    // disturbing.
+
+    // Grab a point in the near clipping plane and it's normal. If
+    // there is no clipping plane, return.
+    Vector3d clipNormal;
+    Vector3d clipPoint;
+    if (!d->camera->nearClippingPlane(&clipNormal, &clipPoint)) {
+      return false;
+    }
+
+    // Nudge the point slightly inside of the viewing volume to ensure
+    // that the clip outline isn't clipped itself
+    clipPoint += 1e-4 * clipNormal;
+
+    // Check which edges of the plane are intersected by the view
+    // plane.
+    //
+    // The intersections are stored bitwise in a quint16, the
+    // least significant bit representing e1 and the four most
+    // significant bits being 0. A bit == 1 indicates that the edge is
+    // intersected. Initialize to all 0s.
+    //
+    register quint16 intersections = 0;
+    //
+    // Define masks for the edge bits to prevent errors:
+    //
+    enum {
+      E1MASK =  0x001,
+      E2MASK =  0x002,
+      E3MASK =  0x004,
+      E4MASK =  0x008,
+      E5MASK =  0x010,
+      E6MASK =  0x020,
+      E7MASK =  0x040,
+      E8MASK =  0x080,
+      E9MASK =  0x100,
+      E10MASK = 0x200,
+      E11MASK = 0x400,
+      E12MASK = 0x800
+    };
+    //
+    // Points of intersections:
+    //
+    unsigned short intersectionCount = 0;
+    Vector3d i1;
+    Vector3d i2;
+    Vector3d i3;
+    Vector3d i4;
+    Vector3d i5;
+    Vector3d i6;
+    Vector3d i7;
+    Vector3d i8;
+    Vector3d i9;
+    Vector3d i10;
+    Vector3d i11;
+    Vector3d i12;
+    //
+    // Test points
+    //
+    if (isPlaneBetweenPoints(c1, c2, clipNormal, clipPoint, &i1)) {
+      intersections |= E1MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c1, c3, clipNormal, clipPoint, &i2)) {
+      intersections |= E2MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c1, c4, clipNormal, clipPoint, &i3)) {
+      intersections |= E3MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c2, c5, clipNormal, clipPoint, &i4)) {
+      intersections |= E4MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c2, c7, clipNormal, clipPoint, &i5)) {
+      intersections |= E5MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c3, c5, clipNormal, clipPoint, &i6)) {
+      intersections |= E6MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c3, c6, clipNormal, clipPoint, &i7)) {
+      intersections |= E7MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c4, c6, clipNormal, clipPoint, &i8)) {
+      intersections |= E8MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c4, c7, clipNormal, clipPoint, &i9)) {
+      intersections |= E9MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c5, c8, clipNormal, clipPoint, &i10)) {
+      intersections |= E10MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c6, c8, clipNormal, clipPoint, &i11)) {
+      intersections |= E11MASK;
+      ++intersectionCount;
+    }
+    if (isPlaneBetweenPoints(c7, c8, clipNormal, clipPoint, &i12)) {
+      intersections |= E12MASK;
+      ++intersectionCount;
+    }
+
+    // Set stipple pattern for clip lines. glPopAttrib() must be
+    // called at all exit points that follow.
+    glPushAttrib(GL_LINE_BIT);
+    const GLushort clipStipple = 0xF0F0; // A = 1010
+    const GLint clipStippleFactor = 1;
+    glLineStipple(clipStippleFactor, clipStipple);
+    glEnable(GL_LINE_STIPPLE);
+
+    // Handle polygon drawing based on number of intersections
+    switch (intersectionCount) {
+
+    case 0:
+      // No intersections, just return.
+      glPopAttrib();
+      return false;
+
+    case 1:
+      // Shouldn't happen, probably floating points errors. Print a
+      // warning and return.
+      qWarning() << "Viewing volume near-plane intersects unit cell only once.";
+      glPopAttrib();
+      return false;
+
+    case 2:
+      // Also shouldn't happen. Bail.
+      qWarning() << "Viewing volume near-plane intersects unit cell only twice.";
+      glPopAttrib();
+      return false;
+
+    case 3: {
+      // Either one corner is in the frustum, or only one is
+      // out. Either way, just connect the points in the triangle.
+      const Vector3d * triangle[3];
+      unsigned short triangleInd = 0;
+
+      if (intersections & E1MASK) {
+        triangle[triangleInd++] = &i1;
+      }
+      if (intersections & E2MASK) {
+        triangle[triangleInd++] = &i2;
+      }
+      if (intersections & E3MASK) {
+        triangle[triangleInd++] = &i3;
+      }
+      if (intersections & E4MASK) {
+        triangle[triangleInd++] = &i4;
+      }
+      if (intersections & E5MASK) {
+        triangle[triangleInd++] = &i5;
+      }
+      if (intersections & E6MASK) {
+        triangle[triangleInd++] = &i6;
+      }
+      if (intersections & E7MASK) {
+        triangle[triangleInd++] = &i7;
+      }
+      if (intersections & E8MASK) {
+        triangle[triangleInd++] = &i8;
+      }
+      if (intersections & E9MASK) {
+        triangle[triangleInd++] = &i9;
+      }
+      if (intersections & E10MASK) {
+        triangle[triangleInd++] = &i10;
+      }
+      if (intersections & E11MASK) {
+        triangle[triangleInd++] = &i11;
+      }
+      if (intersections & E12MASK) {
+        triangle[triangleInd++] = &i12;
+      }
+
+      // If there were more/less than three intersections, something is
+      // buggy above
+      Q_ASSERT(triangleInd == 3);
+
+      d->painter->drawLine(*(triangle[0]), *(triangle[1]), lineWidth);
+      d->painter->drawLine(*(triangle[1]), *(triangle[2]), lineWidth);
+      d->painter->drawLine(*(triangle[2]), *(triangle[0]), lineWidth);
+
+      glPopAttrib();
+      return true;
+    }
+
+    case 4:
+      // Case of either two, four, or six corners outside the near
+      // plane.
+      //
+      // 2 corner cuts follow, enumerated in order of isolated
+      // coherent edge
+      //
+      switch (intersections) {
+      case ( E2MASK | E4MASK | E5MASK | E3MASK ):
+        // e1 excluded; e2, e4, e5, e3 intersected.
+        d->painter->drawQuadrilateral(i2, i4, i5, i3, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E1MASK | E6MASK | E7MASK | E3MASK ):
+        // e2 excluded; e1, e6, e7, e3 intersected.
+        d->painter->drawQuadrilateral(i1, i6, i7, i3, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E2MASK | E8MASK | E9MASK | E1MASK ):
+        // e3 excluded; e2, e8, e9, e1 intersected.
+        d->painter->drawQuadrilateral(i2, i8, i9, i1, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E1MASK | E6MASK | E10MASK | E5MASK ):
+        // e4 excluded; e1, e6, e10, e5 intersected.
+        d->painter->drawQuadrilateral(i1, i6, i10, i5, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E1MASK | E4MASK | E12MASK | E9MASK ):
+        // e5 excluded; e1, e4, e12, e9 intersected.
+        d->painter->drawQuadrilateral(i1, i4, i12, i9, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E2MASK | E4MASK | E10MASK | E7MASK ):
+        // e6 excluded; e2, e4, e10, e7 intersected.
+        d->painter->drawQuadrilateral(i2, i4, i10, i7, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E2MASK | E6MASK | E11MASK | E8MASK ):
+        // e7 excluded; e2, e6, e11, e8 intersected.
+        d->painter->drawQuadrilateral(i2, i6, i11, i8, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E3MASK | E7MASK | E11MASK | E9MASK ):
+        // e8 excluded; e3, e7, e11, e9 intersected.
+        d->painter->drawQuadrilateral(i3, i7, i11, i9, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E3MASK | E5MASK | E12MASK | E8MASK ):
+        // e9 excluded; e3, e5, e12, e8 intersected.
+        d->painter->drawQuadrilateral(i3, i5, i12, i8, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E4MASK | E12MASK | E11MASK | E6MASK ):
+        // e10 excluded; e4, e12, e11, e6 intersected.
+        d->painter->drawQuadrilateral(i4, i12, i11, i6, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E7MASK | E10MASK | E12MASK | E8MASK ):
+        // e11 excluded; e7, e10, e12, e8 intersected.
+        d->painter->drawQuadrilateral(i7, i10, i12, i8, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E5MASK | E10MASK | E11MASK | E9MASK ):
+        // e12 excluded; e5, e10, e11, e9 intersected.
+        d->painter->drawQuadrilateral(i5, i10, i11, i9, lineWidth);
+        glPopAttrib();
+        return true;
+
+      // Cases of the four coplanar corners outside of the near-plane
+
+      case ( E3MASK | E7MASK | E10MASK | E5MASK ):
+        // "parallel" to v1, v2; e3, e7, e10, e5 intersected.
+        d->painter->drawQuadrilateral(i3, i7, i10, i5, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E2MASK | E4MASK | E12MASK | E8MASK ):
+        // "parallel" to v1, v3; e2, e4, e12, e8 intersected.
+        d->painter->drawQuadrilateral(i2, i4, i12, i8, lineWidth);
+        glPopAttrib();
+        return true;
+
+      case ( E1MASK | E6MASK | E11MASK | E9MASK ):
+        // "parallel" to v2,v3; e1, e6, e11, e9 intersected.
+        d->painter->drawQuadrilateral(i1, i6, i11, i9, lineWidth);
+        glPopAttrib();
+        return true;
+
+      default:
+        // Shouldn't be any others:
+        qWarning() << "Unhandled 4-point near-plane unit cell intersection:"
+                   << debug16bit(intersections);
+        glPopAttrib();
+        return false;
+
+      } // End switch on 4 intersections
+
+    case 5:
+      // Three or five corner split by near-plane, enumerated by the
+      // three-corner combinations below:
+      switch (intersections) {
+
+      case ( E4MASK | E6MASK | E7MASK | E3MASK | E5MASK ): {
+        // Corners: c1, c2, c3; e4, e6, e7, e3, e5 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i4 << i6 << i7 << i3 << i5;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E4MASK | E5MASK | E9MASK | E8MASK ): {
+        // Corners: c1, c2, c4; e2, e4, e5, e9, e8 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i4 << i5 << i9 << i8;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E6MASK | E10MASK | E5MASK | E3MASK ): {
+        // Corners: c1, c2, c5; e2, e6, e10, e5, e3 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i6 << i10 << i5 << i3;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E4MASK | E12MASK | E9MASK | E3MASK ): {
+        // Corners: c1, c2, c7; e2, e4, e12, e9, e3 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i4 << i12 << i9 << i3;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E6MASK | E1MASK | E9MASK | E8MASK | E7MASK ): {
+        // Corners: c1, c3, c4; e6, e1, e9, e8, e7 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i6 << i1 << i9 << i8 << i7;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E3MASK | E7MASK | E10MASK | E4MASK | E1MASK ): {
+        // Corners: c1, c3, c5; e3, e7, e10, e4, e1 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i3 << i7 << i10 << i4 << i1;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E6MASK | E11MASK | E8MASK | E3MASK ): {
+        // Corners: c1, c3, c6; e1, e6, e11, e8, e3 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i6 << i11 << i8 << i3;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E9MASK | E11MASK | E7MASK | E2MASK ): {
+        // Corners: c1, c4, c6; e1, e9, e11, e7, e2 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i9 << i11 << i7 << i2;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E8MASK | E12MASK | E5MASK | E1MASK ): {
+        // Corners: c1, c4, c7; e2, e8, e12, e5, e1 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i8 << i12 << i5 << i1;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E5MASK | E10MASK | E7MASK | E2MASK | E1MASK ): {
+        // Corners: c2, c3, c5; e5, e10, e7, e2, e1 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i5 << i10 << i7 << i2 << i1;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E3MASK | E8MASK | E12MASK | E4MASK ): {
+        // Corners: c2, c4, c7; e1, e3, e8, e12, e4 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i3 << i8 << i12 << i4;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E6MASK | E10MASK | E12MASK | E9MASK ): {
+        // Corners: c2, c5, c7; e1, e6, e10, e12, e9 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i6 << i10 << i12 << i9;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E6MASK | E11MASK | E12MASK | E5MASK ): {
+        // Corners: c2, c5, c8; e1, e6, e11, e12, e5 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i6 << i11 << i12 << i5;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E4MASK | E10MASK | E11MASK | E9MASK ): {
+        // Corners: c2, c7, c8; e1, e4, e10, e11, e9 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i4 << i10 << i11 << i9;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E6MASK | E11MASK | E9MASK | E3MASK | E2MASK ): {
+        // Corners: c3, c4, c6; e6, e11, e9, e3, e2 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i6 << i11 << i9 << i3 << i2;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E4MASK | E2MASK | E8MASK | E11MASK | E10MASK ): {
+        // Corners: c3, c5, c6; e4, e2, e8, e11, e10 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i4 << i2 << i8 << i11 << i10;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E4MASK | E12MASK | E11MASK | E7MASK ): {
+        // Corners: c3, c5, c8; e2, e4, e12, e11, e7 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i4 << i12 << i11 << i7;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E6MASK | E10MASK | E12MASK | E8MASK ): {
+        // Corners: c3, c6, c8; e2, e6, e10, e12, e8 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i6 << i10 << i12 << i8;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E5MASK | E3MASK | E7MASK | E11MASK | E12MASK ): {
+        // Corners: c4, c6, c7; e5, e3, e7, e11, e12 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i5 << i3 << i7 << i11 << i12;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E3MASK | E7MASK | E10MASK | E12MASK | E9MASK ): {
+        // Corners: c4, c6, c8; e3, e7, e10, e12, e9 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i3 << i7 << i10 << i12 << i9;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E3MASK | E5MASK | E10MASK | E11MASK | E8MASK ): {
+        // Corners: c4, c7, c8; e3, e5, e10, e11, e8 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i3 << i5 << i10 << i11 << i8;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E4MASK | E6MASK | E7MASK | E8MASK | E12MASK ): {
+        // Corners: c5, c6, c8; e4, e6, e7, e8, e12 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i4 << i6 << i7 << i8 << i12;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E4MASK | E6MASK | E11MASK | E9MASK | E5MASK ): {
+        // Corners: c5, c7, c8; e4, e6, e11, e9, e5 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i4 << i6 << i11 << i9 << i5;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E7MASK | E8MASK | E9MASK | E5MASK | E10MASK ): {
+        // Corners: c6, c7, c8; e7, e8, e9, e5, e10 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i7 << i8 << i9 << i5 << i10;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      default:
+        // Shouldn't be any others:
+        qWarning() << "Unhandled 5-point near-plane unit cell intersection:"
+                   << debug16bit(intersections);
+        glPopAttrib();
+        return false;
+      }
+
+    case 6:
+      // Diagonal slices with four corners each in each volume.
+      switch (intersections) {
+
+      case ( E4MASK | E6MASK | E7MASK | E8MASK | E9MASK | E5MASK ): {
+        // Corners: c1, c2, c3, c4; e4, e6, e7, e8, e9, e5 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i4 << i6 << i7 << i8 << i9 << i5;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E3MASK | E9MASK | E12MASK | E10MASK | E6MASK ): {
+        // Corners: c1, c2, c5, c7; e2, e3, e9, e12, e10, e6 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i3 << i9 << i12 << i10 << i6;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E1MASK | E3MASK | E8MASK | E11MASK | E10MASK | E4MASK ): {
+        // Corners: c1, c3, c5, c6; e1, e3, e8, e11, e10, e4 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i1 << i3 << i8 << i11 << i10 << i4;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      case ( E2MASK | E7MASK | E11MASK | E12MASK | E5MASK | E1MASK ): {
+        // Corners: c1, c4, c6, c7; e2, e7, e11, e12, e5, e1 intersected.
+        QList<Eigen::Vector3d> points;
+        points << i2 << i7 << i11 << i12 << i5 << i1;
+        d->painter->drawLineLoop(points, lineWidth);
+        glPopAttrib();
+        return true;
+      }
+
+      default:
+        // Shouldn't be any others:
+        qWarning() << "Unhandled 6-point near-plane unit cell intersection:"
+                   << debug16bit(intersections);
+        glPopAttrib();
+        return false;
+      }
+
+    default:
+      // It doesn't make sense for more intersections to exist.
+      qWarning() << "Unhandled" << intersectionCount << "point near-plane"
+                 << "unit cell intersection:"
+                 << debug16bit(intersections);
+
+      glPopAttrib();
+      return false;
+    }
+
+    // Shouldn't happen
+    glPopAttrib();
+    return false;
   }
 
   void GLWidget::renderAxesOverlay()
@@ -1003,27 +1683,107 @@ namespace Avogadro {
 
   void GLWidget::renderDebugOverlay()
   {
-    QList<Primitive *> list;
+    qDebug() << Q_FUNC_INFO << "is deprecated."
+             << "Please use renderTextOverlay() instead.";
+    return renderTextOverlay();
+  }
 
-    // Draw all text in while
+  void GLWidget::renderTextOverlay()
+  {
+    // Draw all text in white
     d->pd->painter()->setColor(1.0, 1.0, 1.0);
 
     int x = 5, y = 5;
-    y += d->pd->painter()->drawText(x, y, "---- " + tr("Debug Information") + " ----");
-    y += d->pd->painter()->drawText(x, y, tr("FPS: %L1").arg(computeFramesPerSecond(), 0, 'g', 3));
 
-    y += d->pd->painter()->drawText(x, y,
-                                    tr("View Size: %L1 x %L2").arg(d->pd->width()).arg(d->pd->height()) );
-    if (!d->molecule) {
-      y += d->pd->painter()->drawText(x, y, tr("No molecule set"));
-      return;
+    if (d->renderDebug) {
+      // Title
+      y += d->pd->painter()->drawText
+        (x, y, "---- " + tr("Debug Information") + " ----");
+
+      // FPS
+      y += d->pd->painter()->drawText
+        (x, y, tr("FPS: %L1").arg(computeFramesPerSecond(), 0, 'g', 3));
+
+      // pd size
+      y += d->pd->painter()->drawText
+        (x, y, tr("View Size: %L1 x %L2")
+         .arg(d->pd->width()).arg(d->pd->height()) );
+
+      if (d->renderModelViewDebug) {
+        // Model view matrix:
+        const Eigen::Transform3d &modelview = d->camera->modelview();
+        y += d->pd->painter()->drawText
+            (x, y, tr("ModelView row 1: %L1 %L2 %L3 %L4")
+             .arg(modelview(0, 0), 6, 'f', 2, ' ')
+             .arg(modelview(0, 1), 6, 'f', 2, ' ')
+             .arg(modelview(0, 2), 6, 'f', 2, ' ')
+             .arg(modelview(0, 3), 6, 'f', 2, ' '));
+        y += d->pd->painter()->drawText
+            (x, y, tr("ModelView row 2: %L1 %L2 %L3 %L4")
+             .arg(modelview(1, 0), 6, 'f', 2, ' ')
+             .arg(modelview(1, 1), 6, 'f', 2, ' ')
+             .arg(modelview(1, 2), 6, 'f', 2, ' ')
+             .arg(modelview(1, 3), 6, 'f', 2, ' '));
+        y += d->pd->painter()->drawText
+            (x, y, tr("ModelView row 3: %L1 %L2 %L3 %L4")
+             .arg(modelview(2, 0), 6, 'f', 2, ' ')
+             .arg(modelview(2, 1), 6, 'f', 2, ' ')
+             .arg(modelview(2, 2), 6, 'f', 2, ' ')
+             .arg(modelview(2, 3), 6, 'f', 2, ' '));
+        y += d->pd->painter()->drawText
+            (x, y, tr("ModelView row 4: %L1 %L2 %L3 %L4")
+             .arg(modelview(3, 0), 6, 'f', 2, ' ')
+             .arg(modelview(3, 1), 6, 'f', 2, ' ')
+             .arg(modelview(3, 2), 6, 'f', 2, ' ')
+             .arg(modelview(3, 3), 6, 'f', 2, ' '));
+      }
+
+      // Molecule info
+      if (!d->molecule) {
+        y += d->pd->painter()->drawText(x, y, tr("No molecule set"));
+      }
+      else {
+        // numAtoms
+        y += d->pd->painter()->drawText
+          (x, y, tr("Atoms: %L1").arg(d->molecule->numAtoms()));
+
+        // numBonds
+        y += d->pd->painter()->drawText
+          (x, y, tr("Bonds: %L1").arg(d->molecule->numBonds()));
+      }
+    } // end debug
+
+    // textOverlay stuff
+    if (d->textOverlayLabels.size()) {
+      // Lock mutex
+      d->textOverlayMutex.lock();
+
+      // For null pointers:
+      QList<int> deadLabelIndices;
+
+      // Draw text
+
+      for (int i = 0; i < d->textOverlayLabels.size(); ++i) {
+        QPointer<QLabel> &label = d->textOverlayLabels[i];
+
+        // Check that QPointer is valid
+        if (label == 0) {
+          deadLabelIndices.append(i);
+          continue;
+        }
+
+        // Draw text
+        y += d->pd->painter()->drawText(x, y, label->text());
+      }
+
+      // Remove dead entries in reverse order
+      for (int i = deadLabelIndices.size()-1; i >= 0; --i) {
+        d->textOverlayLabels.removeAt(i);
+      }
+
+      // Release mutex
+      d->textOverlayMutex.unlock();
     }
-
-//    list = primitives().subList(Primitive::AtomType);
-    y += d->pd->painter()->drawText(x, y, tr("Atoms: %L1").arg(d->molecule->numAtoms()));
-
-//    list = primitives().subList(Primitive::BondType);
-    y += d->pd->painter()->drawText(x, y, tr("Bonds: %L1").arg(d->molecule->numBonds()));
   }
 
   bool GLWidget::event( QEvent *event )
@@ -1133,6 +1893,36 @@ namespace Avogadro {
       }
     }
     emit wheel(event);
+  }
+
+  void GLWidget::mouseDoubleClickEvent( QMouseEvent * event )
+  {
+    // Set the event to ignored, check whether any tools accept it
+    event->ignore();
+
+    if ( d->tool ) {
+      QUndoCommand *command;
+      command = d->tool->mouseDoubleClickEvent( this, event );
+      // If the mouse event is not accepted, pass it to the navigate tool
+      if (!event->isAccepted() && m_navigateTool) {
+        command = m_navigateTool->mouseDoubleClickEvent(this, event);
+      }
+
+      if ( command && d->undoStack ) {
+        d->undoStack->push( command );
+      }
+    }
+#ifdef ENABLE_THREADED_GL
+    d->renderMutex.lock();
+#endif
+    // Stop using quickRender
+    d->quickRender = false;
+#ifdef ENABLE_THREADED_GL
+    d->renderMutex.unlock();
+#endif
+    // Render the scene at full quality now the mouse button has been released
+    update();
+    emit mouseDoubleClick(event);
   }
 
   void GLWidget::keyPressEvent(QKeyEvent *event)
@@ -1267,58 +2057,49 @@ namespace Avogadro {
     if (!d->molecule->lock()->tryLockForRead())
       return;
 
-    if (!d->molecule->OBUnitCell()) {
-      // Plain molecule, no crystal cell
-      d->center = d->molecule->center();
-      d->normalVector = d->molecule->normalVector();
-      d->radius = d->molecule->radius();
-      d->farthestAtom = d->molecule->farthestAtom();
-    }
-    else {
-      // render a crystal (so most geometry comes from the cell vectors)
-      // Origin at 0.0, 0.0, 0.0
-      // a = <x0, y0, z0>
-      // b = <x1, y1, z1>
-      // c = <x2, y2, z2>
-      std::vector<vector3> cellVectors = d->molecule->OBUnitCell()->GetCellVectors();
-      Vector3d a(cellVectors[0].AsArray());
-      Vector3d b(cellVectors[1].AsArray());
-      Vector3d c(cellVectors[2].AsArray());
-      Vector3d centerOffset = ( a * (d->aCells - 1)
-                              + b * (d->bCells - 1)
-                              + c * (d->cCells - 1) ) / 2.0;
-      // the center is the center of the molecule translated by centerOffset
-      d->center = d->molecule->center() + centerOffset;
-      // the radius is the length of centerOffset plus the molecule radius
-      d->radius = d->molecule->radius() + centerOffset.norm();
-      // for the normal vector, we just ask for the molecule's normal vector,
-      // crossing our fingers hoping that it will give a nice viewpoint not only
-      // with respect to the molecule but also with respect to the cells.
-      d->normalVector = d->molecule->normalVector();
-      // Computation of the farthest atom.
-      // First case: the molecule is empty
-      if(d->molecule->numAtoms() == 0)
-      d->farthestAtom = 0;
-      // Second case: there is no repetition of the molecule
-      else if(d->aCells <= 1 && d->bCells <= 1 && d->cCells <= 1)
-        d->farthestAtom = d->molecule->farthestAtom();
-      // General case: the farthest atom is the one that is located the
-      // farthest in the direction pointed to by centerOffset.
-      else {
-        QList<Atom *> atoms = d->molecule->atoms();
-        double x, max_x;
+    // The molecule radius, center, normal vector, and farthest atom methods
+    // already account for the unit cell, if present:
+    d->center = d->molecule->center();
+    d->radius = d->molecule->radius();
+    d->normalVector = d->molecule->normalVector();
+    d->farthestAtom = d->molecule->farthestAtom();
 
-        d->farthestAtom = atoms.at(0);
-        max_x = centerOffset.dot(*d->farthestAtom->pos());
-        foreach (Atom *atom, atoms) {
-          x = centerOffset.dot(*atom->pos());
-          if (x > max_x) {
-            max_x = x;
-            d->farthestAtom = atom;
-          }
-        } // end foreach
-      } // end general repeat (many atoms, multiple cells)
-    } // End the case for unit cells
+    // if any cell repeats are used, adjust the geometries
+    if (d->molecule->OBUnitCell() &&
+        (d->aCells > 1 || d->bCells > 1 || d->cCells > 1)) {
+      // Cache unit cell info
+      std::vector<vector3> cellVectors = d->molecule->OBUnitCell()->GetCellVectors();
+      const Vector3d aVec (cellVectors[0].AsArray());
+      const Vector3d bVec (cellVectors[1].AsArray());
+      const Vector3d cVec (cellVectors[2].AsArray());
+
+      // The center must be updated to account for the images
+      d->center += (static_cast<double>(d->aCells - 1) * aVec +
+                    static_cast<double>(d->bCells - 1) * bVec +
+                    static_cast<double>(d->cCells - 1) * cVec) * 0.5;
+
+      // Exploit symmetry and only calculate distance to four of the corners
+      // of the supercell
+      double scSqRadii[4];
+      scSqRadii[0] = ((Eigen::Vector3d::Zero()) - d->center).squaredNorm();
+      scSqRadii[1] = (static_cast<double>(d->aCells) * aVec -
+                      d->center).squaredNorm();
+      scSqRadii[2] = (static_cast<double>(d->bCells) * bVec -
+                      d->center).squaredNorm();
+      scSqRadii[3] = (static_cast<double>(d->cCells) * cVec -
+                      d->center).squaredNorm();
+
+      // Select the largest radius
+      double scSqRadius = scSqRadii[0];
+      if (scSqRadius > scSqRadii[1])
+        scSqRadius = scSqRadii[1];
+      if (scSqRadius > scSqRadii[2])
+        scSqRadius = scSqRadii[2];
+      if (scSqRadius > scSqRadii[3])
+        scSqRadius = scSqRadii[3];
+      d->radius = sqrt(scSqRadius);
+    }
+
     d->molecule->lock()->unlock();
   }
 
@@ -1378,7 +2159,7 @@ namespace Avogadro {
     }
     // Find the navigate tool and set it
     foreach (Tool *tool, d->toolGroup->tools()) {
-      if (tool->name() == "Navigate") {
+      if (tool->identifier() == "Navigate") {
         m_navigateTool = tool;
       }
     }
@@ -1388,6 +2169,30 @@ namespace Avogadro {
   {
     d->tool = 0;
     m_navigateTool = 0;
+  }
+
+  void GLWidget::addTextOverlay(QLabel* str)
+  {
+    d->textOverlayMutex.lock();
+    d->textOverlayLabels.append(QPointer<QLabel>(str));
+    d->textOverlayMutex.unlock();
+  }
+
+  void GLWidget::addTextOverlay(const QList<QLabel*> &strs)
+  {
+    d->textOverlayMutex.lock();
+    for (QList<QLabel*>::const_iterator
+           it = strs.constBegin(),
+           it_end = strs.constEnd();
+         it != it_end; ++it) {
+      d->textOverlayLabels.append(QPointer<QLabel>(*it));
+    }
+    d->textOverlayMutex.unlock();
+  }
+
+  void GLWidget::setExtensions(QList<Extension*> extensions)
+  {
+    d->extensions = extensions;
   }
 
 
@@ -1459,7 +2264,7 @@ namespace Avogadro {
     gluPickMatrix( cx,viewport[3]-cy, w, h,viewport );
 
     // now multiply that projection matrix with the perspective of the camera
-    d->camera->applyPerspective();
+    d->camera->applyProjection();
 
     // now load the modelview matrix from the camera
     glMatrixMode( GL_MODELVIEW );
@@ -1621,7 +2426,7 @@ namespace Avogadro {
         d->selectedPrimitives.removeAll( item );
       // The engine caches must be invalidated
       d->updateCache = true;
-      item->update();
+      //      item->update();
     }
   }
 
@@ -1719,7 +2524,7 @@ namespace Avogadro {
 
   void GLWidget::renameNamedSelection(int index, const QString &name)
   {
-    if (name.isEmpty() || index >= d->namedSelections.size())
+    if (name.isEmpty())
       return;
 
     QPair<QString, QPair<QList<unsigned int>,QList<unsigned int> > > pair = d->namedSelections.takeAt(index);
@@ -1778,6 +2583,23 @@ namespace Avogadro {
     update();
   }
 
+  void GLWidget::setUnitCellColor(const QColor c)
+  {
+#ifdef ENABLE_THREADED_GL
+    d->renderMutex.lock();
+#endif
+    d->cellColor = c;
+#ifdef ENABLE_THREADED_GL
+    d->renderMutex.unlock();
+#endif
+  }
+
+  void GLWidget::setOnlyRenderOriginalUnitCell(bool b)
+  {
+    d->onlyRenderOriginalUnitCell = b;
+    update();
+  }
+
   void GLWidget::clearUnitCell()
   {
     updateGeometry();
@@ -1785,20 +2607,44 @@ namespace Avogadro {
     update();
   }
 
-  int GLWidget::aCells()
+  int GLWidget::aCells() const
   {
     return d->aCells;
   }
 
-  int GLWidget::bCells()
+  int GLWidget::bCells() const
   {
     return d->bCells;
   }
 
-  int GLWidget::cCells()
+  int GLWidget::cCells() const
   {
     return d->cCells;
   }
+
+  Color GLWidget::unitCellColor() const
+  {
+    return Color(d->cellColor);
+  }
+
+  bool GLWidget::onlyRenderOriginalUnitCell()
+  {
+    return d->onlyRenderOriginalUnitCell;
+  }
+
+  void GLWidget::setProjection(GLWidget::ProjectionType type)
+  {
+    d->projection = type;
+    updateGeometry();
+    d->camera->initializeViewPoint();
+    update();
+  }
+
+  GLWidget::ProjectionType GLWidget::projection() const
+  {
+    return d->projection;
+  }
+
 
   inline double GLWidget::computeFramesPerSecond()
   {
@@ -1838,8 +2684,10 @@ namespace Avogadro {
     settings.setValue("fogLevel", d->fogLevel);
     settings.setValue("renderAxes", d->renderAxes);
     settings.setValue("renderDebug", d->renderDebug);
+    settings.setValue("renderModelViewDebug", d->renderModelViewDebug);
     settings.setValue("allowQuickRender", d->allowQuickRender);
     settings.setValue("renderUnitCellAxes", d->renderUnitCellAxes);
+    settings.setValue("projection", d->projection);
 
     int count = d->engines.size();
     settings.beginWriteArray("engines");
@@ -1860,26 +2708,64 @@ namespace Avogadro {
     d->background = settings.value("background", QColor(0,0,0,0)).value<QColor>();
     d->renderAxes = settings.value("renderAxes", 1).value<bool>();
     d->renderDebug = settings.value("renderDebug", 0).value<bool>();
+    d->renderModelViewDebug =
+        settings.value("renderModelViewDebug", 0).value<bool>();
     d->allowQuickRender = settings.value("allowQuickRender", 1).value<bool>();
     d->renderUnitCellAxes = settings.value("renderUnitCellAxes", 1).value<bool>();
+    int pr = settings.value("projection", GLWidget::Perspective).toInt();
+    // Makes the compiler happy about the type conversion.
+    d->projection = GLWidget::ProjectionType(pr);
 
+    loadEngines(settings);
+
+    if(!d->engines.count())
+      loadDefaultEngines();
+  }
+
+  void GLWidget::loadEngines(QSettings &settings)
+  {
     int count = settings.beginReadArray("engines");
+    int numEnabled = 0;
+
+    PluginManager *plugins = PluginManager::instance();
+    QList<QString> allEngines = plugins->identifiers(Plugin::EngineType);
     for(int i=0; i<count; i++) {
       settings.setArrayIndex(i);
       QString engineClass = settings.value("engineID", QString()).toString();
-      PluginManager *plugins = PluginManager::instance();
       PluginFactory *factory = plugins->factory(engineClass,
                                                 Plugin::EngineType);
       if(!engineClass.isEmpty() && factory) {
         Engine *engine = static_cast<Engine *>(factory->createInstance(this));
         engine->readSettings(settings);
+        if(engine->isEnabled())
+          numEnabled++;
         addEngine(engine);
+        allEngines.removeAll(engineClass);
       }
     }
+
+    qDebug() << "Settings are missing for the next engines:" << allEngines;
+
+    // Add engines with missing settings
+    foreach(const QString &engineClass, allEngines) {
+      PluginFactory *factory = plugins->factory(engineClass,
+                                                Plugin::EngineType);
+      if(factory) {
+        Engine *engine = static_cast<Engine *>(factory->createInstance(this));
+        addEngine(engine);
+        allEngines.removeAll(engineClass);
+      }
+    }
+
     settings.endArray();
 
-    if(!d->engines.count())
-      loadDefaultEngines();
+    // Enable default engine if nothing is enabled
+    if(!d->engines.isEmpty() && (numEnabled == 0)) {
+      foreach(Engine *engine, d->engines) {
+        if(engine->identifier() == "Ball and Stick")
+          engine->setEnabled(true);
+      }
+    }
   }
 
   void GLWidget::loadDefaultEngines()
@@ -1892,7 +2778,7 @@ namespace Avogadro {
     PluginManager *plugins = PluginManager::instance();
     foreach(PluginFactory *factory, plugins->factories(Plugin::EngineType)) {
       Engine *engine = static_cast<Engine *>(factory->createInstance(this));
-      if (engine->name() == tr("Ball and Stick"))
+      if (engine->identifier() == "Ball and Stick")
         engine->setEnabled(true);
       addEngine(engine);
     }
@@ -1919,21 +2805,7 @@ namespace Avogadro {
     // clear the engine list
     d->engines.clear();
 
-    // read settings and create required engines
-    count = settings.beginReadArray("engines");
-    for(int i=0; i<count; i++) {
-      settings.setArrayIndex(i);
-      QString engineClass = settings.value("engineID", QString()).toString();
-      PluginManager *plugins = PluginManager::instance();
-      PluginFactory *factory = plugins->factory(engineClass,
-                                                Plugin::EngineType);
-      if(!engineClass.isEmpty() && factory) {
-        Engine *engine = static_cast<Engine *>(factory->createInstance(this));
-        engine->readSettings(settings);
-        addEngine(engine);
-      }
-    }
-    settings.endArray();
+    loadEngines(settings);
   }
 
 
@@ -1965,6 +2837,217 @@ namespace Avogadro {
     // Something changed and we need to invalidate the display lists
     d->updateCache = true;
   }
+
+// Copied from current sources of Qt 4.7
+#ifndef QT_OPENGL_ES
+
+static void save_gl_state()
+{
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    glShadeModel(GL_FLAT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-#include "glwidget.moc"
+static void restore_gl_state()
+{
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
+    glPopClientAttrib();
+}
+
+  void gl_draw_text(QPainter *p, int x, int y, const QString &str, const QFont &font, double zoom)
+  {
+    GLfloat color[4];
+    glGetFloatv(GL_CURRENT_COLOR, &color[0]);
+
+    QFont fore_font = font;
+    qreal size = font.pointSizeF() * zoom;
+    fore_font.setPointSizeF(size);
+
+    QColor col, outline;
+    col.setRgbF(color[0], color[1], color[2],color[3]);
+    outline.setRgbF((1-color[0])/2,(1-color[1])/2,(1-color[2])/2); // use opposite color, but make it darker
+    if(!p) return;  // prevent segfaults
+
+    QPen old_pen = p->pen();
+    QFont old_font = p->font();
+
+    // Outline
+    p->setPen(outline);
+    //QFont out_font = fore_font;
+    //out_font.setWeight(font.weight()+10);
+    p->setFont(fore_font);
+   // p->drawText(x+2, y, str);
+    p->drawText(x+1, y, str);
+    p->drawText(x-1, y, str);
+   // p->drawText(x-2, y, str);
+    p->drawText(x, y+1, str);
+   // p->drawText(x, y+2, str);
+    p->drawText(x, y-1, str);
+   // p->drawText(x, y-2, str);
+
+    // Foreground
+    p->setPen(col);
+    p->setFont(fore_font);
+    p->drawText(x, y, str);
+
+    p->setPen(old_pen);
+    p->setFont(old_font);
+  }
+
+static inline void transform_point(GLdouble out[4], const GLdouble m[16], const GLdouble in[4])
+{
+#define M(row,col)  m[col*4+row]
+    out[0] =
+        M(0, 0) * in[0] + M(0, 1) * in[1] + M(0, 2) * in[2] + M(0, 3) * in[3];
+    out[1] =
+        M(1, 0) * in[0] + M(1, 1) * in[1] + M(1, 2) * in[2] + M(1, 3) * in[3];
+    out[2] =
+        M(2, 0) * in[0] + M(2, 1) * in[1] + M(2, 2) * in[2] + M(2, 3) * in[3];
+    out[3] =
+        M(3, 0) * in[0] + M(3, 1) * in[1] + M(3, 2) * in[2] + M(3, 3) * in[3];
+#undef M
+}
+
+static inline GLint gluProject(GLdouble objx, GLdouble objy, GLdouble objz,
+           const GLdouble model[16], const GLdouble proj[16],
+           const GLint viewport[4],
+           GLdouble * winx, GLdouble * winy, GLdouble * winz)
+{
+   GLdouble in[4], out[4];
+
+   in[0] = objx;
+   in[1] = objy;
+   in[2] = objz;
+   in[3] = 1.0;
+   transform_point(out, model, in);
+   transform_point(in, proj, out);
+
+   if (in[3] == 0.0)
+      return GL_FALSE;
+
+   in[0] /= in[3];
+   in[1] /= in[3];
+   in[2] /= in[3];
+
+   *winx = viewport[0] + (1 + in[0]) * viewport[2] / 2;
+   *winy = viewport[1] + (1 + in[1]) * viewport[3] / 2;
+
+   *winz = (1 + in[2]) / 2;
+   return GL_TRUE;
+}
+
+#endif
+
+  // Based on Qt code
+  void GLWidget::renderText(double x, double y, double z, const QString &str, const QFont &font, int)
+  {
+    //QGLWidget::renderText(x,y,z,str,font, i);
+
+#ifndef QT_OPENGL_ES
+    if (str.isEmpty() || !isValid())
+        return;
+
+    bool auto_swap = autoBufferSwap();
+
+    int width = d->pd->width();
+    int height = d->pd->height();
+    GLdouble model[4][4], proj[4][4];
+    GLint view[4];
+    glGetDoublev(GL_MODELVIEW_MATRIX, &model[0][0]);
+    glGetDoublev(GL_PROJECTION_MATRIX, &proj[0][0]);
+    glGetIntegerv(GL_VIEWPORT, &view[0]);
+    GLdouble win_x = 0, win_y = 0, win_z = 0;
+    gluProject(x, y, z, &model[0][0], &proj[0][0], &view[0],
+                &win_x, &win_y, &win_z);
+    win_y = height - win_y; // y is inverted
+
+    //QPaintEngine::Type oldEngineType = qgl_engine_selector()->preferredPaintEngine();
+    //QPaintEngine::Type oldEngineType = QGL::preferredPaintEngine();
+    QPaintEngine *engine = paintEngine();
+
+    //if (engine && (oldEngineType == QPaintEngine::OpenGL2) && engine->isActive()) {
+    //    qWarning("QGLWidget::renderText(): Calling renderText() while a GL 2 paint engine is"
+    //             " active on the same device is not allowed.");
+    //    return;
+    //}
+
+    // this changes what paintEngine() returns
+    //QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
+    //qgl_engine_selector()->setPreferredPaintEngine(QPaintEngine::OpenGL);
+    engine = paintEngine();
+    QPainter *p;
+    bool reuse_painter = false;
+    bool use_depth_testing = glIsEnabled(GL_DEPTH_TEST);
+    bool use_scissor_testing = glIsEnabled(GL_SCISSOR_TEST);
+
+    if (engine->isActive()) {
+        reuse_painter = true;
+        p = engine->painter();
+        save_gl_state();
+    } else {
+        setAutoBufferSwap(false);
+        // disable glClear() as a result of QPainter::begin()
+        //d->disable_clear_on_painter_begin = true;
+        p = new QPainter(this);
+    }
+
+    QRect viewport(view[0], view[1], view[2], view[3]);
+    if (!use_scissor_testing && viewport != rect()) {
+        glScissor(view[0], view[1], view[2], view[3]);
+        glEnable(GL_SCISSOR_TEST);
+    } else if (use_scissor_testing) {
+        glEnable(GL_SCISSOR_TEST);
+    }
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0, 0, width, height);
+    glOrtho(0, width, height, 0, 0, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glAlphaFunc(GL_GREATER, 0.0);
+    glEnable(GL_ALPHA_TEST);
+    if (use_depth_testing)
+        glEnable(GL_DEPTH_TEST);
+    glTranslated(0, 0, -win_z);
+
+    gl_draw_text(p, qRound(win_x), qRound(win_y), str, font, 10.0/camera()->distance(Vector3d(0,0,0)));
+
+    if (reuse_painter) {
+        restore_gl_state();
+    } else {
+        p->end();
+        delete p;
+        setAutoBufferSwap(auto_swap);
+      //  d->disable_clear_on_painter_begin = false;
+    }
+    //qgl_engine_selector()->setPreferredPaintEngine(oldEngineType);
+#else // QT_OPENGL_ES
+    Q_UNUSED(x);
+    Q_UNUSED(y);
+    Q_UNUSED(z);
+    Q_UNUSED(str);
+    Q_UNUSED(font);
+    qWarning("QGLWidget::renderText is not supported under OpenGL/ES");
+#endif
+  }
+}

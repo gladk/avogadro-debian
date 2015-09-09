@@ -30,6 +30,7 @@
 
 #include <avogadro/primitivelist.h>
 #include <avogadro/extension.h>
+#include <avogadro/glwidget.h>
 
 #include <QMainWindow>
 #include <QFileDialog>
@@ -39,6 +40,10 @@ class QUndoStack;
 class QUndoCommand;
 class QStackedLayout;
 class QStandardItem;
+
+#ifdef QTTESTING
+class pqTestUtility;
+#endif
 
 namespace OpenBabel{
   class OBFormat;
@@ -71,7 +76,12 @@ namespace Avogadro {
       bool renderAxes() const;
       bool renderDebug() const;
       bool quickRender() const;
-      bool renderUnitCellAxes() const;
+
+      /**
+       * Return projection type in GLWiget
+       * @return projection type
+      **/
+      GLWidget::ProjectionType projection() const;
 
       /**
        * @param fileName fileName to load (defaults to loading a blank file)
@@ -86,6 +96,16 @@ namespace Avogadro {
        */
       bool saveFile(const QString &fileName,
             OpenBabel::OBFormat *format = NULL);
+
+      /**
+       * @param noConfig Ignore any configuration options on open.
+       */
+      void setIgnoreConfig(bool noConfig);
+
+      /**
+       * @return true if the config file will be ignored, false otherwise.
+       */
+      bool ignoreConfig() const;
 
     protected:
       void closeEvent(QCloseEvent *event);
@@ -108,7 +128,6 @@ namespace Avogadro {
       void revert();
       void importFile();
       void exportGraphics();
-      void exportGL2PS();
 
       void closeFile();
 
@@ -128,6 +147,7 @@ namespace Avogadro {
       void closeView();
       void closeView(int index);
       void centerView();
+      void alignViewToAxes();
       void setView(int index);
       void fullScreen();
       void resetDisplayTypes();
@@ -136,10 +156,18 @@ namespace Avogadro {
       void setPainterQuality(int quality);
       void setFogLevel(int level);
 
+      /**
+       * Slot to switch glWidget to the perspective projection mode
+       */
+      void setPerspective();
+      /**
+       * Slot to switch glWidget to the orthographic projection mode
+       */
+      void setOrthographic();
+
       void setRenderAxes(bool render);
       void setRenderDebug(bool render);
       void setQuickRender(bool quick);
-      void setRenderUnitCellAxes(bool render);
       void showAllMolecules(bool show);
 
       void undoStackClean(bool clean);
@@ -196,10 +224,23 @@ namespace Avogadro {
        */
       void windowClosed();
 
+#ifdef QTTESTING
+    protected Q_SLOTS:
+      void record();
+      void play();
+      void popup();
+#endif
+
     private:
       friend class MainWindowPrivate;
       MainWindowPrivate * const d;
       static const int m_configFileVersion;
+
+      bool m_ignoreConfig;
+
+#ifdef QTTESTING
+      pqTestUtility *TestUtility;
+#endif
 
 #ifdef ENABLE_UPDATE_CHECKER
       UpdateCheck *m_updateCheck;
@@ -261,6 +302,9 @@ namespace Avogadro {
       void hideMainWindowMac();
       //! Helper function for Mac -- show main window and re-enable menus
       void showMainWindowMac();
+
+      static QStringList pluginSearchDirs();
+
     private Q_SLOTS:
 
       void firstMolReady();

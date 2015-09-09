@@ -171,6 +171,11 @@ namespace Avogadro {
     return mouseEvent("mouseReleaseEvent", widget, event);
   }
 
+  QUndoCommand* PythonTool::mouseDoubleClickEvent(GLWidget *widget, QMouseEvent *event)
+  {
+    return mouseEvent("mouseDoubleClickEvent", widget, event);
+  }
+
   QUndoCommand* PythonTool::wheelEvent(GLWidget *widget, QWheelEvent *event)
   {
     PythonThread pt;
@@ -344,5 +349,3 @@ namespace Avogadro {
   }
 
 }
-
-#include "pythontool_p.moc"

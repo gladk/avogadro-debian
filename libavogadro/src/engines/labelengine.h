@@ -4,6 +4,7 @@
   Copyright (C) 2007 Donald Ephraim Curtis
   Copyright (C) 2007 Benoit Jacob
   Copyright (C) 2007 Marcus D. Hanwell
+  Some portions Copyright (C) 2009 Konstantin L. Tokarev
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -29,7 +30,7 @@
 
 #include <avogadro/global.h>
 #include <avogadro/engine.h>
-
+#include <openbabel/babelconfig.h>
 
 #include "ui_labelsettingswidget.h"
 
@@ -53,7 +54,6 @@ namespace Avogadro {
       //! Deconstructor
       ~LabelEngine() {}
 
-
       //! \name Render Methods
       //@{
       bool renderOpaque(PainterDevice *pd);
@@ -70,6 +70,9 @@ namespace Avogadro {
 
       bool hasSettings() { return true; }
 
+      QString createAtomLabel(const Atom *a);
+      QString createBondLabel(const Bond *b);
+
       /**
        * Write the engine settings so that they can be saved between sessions.
        */
@@ -80,25 +83,37 @@ namespace Avogadro {
        */
       void readSettings(QSettings &settings);
 
-
     private:
       int m_atomType;  // Atom label type
       int m_bondType;  // Bond label type
+      int m_textRendering;
+      int m_lengthPrecision;
+      QFont m_atomFont;
+      QFont m_bondFont;
+      QColor m_atomColor;
+      QColor m_bondColor;
+      Eigen::Vector3d m_displacement;
+      Eigen::Vector3d m_bondDisplacement;
       LabelSettingsWidget* m_settingsWidget;
 
     private Q_SLOTS:
       void setAtomType(int value);
+      void setTextRendering(int value);
       void setBondType(int value);
+      void setLengthPrecision(int value);
+      void setAtomColor(QColor);
+      void setBondColor(QColor);
+      void setAtomFont();
+      void setBondFont();
+      void updateDisplacement(double = 0.0);
+      void updateBondDisplacement(double = 0.0);
       void settingsWidgetDestroyed();
-
   };
 
   class LabelSettingsWidget : public QWidget, public Ui::LabelSettingsWidget
   {
     public:
-      LabelSettingsWidget(QWidget *parent=0) : QWidget(parent) {
-        setupUi(this);
-      }
+      LabelSettingsWidget(QWidget *parent=0);
   };
 
   //! Generates instances of our LabelEngine class

@@ -74,7 +74,7 @@ namespace Avogadro {
         m_originalConformers.push_back(molecule->conformer(i));
       }
     } else {
-      m_timeLine->setFrameRange(0, m_molecule->numConformers() - 1);
+      m_timeLine->setFrameRange( 1, m_molecule->numConformers() );
     }
   }
 
@@ -113,7 +113,8 @@ namespace Avogadro {
       return; // nothing to do
 
     m_molecule->lock()->lockForWrite();
-    m_molecule->setConformer(i);
+    m_molecule->setConformer(i-1); // Frame counting starts from 1
+
     if (d->dynamicBonds) {
       // construct minimal OBMol
       OpenBabel::OBMol obmol;
@@ -169,7 +170,7 @@ namespace Avogadro {
  
     d->framesSet = true;
     m_frames = frames;
-    m_timeLine->setFrameRange(0, frames.size() - 1);
+    m_timeLine->setFrameRange(1, numFrames() );
   }
 
   void Animation::stop()
@@ -188,7 +189,7 @@ namespace Avogadro {
       m_molecule->setAllConformers(m_originalConformers);
       m_molecule->lock()->unlock();
     }
-    setFrame(0);
+    setFrame(1);
   }
 
   void Animation::start()
@@ -210,10 +211,11 @@ namespace Avogadro {
     m_timeLine->setUpdateInterval(interval);
     int duration = interval * numFrames();
     m_timeLine->setDuration(duration);
-    setFrame(0);
+    m_timeLine->setFrameRange( 1,numFrames() );
 
     connect(m_timeLine, SIGNAL(frameChanged(int)),
             this, SLOT(setFrame(int)));
+    setFrame(1);
     m_timeLine->setCurrentTime(0);
     m_timeLine->start();
   }
@@ -224,5 +226,3 @@ namespace Avogadro {
   }
 
 } // end namespace Avogadro
-
-#include "animation.moc"

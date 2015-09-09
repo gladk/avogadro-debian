@@ -2,8 +2,9 @@
   Atom - Atom class derived from the base Primitive class
 
   Copyright (C) 2007 Donald Ephraim Curtis
-	Copyright (c) 2008-2009 Geoff Hutchison
-	Copyright (c) 2008-2009 Marcus D. Hanwell
+  Copyright (c) 2008-2009 Geoff Hutchison
+  Copyright (c) 2008-2009 Marcus D. Hanwell
+  Copyright (c) 2010 Konstantin Tokarev
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -28,7 +29,7 @@
 #define ATOM_H
 
 #include <avogadro/primitive.h>
-#include <QList>
+#include <QtCore/QList>
 
 namespace OpenBabel {
   class OBAtom;
@@ -91,12 +92,10 @@ namespace Avogadro {
 
     /**
      * Set the partial charge of the atom.
-     * @note This is not calculated by the atom, instead call Molecule::calculatePartialCharges()
+     * @note This is not calculated by the atom, instead call
+     * Molecule::calculatePartialCharges()
      */
-    void setPartialCharge(double charge) const
-    {
-      m_partialCharge = charge;
-    }
+    void setPartialCharge(double charge) const;
 
     /**
      * Set the formal charge of the atom.
@@ -104,16 +103,38 @@ namespace Avogadro {
     void setFormalCharge(int charge);
 
     /**
+     * Set the number of the atom in group of atoms of the same element.
+     */
+    void setGroupIndex(unsigned int index);
+
+    /**
      * Set the force vector on the atom (e.g., used to display vibrations)
      */
-    void setForceVector(const Eigen::Vector3d &force) { m_forceVector = force; }
-    /** @} */
+    void setForceVector(const Eigen::Vector3d &force);
 
+    /**
+     * Set the custom label for the atom
+     */
+    void setCustomLabel(const QString &label);
+
+    /**
+     * Set the custom color for the atom using color name
+     */
+    void setCustomColorName(const QString &name);
+
+    /**
+     * Set the custom radius for the atom
+     */
+    void setCustomRadius(const double radius);
+    /** @} */
 
     /** @name Get atomic information
      * These functions are used to get atomic information.
      * @{
      */
+
+    /** @return A pointer to the Molecule that the Atom belongs to. */
+    Molecule * molecule() const { return m_molecule; }
 
     /**
       * @return The position of the atom.
@@ -149,6 +170,11 @@ namespace Avogadro {
     double valence() const { return static_cast<double>(m_bonds.size()); }
 
     /**
+     * The index of the atom in group of atoms of the same element in Molecule
+     */
+    unsigned int groupIndex() const;
+    
+    /**
      * @return True if the atom is a hydrogen.
      */
     bool isHydrogen() const { return m_atomicNumber == 1; }
@@ -163,10 +189,16 @@ namespace Avogadro {
      */
     int formalCharge() const;
 
+    QString customLabel() const;
+
+    QString customColorName() const;
+
+    double customRadius() const;
+
     /**
      * @return The force vector on this atom (if any)
      */
-    const Eigen::Vector3d forceVector() const { return m_forceVector; }
+    const Eigen::Vector3d forceVector() const;
 
     /**
      * @return The Id of the Residue that the Atom is a part of.
@@ -189,6 +221,7 @@ namespace Avogadro {
      * @return An OpenBabel::OBAtom copy of the atom.
      */
     OpenBabel::OBAtom OBAtom();
+    //const OpenBabel::OBAtom OBAtom() const;
 
     /**
      * Copies the data from an OpenBabel::OBAtom to the atom.
@@ -241,11 +274,8 @@ namespace Avogadro {
     AtomPrivate * const d_ptr;
     Molecule *m_molecule; /** Parent molecule - should always be valid. **/
     int m_atomicNumber;
-    unsigned long m_residue;
     QList<unsigned long> m_bonds;
-    mutable double m_partialCharge;
-    int m_formalCharge;
-    Eigen::Vector3d m_forceVector;
+
     Q_DECLARE_PRIVATE(Atom)
   };
 

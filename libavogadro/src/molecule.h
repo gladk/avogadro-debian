@@ -45,10 +45,11 @@ namespace Avogadro {
   // Declare new classes
   class Atom;
   class Bond;
-  class Residue;
   class Cube;
-  class Mesh;
   class Fragment;
+  class Mesh;
+  class PrimitiveList;
+  class Residue;
   class ZMatrix;
 
   /**
@@ -66,7 +67,6 @@ namespace Avogadro {
   class A_EXPORT Molecule : public Primitive
   {
   Q_OBJECT
-
   public:
     /**
      * Constructor.
@@ -114,6 +114,7 @@ namespace Avogadro {
      */
 
     /**
+     * @overload
      * Create a new Atom object and return a pointer to it.
      * @note Do not delete the object, use removeAtom(Atom*).
      */
@@ -125,6 +126,25 @@ namespace Avogadro {
      * @note Do not delete the object, use removeAtom(unsigned long id).
      */
     Atom *addAtom(unsigned long id);
+
+    /**
+    * @overload
+     * Create a new Atom object of the specified element at the given
+     * position, and return a pointer to it.
+     * @param atomicNum Atomic number
+     * @param pos Cartesian position
+     * @note Do not delete the object, use removeAtom(unsigned long id).
+     */
+    Atom *addAtom(int atomicNum, const Eigen::Vector3d &pos);
+
+    /**
+     * @overload
+     * Create a new Atom object and copy the Atom object @a other's data into
+     * it. A pointer to the new atom in @a this is returned.
+     * @param other The atom to copy into the new atom
+     * @note Do not delete the new object, use removeAtom(unsigned long id).
+     */
+    Atom *addAtom(const Atom &other);
 
     /**
      * Remove the supplied Atom.
@@ -177,6 +197,7 @@ namespace Avogadro {
      * @return The total number of Atom objects in the molecule.
      */
     unsigned int numAtoms() const;
+
     /** @} */
 
 
@@ -187,6 +208,7 @@ namespace Avogadro {
      */
 
     /**
+     * @overload
      * Create a new Bond object and return a pointer to it.
      * @note Do not delete the object, use removeBond(Bond*).
      */
@@ -198,6 +220,30 @@ namespace Avogadro {
      * @note Do not delete the object, use removeBond(unsigned long id).
      */
     Bond *addBond(unsigned long id);
+
+    /**
+     * @overload
+     * Create a new bond between two atoms of the specified order. A pointer
+     * to the new Bond is returned.
+     * @param beginAtomId ID of the beginning atom of the bond
+     * @param endAtomId ID of the ending atom of the bond
+     * @param order Bond order of the new bond (default 1)
+     * @note Do not delete the object, use removeBond(Bond*).
+     */
+    Bond *addBond(unsigned long beginAtomId, unsigned long endAtomId,
+                  short order = 1);
+
+    /**
+     * @overload
+     * Create a new bond between two atoms of the specified order. A pointer
+     * to the new Bond is returned.
+     * @param beginAtom Pointer to the beginning atom of the bond
+     * @param endAtom Pointer to the ending atom of the bond
+     * @param order Bond order of the new bond (default 1)
+     * @note Do not delete the object, use removeBond(Bond*).
+     * @note Both beginAtom and endAtom must be owned by @a this Molecule.
+     */
+    Bond *addBond(Atom *beginAtom, Atom* endAtom, short order = 1);
 
     /**
      * Remove the supplied Bond.
@@ -229,6 +275,7 @@ namespace Avogadro {
      * @return The total number of Bond objects in the Mmolecule.
      */
     unsigned int numBonds() const;
+
     /** @} */
 
     /** @name Residue properties
@@ -251,12 +298,12 @@ namespace Avogadro {
     Residue *addResidue(unsigned long id);
 
     /**
-     * Remove the supplied residue.
+     * Remove the supplied Residue.
      */
     void removeResidue(Residue *residue);
 
     /**
-     * Remove the residue with the unique id specified.
+     * Remove the Residue with the unique id specified.
      */
     void removeResidue(unsigned long id);
 
@@ -499,6 +546,11 @@ namespace Avogadro {
      * Calculate the aromaticity of the bonds.
      */
     void calculateAromaticity() const;
+
+    /**
+     * Calculate the indices of atoms in groups of atoms of the same element.
+     */
+    void calculateGroupIndices() const;
 
     /**
      * @return The bond between the two supplied atom ids if one exists,
@@ -751,6 +803,36 @@ namespace Avogadro {
     Molecule& operator+=(const Molecule& other);
     /** @} */
 
+    /** @name Misc.
+     * Functions that don't neatly fit into the above categories.
+     * @{
+     */
+
+    /**
+     * Copy the atoms and bonds in the argument lists into new atoms and bonds
+     * in @a this.
+     * @param atoms Atoms to copy into @a this.
+     * @param bonds Bonds to copy into @a this.
+     * @return A PrimitiveList containing new atoms and bonds.
+     * @note All atoms and bonds must belong to the same molecule.
+     * @note All bonds in @bonds must be between atoms in @atoms.
+     */
+    PrimitiveList copyAtomsAndBonds(const QList<Atom*> &atoms,
+                                    const QList<Bond*> &bonds);
+
+    /**
+     * @overload
+     * Copy the atoms and bonds in the argument lists into new atoms and bonds
+     * in @a this.
+     * @param atomsAndBonds Atoms and bonds to copy into @a this.
+     * @return A PrimitiveList containing the new atoms and bonds.
+     * @note All atoms and bonds must belong to the same molecule.
+     * @note All bonds in the list must be between atoms in the list.
+     * @note The QList overload of this function is faster.
+     */
+    PrimitiveList copyAtomsAndBonds(const PrimitiveList &atomsAndBonds);
+    /** @} */
+
   protected:
     MoleculePrivate * const d_ptr;
     QString m_fileName;
@@ -758,6 +840,7 @@ namespace Avogadro {
     /** Vector containing pointers to various conformers. **/
     std::vector< std::vector<Eigen::Vector3d>* > m_atomConformers;
     mutable unsigned int m_currentConformer;
+
     mutable bool m_estimatedDipoleMoment;
     mutable Eigen::Vector3d *m_dipoleMoment;
     mutable bool m_invalidPartialCharges;
@@ -777,6 +860,13 @@ namespace Avogadro {
      * instead of being recalculated every time the Molecule is drawn.
      */
     void computeGeomInfo() const;
+
+  private:
+    /**
+     * Helper function for setting cached geometry information from the unit
+     * unit cell. This is called as needed by Molecule::computeGeomInfo.
+     */
+    void computeGeomInfoFromUnitCell() const;
 
   public Q_SLOTS:
     /**
@@ -886,7 +976,7 @@ namespace Avogadro {
 
   inline Atom * Molecule::atomById(unsigned long id) const
   {
-    if(id < m_atoms.size())
+    if(id < m_atoms.size() && id != FALSE_ID)
       return m_atoms[id];
     else
       return 0;
@@ -894,7 +984,7 @@ namespace Avogadro {
 
   inline const Eigen::Vector3d * Molecule::atomPos(unsigned long id) const
   {
-    if (id < m_atomPos->size())
+    if (id < m_atomPos->size() && id != FALSE_ID)
       return &(*m_atomPos)[id];
     else
       return 0;
@@ -910,7 +1000,7 @@ namespace Avogadro {
 
   inline Bond * Molecule::bondById(unsigned long id) const
   {
-    if(id < m_bonds.size())
+    if(id < m_bonds.size() && id != FALSE_ID)
       return m_bonds[id];
     else
       return 0;

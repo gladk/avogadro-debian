@@ -124,7 +124,7 @@ namespace Avogadro {
     } // end if molecule
   } // end parameters changed
 
-  vector3 transformedFractionalCoordinate(vector3 originalCoordinate)
+  static vector3 transformedFractionalCoordinate(vector3 originalCoordinate)
   {
     // ensure the fractional coordinate is entirely within the unit cell
     vector3 returnValue(originalCoordinate);
@@ -182,7 +182,7 @@ namespace Avogadro {
       foreach(OBAtom *atom, atoms) {
         uniqueV = atom->GetVector();
         // Assert: won't crash because we already ensure uc != NULL
-        uniqueV *= uc->GetFractionalMatrix();
+        uniqueV = uc->CartesianToFractional(uniqueV);
         uniqueV = transformedFractionalCoordinate(uniqueV);
         coordinates.push_back(uniqueV);
 
@@ -208,15 +208,20 @@ namespace Avogadro {
           coordinates.push_back(updatedCoordinate); // make sure to check the new atom for dupes
           addAtom = mol.NewAtom();
           addAtom->Duplicate(atom);
-          addAtom->SetVector(uc->GetOrthoMatrix() * updatedCoordinate);
+          addAtom->SetVector(uc->FractionalToCartesian(updatedCoordinate));
         } // end loop of transformed atoms
 
         // Put the original atom into the proper space in the unit cell too
-        atom->SetVector(uc->GetOrthoMatrix() * uniqueV);
+        atom->SetVector(uc->FractionalToCartesian(uniqueV));
       } // end loop of atoms
 
       m_molecule->setOBMol(&mol);
       qDebug() << "Spacegroups done...";
+
+      // Need a fresh pointer to the new unit cell - setOBMol is invalidating
+      // the old one. This should be cleaned up to use a more permanent data
+      // structure.
+      uc = m_molecule->OBUnitCell();
       uc->SetSpaceGroup(1);
     }
 

@@ -56,7 +56,7 @@ namespace Avogadro {
     }
   }
 
-  QList<unsigned long> Fragment::atoms()
+  QList<unsigned long> Fragment::atoms() const
   {
     return m_atoms;
   }
@@ -76,11 +76,9 @@ namespace Avogadro {
     }
   }
 
-  QList<unsigned long> Fragment::bonds()
+  QList<unsigned long> Fragment::bonds() const
   {
     return m_bonds;
   }
 
-} // End namespace Avogadro
-
-#include "fragment.moc"
+} // End namespace

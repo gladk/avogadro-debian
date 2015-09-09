@@ -3,6 +3,7 @@
  Avogadro
 
  Copyright (C) 2007-2009 by Marcus D. Hanwell
+ Some portions (C) 2010 by Konstantin Tokarev
 
  This file is part of the Avogadro molecular editor project.
  For more information, see <http://avogadro.openmolecules.net/>
@@ -25,8 +26,7 @@
  **********************************************************************/
 
 #include "elementitem_p.h"
-
-#include <avogadro/elementtranslator.h>
+#include "elementtranslator.h"
 
 #include <openbabel/mol.h>
 
@@ -39,13 +39,15 @@
 
 namespace Avogadro{
 
-  ElementItem::ElementItem(int elementNumber) : m_width(26), m_height(26),
-    m_element(elementNumber)
+  ElementItem::ElementItem(int elementNumber) : m_valid(false), m_width(26), m_height(26),
+                                                m_element(elementNumber)
   {
     // Want these items to be selectable
     setFlags(QGraphicsItem::ItemIsSelectable);
 
     m_symbol = OpenBabel::etab.GetSymbol(m_element);
+    if(!m_symbol.isEmpty())
+      m_valid = true;
     std::vector<double> color = OpenBabel::etab.GetRGB(m_element);
     m_color = new QColor();
     m_color->setRgbF(color[0], color[1], color[2]);
@@ -73,27 +75,29 @@ namespace Avogadro{
   void ElementItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
                           QWidget *)
   {
+    if(!m_valid)
+      return;
+
     // Fill the rectangle with the element colour
-    painter->setBrush(*m_color);
-
-    // Handle the case where the item is selected
-//    if (m_color->value() > 240) {
-    if (m_element == 1 || m_element == 2 || m_element == 9 || m_element == 47
-        || m_element == 78) {
-      if (isSelected())
-        painter->setPen(Qt::darkGray);
-      else
-        painter->setPen(Qt::black);
+    QColor bgColor;
+    QPen pen;
+    if (isSelected()) {
+      bgColor = QColor(*m_color).lighter(150);
+      pen.setColor(QColor(*m_color).darker(150));
+      pen.setWidth(4);
+    } else {
+      bgColor = QColor(*m_color);
     }
-    else {
-      if (isSelected())
-        painter->setPen(Qt::white);
-      else
-        painter->setPen(Qt::black);
-    }
-
+    painter->setPen(pen);
+    painter->setBrush(bgColor);
     QRectF rect(-m_width/2, -m_height/2, m_width, m_height);
     painter->drawRect(rect);
+    // Handle the case where the item is selected
+    if (bgColor.value() < 150)
+      pen.setColor(Qt::white);
+    else
+      pen.setColor(Qt::black);
+    painter->setPen(pen);
     painter->drawText(rect, Qt::AlignCenter, m_symbol);
   }
 

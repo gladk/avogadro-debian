@@ -39,7 +39,7 @@ namespace Avogadro {
   {
     Q_OBJECT
     AVOGADRO_ENGINE("Ball and Stick", tr("Ball and Stick"),
-                      tr("Renders primitives using Balls (atoms) and Sticks (bonds)"))
+                    tr("Renders primitives using Balls (atoms) and Sticks (bonds)"))
 
     public:
       //! Constructor
@@ -78,17 +78,24 @@ namespace Avogadro {
        */
       void readSettings(QSettings &settings);
 
-
     private:
       double radius(const Atom *atom) const;
 
       BSDYSettingsWidget *m_settingsWidget;
 
       double m_atomRadiusPercentage;
+      const double m_atomRadiusScale;
       double m_bondRadius;
+      const double m_bondRadiusScale;
+      int m_atomRadiusType;
       int m_showMulti;
 
       double m_alpha; // transparency of the balls & sticks
+
+      /**
+       * Function pointer for the radius function to be used for rendering.
+       */
+      double (*pRadius)(const Atom *atom);
 
    private Q_SLOTS:
       void settingsWidgetDestroyed();
@@ -97,7 +104,10 @@ namespace Avogadro {
        * @param percent percentage of the VdwRad
        */
       void setAtomRadiusPercentage(int percent);
-
+      /**
+       * @param value determines if covalent or VdW radii are used
+       */
+      void setAtomRadiusType(int value);
       /**
        * @param value radius of the bonds * 10
        */
