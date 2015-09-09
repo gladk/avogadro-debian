@@ -1,3 +1,63 @@
+avogadro (1.1.1-1~exp1) experimental; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix compilation against eigen3.3. (Closes: #786355)
+  * Use libeigen3-dev instead of libeigen2-dev. (Closes: #776914)
+  * Merge Ubuntu-changes.
+
+ -- Anton Gladky <gladk@debian.org>  Wed, 09 Sep 2015 20:38:14 +0200
+
+avogadro (1.1.1-0ubuntu5) wily; urgency=low
+
+  * cmake QT search no longer automatically loads X11 detection, load
+    it manually.
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Mon, 10 Aug 2015 20:49:07 +0100
+
+avogadro (1.1.1-0ubuntu4) wily; urgency=medium
+
+  * No change rebuild for boost1.58/libstdc++6.
+
+ -- Dimitri John Ledkov <dimitri.j.ledkov@linux.intel.com>  Sun, 02 Aug 2015 12:26:37 +0100
+
+avogadro (1.1.1-0ubuntu3) utopic; urgency=high
+
+  * No change rebuild against boost1.55.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sat, 26 Apr 2014 23:36:06 +0100
+
+avogadro (1.1.1-0ubuntu2) trusty; urgency=medium
+
+  * No-change rebuild against sip 4.15.5.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Sat, 22 Mar 2014 15:07:23 +0400
+
+avogadro (1.1.1-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 12 Feb 2014 11:10:29 +0000
+
+avogadro (1.1.0-4ubuntu2) trusty; urgency=medium
+
+  * No change rebuild against glew 1.10.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 02 Jan 2014 13:20:09 +0000
+
+avogadro (1.1.0-4ubuntu1) trusty; urgency=low
+
+  * Merge from debian, remaining changes
+    - Add libpython2.7-dev libboost-python-dev to libavogadro-dev
+
+ -- Rohan Garg <rohangarg@kubuntu.org>  Thu, 28 Nov 2013 17:50:48 +0100
+
+avogadro (1.0.3-10.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Replace eigen2 by eigen3. (Closes: #728610)
+
+ -- Anton Gladky <gladk@debian.org>  Sun, 03 Nov 2013 16:28:19 +0100
+
 avogadro (1.1.0-4) experimental; urgency=low
 
   [ Daniel Leidert ]
@@ -68,6 +128,74 @@ avogadro (1.0.3-6) unstable; urgency=low
   * debian/upstream: Added reference. 
 
  -- Debichem Team <debichem-devel@lists.alioth.debian.org>  Sun, 12 May 2013 21:30:52 +0200
+
+avogadro (1.0.3-5ubuntu10) trusty; urgency=low
+
+  * No change rebuild for Boost 1.54 transition.
+
+ -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Tue, 22 Oct 2013 18:08:37 +0100
+
+avogadro (1.0.3-5ubuntu9) saucy; urgency=low
+
+  * Do the same with libboost-python-dev 
+
+ -- Philip Muškovac <yofel@kubuntu.org>  Sat, 17 Aug 2013 16:57:02 +0200
+
+avogadro (1.0.3-5ubuntu8) saucy; urgency=low
+
+  * Add dependency on libpython2.7-dev to libavogadro-dev as cmake expects it
+    to be there
+
+ -- Philip Muškovac <yofel@kubuntu.org>  Sat, 17 Aug 2013 15:35:14 +0200
+
+avogadro (1.0.3-5ubuntu7) saucy; urgency=low
+
+  * Make avogadro look for python-py27 boost library, fixing FTBFS.
+  * Force using python2.7 via Python_ADDITIONAL_VERSIONS
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Fri, 09 Aug 2013 13:13:44 +0100
+
+avogadro (1.0.3-5ubuntu6) saucy; urgency=low
+
+  * Rebuild against sip-api-10
+
+ -- Scott Kitterman <scott@kitterman.com>  Thu, 20 Jun 2013 11:16:36 -0400
+
+avogadro (1.0.3-5ubuntu5) saucy; urgency=low
+
+  * No change rebuild for Boost 1.53 transition.
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Fri, 26 Apr 2013 19:18:39 +0100
+
+avogadro (1.0.3-5ubuntu4) raring; urgency=low
+
+  * Add support for multiarch python:
+    - add use_python_include_dirs.diff to use PYTHON_INCLUDE_DIRS
+      instead of PYTHON_INCLUDE_PATH and drop shipped FindPythonLibs.cmake
+      in favour of the system one.
+    - don't specify the python library and include path by hand in rules
+
+ -- Philip Muškovac <yofel@kubuntu.org>  Thu, 20 Dec 2012 10:07:35 +0100
+
+avogadro (1.0.3-5ubuntu3) raring; urgency=low
+
+  * Rebuild against sip-api-9.0.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 07 Nov 2012 09:29:53 +0000
+
+avogadro (1.0.3-5ubuntu2) quantal; urgency=low
+
+  * No change rebuild with the new glew
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 10 Aug 2012 17:29:15 +0200
+
+avogadro (1.0.3-5ubuntu1) quantal; urgency=low
+
+  * Apply patch from Debian bug #679819:
+    Drop semi-obsolete use of version specify python packages to restore
+    installability (python-qt4 stopped providing one of the required packages).
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 04 Jul 2012 16:21:22 -0400
 
 avogadro (1.0.3-5) unstable; urgency=low
 
@@ -549,3 +677,4 @@ avogadro (0.6.0-1) experimental; urgency=low
   * Initial release. (Closes: #450814)
 
  -- Jordan Mantha <mantha@ubuntu.com>  Mon, 03 Mar 2008 14:44:29 -0800
+

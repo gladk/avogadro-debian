@@ -1,0 +1,738 @@
+Description: Migrate to eigen3
+Author: Anton Gladky <gladk@debian.org>
+Bug-Debian: https://bugs.debian.org/776914
+Last-Update: 2015-09-09
+
+--- avogadro-1.1.1.orig/CMakeLists.txt
++++ avogadro-1.1.1/CMakeLists.txt
+@@ -235,8 +235,6 @@ if(NOT EIGEN3_FOUND)
+    message(STATUS "Cannot find Eigen3, trying Eigen2")
+    find_package(Eigen2 REQUIRED) # Some version is required
+ else()
+-# Use Stage10 Eigen3 support
+-   set (EIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API TRUE)
+ endif()
+ 
+ find_package(ZLIB REQUIRED)
+--- avogadro-1.1.1.orig/avogadro/src/CMakeLists.txt
++++ avogadro-1.1.1/avogadro/src/CMakeLists.txt
+@@ -19,7 +19,7 @@ set_directory_properties(PROPERTIES INCL
+ include_directories(
+   ${CMAKE_CURRENT_SOURCE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${CMAKE_CURRENT_BINARY_DIR}
+ )
+ 
+--- avogadro-1.1.1.orig/avogadro/src/mainwindow.cpp
++++ avogadro-1.1.1/avogadro/src/mainwindow.cpp
+@@ -115,7 +115,6 @@
+ #include <QDebug>
+ 
+ #include <Eigen/Geometry>
+-#include <Eigen/Array>
+ #define USEQUAT
+ // This is a "hidden" exported Qt function on the Mac for Qt-4.x.
+ #ifdef Q_WS_MAC
+@@ -2765,7 +2764,7 @@ protected:
+     linearGoal.row(1) = linearGoal.row(2).cross(linearGoal.row(0));
+ 
+     // calculate the translation matrix
+-    Transform3d goal(linearGoal);
++    Projective3d goal(linearGoal);
+ 
+     goal.pretranslate(- 3.0 * (d->glWidget->radius() + CAMERA_NEAR_DISTANCE) * Vector3d::UnitZ());
+ 
+@@ -2830,7 +2829,7 @@ protected:
+     Matrix3d linearGoal = Matrix3d::Identity();
+ 
+     // calculate the translation matrix
+-    Transform3d goal(linearGoal);
++    Projective3d goal(linearGoal);
+ 
+     goal.pretranslate(- 3.0 * (d->glWidget->radius() + CAMERA_NEAR_DISTANCE) * Vector3d::UnitZ());
+ 
+--- avogadro-1.1.1.orig/avogadro/src/mainwindow.h
++++ avogadro-1.1.1/avogadro/src/mainwindow.h
+@@ -24,7 +24,6 @@
+ #ifndef MAINWINDOW_H
+ #define MAINWINDOW_H
+ 
+-#include <Eigen/Geometry>
+ #include "ui_mainwindow.h"
+ #include "flattabwidget.h"
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/CMakeLists.txt
++++ avogadro-1.1.1/libavogadro/src/CMakeLists.txt
+@@ -11,7 +11,7 @@ set_directory_properties(PROPERTIES INCL
+   "${libavogadro_BINARY_DIR}/include;${tmp_include_dirs}")
+ include_directories(
+   ${CMAKE_CURRENT_BINARY_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+ )
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/camera.cpp
++++ avogadro-1.1.1/libavogadro/src/camera.cpp
+@@ -45,7 +45,7 @@ namespace Avogadro
+ 
+       CameraPrivate() {};
+ 
+-      Eigen::Transform3d modelview, projection;
++      Eigen::Projective3d modelview, projection;
+       const GLWidget *parent;
+       double angleOfViewY;
+       double orthoScale;
+@@ -167,20 +167,20 @@ namespace Avogadro
+ 
+   double Camera::distance(const Eigen::Vector3d & point) const
+   {
+-    return ( d->modelview * point ).norm();
++    return ( (d->modelview).linear() * point ).norm();
+   }
+ 
+-  void Camera::setModelview(const Eigen::Transform3d &matrix)
++  void Camera::setModelview(const Eigen::Projective3d &matrix)
+   {
+     d->modelview = matrix;
+   }
+ 
+-  const Eigen::Transform3d & Camera::modelview() const
++  const Eigen::Projective3d & Camera::modelview() const
+   {
+     return d->modelview;
+   }
+ 
+-  Eigen::Transform3d & Camera::modelview()
++  Eigen::Projective3d & Camera::modelview()
+   {
+     return d->modelview;
+   }
+--- avogadro-1.1.1.orig/libavogadro/src/camera.h
++++ avogadro-1.1.1/libavogadro/src/camera.h
+@@ -100,15 +100,15 @@ namespace Avogadro {
+       /** Sets 4x4 "modelview" matrix representing the camera orientation and position.
+         * @param matrix the matrix to copy from
+         * @sa Eigen::Transform3d & modelview(), applyModelview() */
+-      void setModelview(const Eigen::Transform3d &matrix);
++      void setModelview(const Eigen::Projective3d &matrix);
+       /** @return a constant reference to the 4x4 "modelview" matrix representing
+         *         the camera orientation and position
+         * @sa setModelview(), Eigen::Transform3d & modelview() */
+-      const Eigen::Transform3d & modelview() const;
++      const Eigen::Projective3d & modelview() const;
+       /** @return a non-constant reference to the 4x4 "modelview" matrix representing
+         *         the camera orientation and position
+         * @sa setModelview(), const Eigen::Transform3d & modelview() const */
+-      Eigen::Transform3d & modelview();
++      Eigen::Projective3d & modelview();
+       /** Calls gluPerspective() or glOrtho() with parameters automatically chosen
+         * for rendering the GLWidget's molecule with this camera. Should be called
+         * only in GL_PROJECTION matrix mode. Example code is given
+@@ -340,7 +340,7 @@ namespace Avogadro {
+        * @return {x/w, y/w, z/w} vector
+        */
+       Eigen::Vector3d V4toV3DivW(const Eigen::Vector4d & v4) {
+-        return v4.start<3>()/v4.w();
++        return v4.head<3>()/v4.w();
+       }
+   };
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/engines/wireengine.cpp
++++ avogadro-1.1.1/libavogadro/src/engines/wireengine.cpp
+@@ -109,7 +109,7 @@ namespace Avogadro {
+     const Camera *camera = pd->camera();
+ 
+     // perform a rough form of frustum culling
+-    Eigen::Vector3d transformedPos = pd->camera()->modelview() * v;
++    Eigen::Vector3d transformedPos = (pd->camera()->modelview()).linear() * v;
+     double dot = transformedPos.z() / transformedPos.norm();
+     if(dot > -0.8)
+       return true;
+@@ -167,7 +167,7 @@ namespace Avogadro {
+       map = pd->colorMap(); // fall back to global color map
+ 
+     // perform a rough form of frustum culling
+-    Eigen::Vector3d transformedEnd1 = pd->camera()->modelview() * v1;
++    Eigen::Vector3d transformedEnd1 = (pd->camera()->modelview()).linear() * v1;
+     double dot = transformedEnd1.z() / transformedEnd1.norm();
+     if(dot > -0.8)
+       return true; // i.e., don't bother rendering
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/crystallography/crystallographyextension.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/crystallography/crystallographyextension.cpp
+@@ -1889,7 +1889,8 @@ namespace Avogadro
+     // fix coordinates
+     // Apply COB matrix:
+     Eigen::Matrix3d invCob;
+-    cob.computeInverse(&invCob);
++    bool tInvert;
++    cob.computeInverseWithCheck(invCob,tInvert);
+     for (QList<Eigen::Vector3d>::iterator
+            it = fcoords.begin(),
+            it_end = fcoords.end();
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/crystallography/ui/ceviewoptionswidget.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/crystallography/ui/ceviewoptionswidget.cpp
+@@ -139,7 +139,7 @@ namespace Avogadro
+   {
+     // View into a Miller plane
+     Camera *camera = m_glWidget->camera();
+-    Eigen::Transform3d modelView;
++    Eigen::Projective3d modelView;
+     modelView.setIdentity();
+ 
+     // OK, so we want to rotate to look along the normal at the plane
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/qtaim/qtaimmathutilities.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/qtaim/qtaimmathutilities.cpp
+@@ -26,6 +26,7 @@
+ 
+ #include <cmath>
+ #include <Eigen/QR>
++#include <Eigen/Eigenvalues>
+ 
+ namespace Avogadro {
+   namespace QTAIMMathUtilities {
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/surfaces/openqube/CMakeLists.txt
++++ avogadro-1.1.1/libavogadro/src/extensions/surfaces/openqube/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ find_package(Qt4 4.6 REQUIRED)
+-find_package(Eigen2 REQUIRED)
++find_package(Eigen3 REQUIRED)
+ 
+ include_directories(${QT_INCLUDE_DIR} ${EIGEN2_INCLUDE_DIR})
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/surfaces/openqube/gamessukout.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/surfaces/openqube/gamessukout.cpp
+@@ -15,6 +15,7 @@
+ ******************************************************************************/
+ 
+ #include "gamessukout.h"
++#include <iostream>
+ 
+ using Eigen::Vector3d;
+ using std::vector;
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/surfaces/openqube/gaussianset.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/surfaces/openqube/gaussianset.cpp
+@@ -16,6 +16,7 @@
+ ******************************************************************************/
+ 
+ #include "gaussianset.h"
++#include <iostream>
+ 
+ #ifdef WIN32
+ #define _USE_MATH_DEFINES
+--- avogadro-1.1.1.orig/libavogadro/src/extensions/surfaces/openqube/slaterset.cpp
++++ avogadro-1.1.1/libavogadro/src/extensions/surfaces/openqube/slaterset.cpp
+@@ -23,9 +23,9 @@
+ 
+ #include "cube.h"
+ 
+-#include <Eigen/Array>
+ #include <Eigen/LU>
+ #include <Eigen/QR>
++#include <Eigen/Eigenvalues>
+ 
+ #include <cmath>
+ 
+@@ -248,7 +248,9 @@ bool SlaterSet::initialize()
+ 
+   SelfAdjointEigenSolver<MatrixXd> s(m_overlap);
+   MatrixXd p = s.eigenvectors();
+-  MatrixXd m = p * s.eigenvalues().cwise().inverse().cwise().sqrt().asDiagonal() * p.inverse();
++  //MatrixXd m = p * s.eigenvalues().cwise().inverse().cwise().sqrt().asDiagonal() * p.inverse();
++  MatrixXd m1 = (s.eigenvalues().array().inverse().sqrt());
++  MatrixXd m = p.array()*(m1.diagonal().array())*p.inverse().array();
+   m_normalized = m * m_eigenVectors;
+ 
+   if (!(m_overlap*m*m).isIdentity())
+--- avogadro-1.1.1.orig/libavogadro/src/glpainter_p.cpp
++++ avogadro-1.1.1/libavogadro/src/glpainter_p.cpp
+@@ -787,13 +787,13 @@ namespace Avogadro
+         } else {
+           points[theta-1] = Eigen::AngleAxisd(theta * (M_PI / 180.0) / 2, n) * u;
+         }
+-        points[theta-1] = d->widget->camera()->modelview() * (origin + points[theta-1]);
++        points[theta-1] = (d->widget->camera()->modelview()).linear() * (origin + points[theta-1]);
+       }
+ 
+     // Get vectors representing the points' positions in terms of the model view.
+-    Eigen::Vector3d _origin = d->widget->camera()->modelview() * origin;
+-    Eigen::Vector3d _direction1 = d->widget->camera()->modelview() * (origin+u);
+-    Eigen::Vector3d _direction2 = d->widget->camera()->modelview() * (origin+v);
++    Eigen::Vector3d _origin = (d->widget->camera()->modelview()).linear() * origin;
++    Eigen::Vector3d _direction1 = (d->widget->camera()->modelview()).linear() * (origin+u);
++    Eigen::Vector3d _direction2 = (d->widget->camera()->modelview()).linear() * (origin+v);
+ 
+     glPushAttrib(GL_ALL_ATTRIB_BITS);
+     glPushMatrix();
+@@ -878,12 +878,12 @@ namespace Avogadro
+         } else {
+           points[theta-1] = Eigen::AngleAxisd(theta * (M_PI / 180.0) / 2, n) * u;
+         }
+-        points[theta-1] = d->widget->camera()->modelview() * (origin + points[theta-1]);
++        points[theta-1] = (d->widget->camera()->modelview()).linear() * (origin + points[theta-1]);
+       }
+ 
+     // Get vectors representing the points' positions in terms of the model view.
+-    Eigen::Vector3d _direction1 = d->widget->camera()->modelview() * (origin + u);
+-    Eigen::Vector3d _direction2 = d->widget->camera()->modelview() * (origin + v);
++    Eigen::Vector3d _direction1 = (d->widget->camera()->modelview()).linear() * (origin + u);
++    Eigen::Vector3d _direction2 = (d->widget->camera()->modelview()).linear() * (origin + v);
+ 
+     glPushAttrib(GL_ALL_ATTRIB_BITS);
+     glPushMatrix();
+--- avogadro-1.1.1.orig/libavogadro/src/glwidget.cpp
++++ avogadro-1.1.1/libavogadro/src/glwidget.cpp
+@@ -765,7 +765,7 @@ namespace Avogadro {
+       GLfloat fogColor[4]= {static_cast<GLfloat>(d->background.redF()), static_cast<GLfloat>(d->background.greenF()),
+                             static_cast<GLfloat>(d->background.blueF()), static_cast<GLfloat>(d->background.alphaF())};
+       glFogfv(GL_FOG_COLOR, fogColor);
+-      Vector3d distance = camera()->modelview() * d->center;
++      Vector3d distance = (camera()->modelview()).linear() * d->center;
+       double distanceToCenter = distance.norm();
+       glFogf(GL_FOG_DENSITY, 1.0);
+       glHint(GL_FOG_HINT, GL_NICEST);
+@@ -1711,7 +1711,7 @@ namespace Avogadro {
+ 
+       if (d->renderModelViewDebug) {
+         // Model view matrix:
+-        const Eigen::Transform3d &modelview = d->camera->modelview();
++        const Eigen::Projective3d &modelview = d->camera->modelview();
+         y += d->pd->painter()->drawText
+             (x, y, tr("ModelView row 1: %L1 %L2 %L3 %L4")
+              .arg(modelview(0, 0), 6, 'f', 2, ' ')
+--- avogadro-1.1.1.orig/libavogadro/src/molecule.cpp
++++ avogadro-1.1.1/libavogadro/src/molecule.cpp
+@@ -36,7 +36,7 @@
+ #include "zmatrix.h"
+ 
+ #include <Eigen/Geometry>
+-#include <Eigen/LeastSquares>
++#include <Eigen/Eigenvalues> 
+ 
+ #include <vector>
+ 
+@@ -1899,7 +1899,29 @@ namespace Avogadro{
+         }
+         d->center /= static_cast<double>(nAtoms);
+         Eigen::Hyperplane<double, 3> planeCoeffs;
+-        Eigen::fitHyperplane(numAtoms(), atomPositions, &planeCoeffs);
++        
++        
++        //Eigen::fitHyperplane(numAtoms(), atomPositions, &planeCoeffs);
++        
++        /************************/
++        typedef Eigen::Matrix<double,3,3> CovMatrixType;
++        typedef Eigen::Vector3d VectorType;
++        
++        VectorType mean = d->center;
++        int size=3;
++        int numPoints=numAtoms();
++        VectorType ** points=atomPositions;
++        CovMatrixType covMat = CovMatrixType::Zero(size, size);
++        VectorType remean = VectorType::Zero(size);
++        for(int i = 0; i < numPoints; ++i)
++        {
++          VectorType diff = (*(points[i]) - mean).conjugate();
++          covMat += diff * diff.adjoint();
++        }
++        Eigen::SelfAdjointEigenSolver<CovMatrixType> eig(covMat);
++        planeCoeffs.normal() = eig.eigenvectors().col(0);
++        /************************/
++        
+         delete[] atomPositions;
+         d->normalVector = planeCoeffs.normal();
+       }
+--- avogadro-1.1.1.orig/libavogadro/src/navigate.cpp
++++ avogadro-1.1.1/libavogadro/src/navigate.cpp
+@@ -40,7 +40,7 @@ namespace Avogadro {
+   void Navigate::zoom(GLWidget *widget, const Eigen::Vector3d &goal,
+                       double delta)
+   {
+-    Vector3d transformedGoal = widget->camera()->modelview() * goal;
++    Vector3d transformedGoal = (widget->camera()->modelview()).linear() * goal;
+     double distanceToGoal = transformedGoal.norm();
+ 
+     double t = ZOOM_SPEED * delta;
+--- avogadro-1.1.1.orig/libavogadro/src/primitive.h
++++ avogadro-1.1.1/libavogadro/src/primitive.h
+@@ -27,6 +27,7 @@
+ #define PRIMITIVE_H
+ 
+ #include "global.h"
++#include "Eigen/Core"
+ 
+ #include <QObject>
+ #include <QMetaType>
+--- avogadro-1.1.1.orig/libavogadro/src/python/camera.cpp
++++ avogadro-1.1.1/libavogadro/src/python/camera.cpp
+@@ -10,7 +10,7 @@ using namespace Avogadro;
+ void export_Camera()
+ {
+ 
+-  const Eigen::Transform3d& (Camera::*modelview_ptr)() const = &Camera::modelview;
++  const Eigen::Projective3d& (Camera::*modelview_ptr)() const = &Camera::modelview;
+   Eigen::Vector3d (Camera::*unProject_ptr1)(const Eigen::Vector3d&) const = &Camera::unProject;
+   Eigen::Vector3d (Camera::*unProject_ptr2)(const QPoint&, const Eigen::Vector3d&) const = &Camera::unProject;
+   Eigen::Vector3d (Camera::*unProject_ptr3)(const QPoint&) const = &Camera::unProject;
+--- avogadro-1.1.1.orig/libavogadro/src/python/eigen.cpp
++++ avogadro-1.1.1/libavogadro/src/python/eigen.cpp
+@@ -303,9 +303,9 @@ template <> struct ScalarTraits<double>
+     struct innerclass
+     {
+       //
+-      //  Eigen::Transform3d --> python array (4x4)
++      //  Eigen::Projective3d --> python array (4x4)
+       //
+-      static PyObject* convert(Eigen::Transform3d const &trans)
++      static PyObject* convert(Eigen::Projective3d const &trans)
+       {
+         npy_intp dims[2] = { 4, 4 };
+         PyObject *result = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+@@ -319,9 +319,9 @@ template <> struct ScalarTraits<double>
+         return incref(result);
+       }
+       //
+-      //  Eigen::Transform3d* --> python array (4x4)
++      //  Eigen::Projective3d* --> python array (4x4)
+       //
+-      static PyObject* convert(Eigen::Transform3d *trans)
++      static PyObject* convert(Eigen::Projective3d *trans)
+       {
+         npy_intp dims[2] = { 4, 4 };
+         PyObject *result = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+@@ -335,9 +335,9 @@ template <> struct ScalarTraits<double>
+         return incref(result);
+       }
+       //
+-      //  const Eigen::Transform3d* --> python array (4x4)
++      //  const Eigen::Projective3d* --> python array (4x4)
+       //
+-      static PyObject* convert(const Eigen::Transform3d *trans)
++      static PyObject* convert(const Eigen::Projective3d *trans)
+       {
+         npy_intp dims[2] = { 4, 4 };
+         PyObject *result = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+@@ -356,10 +356,10 @@ template <> struct ScalarTraits<double>
+     Transform3d_to_python_array()
+     {
+       #ifndef WIN32
+-      to_python_converter<Eigen::Transform3d, innerclass>();
++      to_python_converter<Eigen::Projective3d, innerclass>();
+       #endif
+-      to_python_converter<Eigen::Transform3d*, innerclass>();
+-      to_python_converter<const Eigen::Transform3d*, innerclass>();
++      to_python_converter<Eigen::Projective3d*, innerclass>();
++      to_python_converter<const Eigen::Projective3d*, innerclass>();
+     }
+ 
+   };
+@@ -375,13 +375,13 @@ template <> struct ScalarTraits<double>
+       //
+       // used for:
+       //
+-      //  void function(Eigen::Transform3d vec)
+-      //  void function(Eigen::Transform3d & vec)
+-      //  void function(const Eigen::Transform3d & vec)
++      //  void function(Eigen::Projective3d vec)
++      //  void function(Eigen::Projective3d & vec)
++      //  void function(const Eigen::Projective3d & vec)
+       //
+-      converter::registry::push_back( &convertible, &construct, type_id<Eigen::Transform3d>() );
++      converter::registry::push_back( &convertible, &construct, type_id<Eigen::Projective3d>() );
+       
+-      converter::registry::insert( &convert, type_id<Eigen::Transform3d>() );
++      converter::registry::insert( &convert, type_id<Eigen::Projective3d>() );
+     }
+ 
+     static void* convert(PyObject *obj_ptr)
+@@ -399,7 +399,7 @@ template <> struct ScalarTraits<double>
+         throw_error_already_set(); // the 1D array does not have exactly 3 elements
+ 
+       double *values = reinterpret_cast<double*>(array->data);
+-      Eigen::Transform3d *c_obj = new Eigen::Transform3d();
++      Eigen::Projective3d *c_obj = new Eigen::Projective3d();
+       double *dataPtr = c_obj->data();
+ 
+       for (int i = 0; i < 16; ++i)
+@@ -430,7 +430,7 @@ template <> struct ScalarTraits<double>
+       // I think this is a better way to get at the double array, where is this
+       // deleted though? Does Boost::Python do it?
+       double *values = reinterpret_cast<double*>(array->data);
+-      Eigen::Transform3d *storage = new Eigen::Transform3d();
++      Eigen::Projective3d *storage = new Eigen::Projective3d();
+       double *dataPtr = storage->data();
+ 
+       for (int i = 0; i < 16; ++i)
+@@ -465,21 +465,21 @@ class EigenUnitTestHelper
+     void set_vector3d_ptr(Eigen::Vector3d* vec)                 { m_vector3d = *vec; }
+     void set_const_vector3d_ptr(const Eigen::Vector3d* const vec) { m_vector3d = *vec; }
+ 
+-    //Eigen::Transform3d             transform3d()              { return m_transform3d; }
+-    //Eigen::Transform3d&            transform3d_ref()          { return m_transform3d; }
+-    const Eigen::Transform3d&      const_transform3d_ref()    { return m_transform3d; }
+-    Eigen::Transform3d*            transform3d_ptr()          { return &m_transform3d; }
+-    const Eigen::Transform3d*      const_transform3d_ptr()    { return &m_transform3d; }
+-
+-    //void set_transform3d(Eigen::Transform3d vec)                      { m_transform3d = vec; }
+-    //void set_transform3d_ref(Eigen::Transform3d& vec)                 { m_transform3d = vec; }
+-    void set_const_transform3d_ref(const Eigen::Transform3d& vec)     { m_transform3d = vec; }
+-    void set_transform3d_ptr(Eigen::Transform3d* vec)                 { m_transform3d = *vec; }
+-    void set_const_transform3d_ptr(const Eigen::Transform3d* const vec) { m_transform3d = *vec; }
++    //Eigen::Projective3d             transform3d()              { return m_transform3d; }
++    //Eigen::Projective3d&            transform3d_ref()          { return m_transform3d; }
++    const Eigen::Projective3d&      const_transform3d_ref()    { return m_transform3d; }
++    Eigen::Projective3d*            transform3d_ptr()          { return &m_transform3d; }
++    const Eigen::Projective3d*      const_transform3d_ptr()    { return &m_transform3d; }
++
++    //void set_transform3d(Eigen::Projective3d vec)                      { m_transform3d = vec; }
++    //void set_transform3d_ref(Eigen::Projective3d& vec)                 { m_transform3d = vec; }
++    void set_const_transform3d_ref(const Eigen::Projective3d& vec)     { m_transform3d = vec; }
++    void set_transform3d_ptr(Eigen::Projective3d* vec)                 { m_transform3d = *vec; }
++    void set_const_transform3d_ptr(const Eigen::Projective3d* const vec) { m_transform3d = *vec; }
+  
+   private:
+     Eigen::Vector3d m_vector3d;
+-    Eigen::Transform3d m_transform3d;
++    Eigen::Projective3d m_transform3d;
+ 
+ };
+ #endif
+@@ -527,7 +527,7 @@ void export_Eigen()
+   Vector3x_to_python_array<Eigen::Vector3i>();
+   Vector3x_from_python_array<Eigen::Vector3i>();
+ 
+-  // Eigen::Transform3d
++  // Eigen::Projective3d
+   Transform3d_to_python_array();
+   Transform3d_from_python_array();
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/tools/bondcentrictool.cpp
++++ avogadro-1.1.1/libavogadro/src/tools/bondcentrictool.cpp
+@@ -578,8 +578,8 @@ namespace Avogadro {
+ 
+           Vector3d clicked = *m_clickedAtom->pos();
+ 
+-          Vector3d axis = Vector3d(0, 0, ((widget->camera()->modelview() * other).z() >=
+-                (widget->camera()->modelview() * center).z() ? -1 : 1));
++          Vector3d axis = Vector3d(0, 0, (((widget->camera()->modelview()).linear() * other).z() >=
++                ((widget->camera()->modelview()).linear() * center).z() ? -1 : 1));
+ 
+           Vector3d centerProj = widget->camera()->project(center);
+           centerProj -= Vector3d(0,0,centerProj.z());
+@@ -673,8 +673,8 @@ namespace Avogadro {
+ 
+           Vector3d clicked = *m_clickedAtom->pos();
+ 
+-          Vector3d axis = Vector3d(0, 0, ((widget->camera()->modelview() * other).z() >=
+-                (widget->camera()->modelview() * center).z() ? -1 : 1));
++          Vector3d axis = Vector3d(0, 0, ((widget->camera()->modelview().linear() * other).z() >=
++                (widget->camera()->modelview().linear() * center).z() ? -1 : 1));
+ 
+           Vector3d centerProj = widget->camera()->project(center);
+           centerProj -= Vector3d(0,0,centerProj.z());
+@@ -1362,10 +1362,10 @@ namespace Avogadro {
+ 
+     planeVec = length * (planeVec / planeVec.norm());
+ 
+-    Vector3d topLeft = widget->camera()->modelview() * (left + planeVec);
+-    Vector3d topRight = widget->camera()->modelview() * (right + planeVec);
+-    Vector3d botRight = widget->camera()->modelview() * (right - planeVec);
+-    Vector3d botLeft = widget->camera()->modelview() * (left - planeVec);
++    Vector3d topLeft = (widget->camera()->modelview()).linear() * (left + planeVec);
++    Vector3d topRight = (widget->camera()->modelview()).linear() * (right + planeVec);
++    Vector3d botRight = (widget->camera()->modelview()).linear() * (right - planeVec);
++    Vector3d botLeft = (widget->camera()->modelview()).linear() * (left - planeVec);
+ 
+     float alpha = 0.4;
+     double lineWidth = 1.5;
+@@ -1444,10 +1444,10 @@ namespace Avogadro {
+       C = D + ((C-D).normalized() * minWidth);
+     }
+ 
+-    Vector3d topLeft = widget->camera()->modelview() * D;
+-    Vector3d topRight = widget->camera()->modelview() * C;
+-    Vector3d botRight = widget->camera()->modelview() * B;
+-    Vector3d botLeft = widget->camera()->modelview() * A;
++    Vector3d topLeft = widget->camera()->modelview().linear() * D;
++    Vector3d topRight = widget->camera()->modelview().linear() * C;
++    Vector3d botRight = widget->camera()->modelview().linear() * B;
++    Vector3d botLeft = widget->camera()->modelview().linear() * A;
+ 
+     float alpha = 0.4;
+     double lineWidth = 1.5;
+@@ -1506,12 +1506,12 @@ namespace Avogadro {
+       Vector3d positionVector)
+   {
+     //Rotate skeleton around a particular axis and center point
+-    Eigen::Transform3d rotation;
++    Eigen::Projective3d rotation;
+     rotation = Eigen::AngleAxisd(angle, rotationVector);
+     rotation.pretranslate(centerVector);
+     rotation.translate(-centerVector);
+ 
+-    return rotation*positionVector;
++    return rotation.linear()*positionVector;
+   }
+ 
+   // ##########  showAnglesChanged  ##########
+--- avogadro-1.1.1.orig/libavogadro/src/tools/manipulatetool.cpp
++++ avogadro-1.1.1/libavogadro/src/tools/manipulatetool.cpp
+@@ -40,7 +40,7 @@
+ #include <QAbstractButton>
+ 
+ using Eigen::Vector3d;
+-using Eigen::Transform3d;
++using Eigen::Projective3d;
+ using Eigen::AngleAxisd;
+ 
+ namespace Avogadro {
+@@ -138,7 +138,7 @@ namespace Avogadro {
+     double yRotate = m_settingsWidget->yRotateSpinBox->value() * DEG_TO_RAD;
+     double zRotate = m_settingsWidget->zRotateSpinBox->value() * DEG_TO_RAD;
+ 
+-    Eigen::Transform3d rotation;
++    Eigen::Projective3d rotation;
+     rotation.matrix().setIdentity();
+     rotation.translation() = center;
+     rotation.rotate(AngleAxisd(xRotate, Vector3d::UnitX())
+@@ -152,12 +152,12 @@ namespace Avogadro {
+         if (p->type() == Primitive::AtomType) {
+           Atom *atom = static_cast<Atom*>(p);
+           tempPos = translate + *(atom->pos());
+-          atom->setPos(rotation * tempPos);
++          atom->setPos(rotation.linear() * tempPos);
+         }
+     } else {
+       foreach(Atom *atom, widget->molecule()->atoms()) {
+         tempPos = translate + *(atom->pos());
+-        atom->setPos(rotation * tempPos);
++        atom->setPos(rotation.linear() * tempPos);
+       }
+     }
+ 
+@@ -199,7 +199,7 @@ namespace Avogadro {
+     widget->setCursor(Qt::SizeVerCursor);
+ 
+     // Move the selected atom(s) in to or out of the screen
+-    Vector3d transformedGoal = widget->camera()->modelview() * *goal;
++    Vector3d transformedGoal = widget->camera()->modelview().linear() * *goal;
+     double distanceToGoal = transformedGoal.norm();
+ 
+     double t = ZOOM_SPEED * delta;
+@@ -255,7 +255,7 @@ namespace Avogadro {
+ 
+     // Rotate the selected atoms about the center
+     // rotate only selected primitives
+-    Transform3d fragmentRotation;
++    Eigen::Projective3d fragmentRotation;
+     fragmentRotation.matrix().setIdentity();
+     fragmentRotation.translation() = *center;
+     fragmentRotation.rotate(
+@@ -266,7 +266,7 @@ namespace Avogadro {
+ 
+     foreach(Primitive *p, widget->selectedPrimitives())
+       if (p->type() == Primitive::AtomType)
+-        static_cast<Atom *>(p)->setPos(fragmentRotation * *static_cast<Atom *>(p)->pos());
++        static_cast<Atom *>(p)->setPos(fragmentRotation.linear() * *static_cast<Atom *>(p)->pos());
+     widget->molecule()->update();
+   }
+ 
+@@ -274,7 +274,7 @@ namespace Avogadro {
+                             double delta) const
+   {
+     // Tilt the selected atoms about the center
+-    Transform3d fragmentRotation;
++    Eigen::Projective3d fragmentRotation;
+     fragmentRotation.matrix().setIdentity();
+     fragmentRotation.translation() = *center;
+     fragmentRotation.rotate(AngleAxisd(delta * ROTATION_SPEED, widget->camera()->backTransformedZAxis()));
+@@ -282,7 +282,7 @@ namespace Avogadro {
+ 
+     foreach(Primitive *p, widget->selectedPrimitives())
+       if (p->type() == Primitive::AtomType)
+-        static_cast<Atom *>(p)->setPos(fragmentRotation * *static_cast<Atom *>(p)->pos());
++        static_cast<Atom *>(p)->setPos(fragmentRotation.linear() * *static_cast<Atom *>(p)->pos());
+     widget->molecule()->update();
+   }
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/tools/navigatetool.cpp
++++ avogadro-1.1.1/libavogadro/src/tools/navigatetool.cpp
+@@ -92,7 +92,7 @@ namespace Avogadro {
+       double sumOfWeights = 0.;
+       QList<Atom*> atoms = widget->molecule()->atoms();
+       foreach (Atom *atom, atoms) {
+-        Vector3d transformedAtomPos = widget->camera()->modelview() * *atom->pos();
++        Vector3d transformedAtomPos = (widget->camera()->modelview()).linear() * (*atom->pos());
+         double atomDistance = transformedAtomPos.norm();
+         double dot = transformedAtomPos.z() / atomDistance;
+         double weight = exp(-30. * (1. + dot));
+--- avogadro-1.1.1.orig/libavogadro/src/tools/skeletontree.cpp
++++ avogadro-1.1.1/libavogadro/src/tools/skeletontree.cpp
+@@ -25,6 +25,7 @@
+  **********************************************************************/
+ 
+ #include "skeletontree.h"
++#include <iostream>
+ 
+ #include <avogadro/atom.h>
+ #include <avogadro/bond.h>
+@@ -221,7 +222,7 @@ namespace Avogadro {
+   {
+     if (m_rootNode) {
+       //Rotate skeleton around a particular axis and center point
+-      Eigen::Transform3d rotation;
++      Eigen::Projective3d rotation;
+       rotation = Eigen::AngleAxisd(angle, rotationAxis);
+       rotation.pretranslate(centerVector);
+       rotation.translate(-centerVector);
+@@ -248,11 +249,11 @@ namespace Avogadro {
+   // ##########  recursiveRotate  ##########
+ 
+   void SkeletonTree::recursiveRotate(Node* n,
+-                                     const Eigen::Transform3d &rotationMatrix)
++                                     const Eigen::Projective3d &rotationMatrix)
+   {
+     // Update the root node with the new position
+     Atom* a = n->atom();
+-    a->setPos(rotationMatrix * (*a->pos()));
++    a->setPos(rotationMatrix.linear() * (*a->pos()));
+     a->update();
+ 
+     // Now update the children
+@@ -270,10 +271,10 @@ namespace Avogadro {
+       printSkeleton(node);
+ 
+     Atom* a = n->atom();
+-    cout << a->pos()->x() << "," << a->pos()->y()<< ","<<a->pos()->z() << endl;
++    std::cout << a->pos()->x() << "," << a->pos()->y()<< ","<<a->pos()->z() << endl;
+ 
+     if (!n->isLeaf()) {
+-      cout << "-------------" << endl;
++      std::cout << "-------------" << endl;
+     }
+   }
+ 
+--- avogadro-1.1.1.orig/libavogadro/src/tools/skeletontree.h
++++ avogadro-1.1.1/libavogadro/src/tools/skeletontree.h
+@@ -228,7 +228,7 @@ namespace Avogadro {
+        * @param centerVector Center location to rotate around.
+        */
+       void recursiveRotate(Node* n,
+-                           const Eigen::Transform3d &rotationMatrix);
++                           const Eigen::Projective3d &rotationMatrix);
+ 
+   };
+ } // End namespace Avogadro
+--- avogadro-1.1.1.orig/libavogadro/tests/CMakeLists.txt
++++ avogadro-1.1.1/libavogadro/tests/CMakeLists.txt
+@@ -13,7 +13,7 @@ set_directory_properties(PROPERTIES INCL
+ include_directories(
+   ${CMAKE_SOURCE_DIR}
+   ${CMAKE_CURRENT_BINARY_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+   ${BOOST_PYTHON_INCLUDES}
+   ${PYTHON_INCLUDE_PATH}

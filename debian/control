@@ -6,7 +6,7 @@ Uploaders: Michael Banck <mbanck@debian.org>
 Build-Depends: cmake (>> 2.6.0),
                debhelper (>> 7.0.50~),
                libboost-python-dev,
-               libeigen2-dev (>> 2.0~beta6),
+               libeigen3-dev,
                libgl2ps-dev,
                libglew-dev,
                libopenbabel-dev (>> 2.2.0),
@@ -83,6 +83,8 @@ Depends: libavogadro1 (= ${binary:Version}),
          libglew-dev,
          libopenbabel-dev (>= 2.2.0),
          libqt4-dev (>= 4.4.0),
+         libpython2.7-dev,
+         libboost-python-dev,
          ${misc:Depends}
 Description: Molecular Graphics and Modelling System (development files)
  Avogadro is a molecular graphics and modelling system targeted at small
