@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export CFLAGS   := $(CPPFLAGS) $(shell dpkg-buildflags --get CFLAGS)
+export CXXFLAGS := $(CPPFLAGS) $(shell dpkg-buildflags --get CXXFLAGS)
+export LDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS) -Wl,-z,defs -Wl,--as-needed
+
+DEB_HOST_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+PYTHON_VERSION     := $(shell pyversions -dv)
+
+ifneq ($(wildcard /usr/lib/$(DEB_HOST_MULTIARCH)/libpython$(PYTHON_VERSION).so),)
+PYTHON_LIBRARY=/usr/lib/$(DEB_HOST_MULTIARCH)/libpython$(PYTHON_VERSION).so
+else
+PYTHON_LIBRARY=/usr/lib/libpython$(PYTHON_VERSION).so
+endif
+
+%:
+	dh $@ --with python2 --parallel
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	-DENABLE_GLSL=ON \
+	-DENABLE_RPATH=OFF \
+	-DENABLE_UPDATE_CHECKER=OFF \
+	-DPYTHON_EXECUTABLE=/usr/bin/python$(PYTHON_VERSION) \
+	-DPYTHON_LIBRARY=$(PYTHON_LIBRARY) \
+	-DPYTHON_INCLUDE_DIR=/usr/include/python$(PYTHON_VERSION)/
+
+override_dh_install:
+	dh_install --list-missing
+
+override_dh_clean:
+	dh_clean conf.log conf.pri
+
+override_dh_python2:
+	dh_python2 -ppython-avogadro
+	dh_numpy -ppython-avogadro
+	dh_sip

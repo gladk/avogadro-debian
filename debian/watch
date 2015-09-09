@@ -1,0 +1,4 @@
+# See uscan(1) for format
+
+version=3
+http://sf.net/avogadro/avogadro-(\d+)\.([02468]\d*)\.(\d+)\.tar\.(?:bz2|gz)

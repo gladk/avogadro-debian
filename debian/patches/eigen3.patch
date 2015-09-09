@@ -1,0 +1,101 @@
+Description: migrate from eigen2 to eigen3
+Applied-Upstream: https://github.com/cryos/avogadro/commit/3cc14da0f92e6ea0bd763e97b5711c4afe56a7cd
+Author: Anton Gladky <gladk@debian.org>
+Bug-Debian: http://bugs.debian.org/728610
+Last-Update: 2013-11-03
+
+--- a/avogadro.prf.in
++++ b/avogadro.prf.in
+@@ -3,6 +3,6 @@
+ INCLUDEPATH += . \
+                $$AVOGADRO_PREFIX/include \
+                @OPENBABEL2_INCLUDE_DIR@ \
+-               @EIGEN2_INCLUDE_DIR@
++               @EIGEN3_INCLUDE_DIR@
+ LIBS += -L$$AVOGADRO_PREFIX/lib -lavogadro \
+         -L$$OPENBABEL_PREFIX/lib -lopenbabel
+--- a/avogadro/src/CMakeLists.txt
++++ b/avogadro/src/CMakeLists.txt
+@@ -19,7 +19,7 @@
+ include_directories(
+   ${CMAKE_CURRENT_SOURCE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${CMAKE_CURRENT_BINARY_DIR}
+ )
+ 
+--- a/cmake/modules/AvogadroUse.cmake
++++ b/cmake/modules/AvogadroUse.cmake
+@@ -16,8 +16,9 @@
+ 
+ # Add the Avogadro modules directory to the CMake module path
+ set(CMAKE_MODULE_PATH ${Avogadro_PLUGIN_DIR}/cmake ${CMAKE_MODULE_PATH})
+-find_package(Eigen2 REQUIRED)
+-include_directories(${EIGEN2_INCLUDE_DIR})
++find_package(Eigen3 REQUIRED)
++include_directories(${EIGEN3_INCLUDE_DIR})
++add_definitions(-DEIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API)
+ if(Avogadro_ENABLE_GLSL)
+   find_package(GLEW)
+   if(GLEW_FOUND)
+--- a/libavogadro/src/CMakeLists.txt
++++ b/libavogadro/src/CMakeLists.txt
+@@ -14,7 +14,7 @@
+   "${libavogadro_BINARY_DIR}/include;${tmp_include_dirs}")
+ include_directories(
+   ${CMAKE_CURRENT_BINARY_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+ )
+ 
+--- a/libavogadro/tests/CMakeLists.txt
++++ b/libavogadro/tests/CMakeLists.txt
+@@ -14,7 +14,7 @@
+ include_directories(
+   ${CMAKE_SOURCE_DIR}
+   ${CMAKE_CURRENT_BINARY_DIR}
+-  ${EIGEN2_INCLUDE_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   ${OPENBABEL2_INCLUDE_DIR}
+   ${BOOST_PYTHON_INCLUDES}
+   ${PYTHON_INCLUDE_PATH}
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -192,7 +192,7 @@
+ find_package(Qt4 REQUIRED) # find and setup Qt4 for this project
+ find_package(OpenGL REQUIRED) # find and setup OpenGL
+ find_package(Linguist) # find and setup Linguist
+-find_package(Eigen2 REQUIRED) # find and setup Eigen2
++find_package(Eigen3 REQUIRED) # find and setup Eigen3
+ find_package(ZLIB REQUIRED)
+ find_package(OpenBabel2 REQUIRED) # find and setup OpenBabel
+ 
+@@ -427,7 +427,6 @@
+ 
+ # Install the find modules we require to be present
+ install(FILES
+-  "${CMAKE_MODULE_PATH}/FindEigen2.cmake"
+   "${CMAKE_MODULE_PATH}/FindGLEW.cmake"
+   DESTINATION "${Avogadro_PLUGIN_INSTALL_DIR}/cmake")
+ 
+--- a/libavogadro/CMakeLists.txt
++++ b/libavogadro/CMakeLists.txt
+@@ -3,6 +3,7 @@
+ # We probably want to adopt the libtool scheme once we hit 1.0.0
+ set(SOVERSION 0)
+ 
++add_definitions(-DEIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API)
+ if (WIN32)
+   add_definitions( -DWIN32 )
+   # add definitions for OB in WIN32
+--- a/avogadro/CMakeLists.txt
++++ b/avogadro/CMakeLists.txt
+@@ -6,5 +6,6 @@
+   add_definitions( -DUSING_OBDLL -DUSING_DYNAMIC_LIBS )
+ endif (WIN32)
+ 
++add_definitions(-DEIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API)
+ # tell cmake to process CMakeLists.txt in that subdirectory
+ add_subdirectory(src)
