@@ -113,13 +113,14 @@ namespace Avogadro {
 
   // ##########  Constructor  ##########
 
-  SkeletonTree::SkeletonTree() {}
+  SkeletonTree::SkeletonTree() : m_rootNode(0) {}
 
   // ##########  Destructor  ##########
 
   SkeletonTree::~SkeletonTree()
   {
-    delete m_rootNode;
+    if (m_rootNode)
+      delete m_rootNode;
   }
 
   // ##########  rootAtom  ##########
@@ -140,8 +141,9 @@ namespace Avogadro {
 
   void SkeletonTree::populate(Atom *rootAtom, Bond *rootBond, Molecule* molecule)
   {
-    if (!m_rootNode) {
+    if (m_rootNode) {
       delete m_rootNode;
+      m_rootNode = 0;
     }
 
     m_rootNode = new Node(rootAtom);

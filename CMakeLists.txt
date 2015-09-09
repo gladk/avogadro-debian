@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.9)
 project(Avogadro) # the name of your project
 
 # The Avogadro version number, currently used by the Avogadro library too
 set(Avogadro_VERSION_MAJOR 1)
 set(Avogadro_VERSION_MINOR 1)
-set(Avogadro_VERSION_PATCH 0)
+set(Avogadro_VERSION_PATCH 1)
 set(Avogadro_VERSION "${Avogadro_VERSION_MAJOR}.${Avogadro_VERSION_MINOR}")
 set(Avogadro_VERSION_FULL "${Avogadro_VERSION}.${Avogadro_VERSION_PATCH}")
 
@@ -229,7 +229,16 @@ find_package(Linguist) # find and setup Linguist
 if(NOT Linguist_FOUND)
   message(WARNING " Qt4 Linguist not found, please install it if you want Avogadro translations")
 endif()
-find_package(Eigen2 REQUIRED) # find and setup Eigen2
+
+find_package(Eigen3) # find and setup Eigen3 if available
+if(NOT EIGEN3_FOUND)
+   message(STATUS "Cannot find Eigen3, trying Eigen2")
+   find_package(Eigen2 REQUIRED) # Some version is required
+else()
+# Use Stage10 Eigen3 support
+   set (EIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API TRUE)
+endif()
+
 find_package(ZLIB REQUIRED)
 find_package(OpenBabel2 REQUIRED) # find and setup OpenBabel
 
@@ -460,6 +469,7 @@ install(FILES
 # Install the find modules we require to be present
 install(FILES
   "${CMAKE_MODULE_PATH}/FindEigen2.cmake"
+  "${CMAKE_MODULE_PATH}/FindEigen3.cmake"
   "${CMAKE_MODULE_PATH}/FindGLEW.cmake"
   DESTINATION "${Avogadro_PLUGIN_INSTALL_DIR}/cmake")
 

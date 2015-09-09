@@ -28,6 +28,7 @@
 #include <avogadro/primitivelist.h>
 
 #include <openbabel/obconversion.h>
+
 #include <openbabel/conformersearch.h>
 
 #include <QProgressDialog>

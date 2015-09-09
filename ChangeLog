@@ -1,3 +1,1776 @@
+2013-12-02  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I05659554de4b5c7d74bfeba1dbc3e80f2db021ca
+
+2013-11-25  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ia653309d4e4a71dd956d6855d389f59158dc1a1a
+
+2013-11-18  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: If360428adfdb6da7a448f3782ba2f9c58d0bff1a
+
+2013-11-11  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I4be2a310c7cc070699ea94c9be87de25d98c542d
+
+2013-11-04  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: If3080e7ae3cd28b1d3f5638b80393ddbd2b8415c
+
+2013-10-29  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * libavogadro/src/extensions/gl2ps/gl2ps.c,
+  libavogadro/src/extensions/gl2ps/gl2ps.h,
+  libavogadro/src/extensions/gl2ps/gl2ps.pdf,
+  libavogadro/src/extensions/gl2ps/gl2psTest.c,
+  libavogadro/src/extensions/gl2ps/gl2psTestSimple.c: Import gl2ps 1.3.8 for
+  upcoming Avogadro bugfix release.  Change-Id:
+  I5fd18a6dc1599cf868336dd1733d0fc684e9dcb2
+
+2013-10-28  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I3d2076c510d9cb1728ea9fc0617d875536f98c54
+
+2013-10-21  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I2b57d2dbef208d93aacae8586098fd7dff4b1797
+
+2013-10-14  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I8c2f421dd7c47847f54da276cf360372b7614109
+
+2013-10-07  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I20a5041d0427424e53e0eb13f33fa85f71d7d525
+
+2013-09-30  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * CMakeLists.txt, INSTALL, cmake/modules/FindEigen2.cmake,
+  cmake/modules/FindEigen3.cmake, libavogadro/src/config.h.in: Use Eigen3 in
+  preference to Eigen2 if found, but in support mode.  Eigen3 allows a staged
+  migration to the new API. This patch enables building with either Eigen2 or
+  Eigen3 with complete compatibility. Future versions of Avogadro can use
+  Eigen3 directly. In the meantime, both version 2.x and 3.x are now supported.
+   Change-Id: Ibae3a7ca719124af73f52a19244beb9a2cbf180e
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Idba55093eec7517844553d8e39cd16d1cdadbde8
+
+2013-09-23  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Iec7ff4cd3c3254af406730ff49ce60e7b9c36e03
+
+2013-09-21  Marcus D. Hanwell <marcus.hanwell@kitware.com>
+
+  * libavogadro/src/extensions/forcefieldextension.cpp,
+  libavogadro/src/extensions/qtaim/qtaimlsodaintegrator.h,
+  libavogadro/src/extensions/qtaim/qtaimodeintegrator.h,
+  libavogadro/src/glwidget.h: Removed unguarded GCC pragma calls  These were
+  introduced as part of a larger cleanup, and should not be used unguarded.
+  Reverting these, but leaving the rest of the changes in place.  Change-Id:
+  Iea444b14e5f82663f7f3a54cebc9e643def7f322
+
+2013-09-20  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * libavogadro/src/extensions/propmodel.cpp,
+  libavogadro/src/tools/skeletontree.cpp: Fix crash when setting torsion angles
+  PR#666.  Crash from incorrect memory access with SkeletonTree class. Make
+  sure root node is initialized to NULL to avoid deleting. Also make sure to
+  invalidate property table cache. Now setting a torsion rotates the angle and
+  properly updates data.  Change-Id: I667cd3ac21d6cb59486483e6752210d5d393722d
+
+2013-09-20  Marcus D. Hanwell <marcus.hanwell@kitware.com>
+
+  * libavogadro/src/extensions/CMakeLists.txt,
+  .../src/extensions/qtaim/qtaimmathutilities.cpp,
+  .../src/extensions/qtaim/qtaimmathutilities.h: Make QTAIM compile and work on
+  Windows  Rewrote the math utilities for QTAIM to be simple functions in a
+  namespace, pass their arguments by reference and adjusted style to be a
+  little more consistent.  Change-Id: I11737cb521359c1e038930f054630419d2309a30
+
+2013-08-11  Andreas Schwab <schwab@linux-m68k.org>
+
+  * libavogadro/src/extensions/crystallography/spglib/CMakeLists.txt,
+  libavogadro/src/extensions/swcntbuilder/tubegen/CMakeLists.txt: Properly set
+  PIC flag for libspglib and libtubegen   Change-Id:
+  Ibe8f103fe3a6bfe0ad7c72c6cdfe37d0c2535899
+
+2013-09-19  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * testfiles/methane.nwo, testfiles/methanol.nwo: Applied updated NWChem test
+  files using v6.0  Contributed by Michael Banck to clarify distribution. Files
+  remove strongly-worded statement from non-open NWChem.  Change-Id:
+  I6ab01e496f05a8116e73e95e0a849c89b301db83
+
+2013-08-14  Julien Nabet <serval2412@yahoo.fr>
+
+  * avogadro/src/mainwindow.cpp, avogadro/src/pluginitemmodel.cpp,
+  libavogadro/src/colors/smartscolor.cpp,
+  .../extensions/qtaim/qtaimcriticalpointlocator.cpp,
+  libavogadro/src/extensions/qtaim/qtaimcubature.cpp,
+  .../src/extensions/qtaim/qtaimlsodaintegrator.cpp,
+  .../src/extensions/qtaim/qtaimlsodaintegrator.h,
+  .../src/extensions/qtaim/qtaimodeintegrator.h,
+  .../src/extensions/quantuminput/gamessinputdata.cpp,
+  .../extensions/quantuminput/molproinputdialog.cpp,
+  .../src/extensions/surfaces/orbitalextension.cpp,
+  libavogadro/src/tools/skeletontree.cpp: Fix warnings (final part)  Avogadro
+  builds ok with -Werror with gcc 4.7.3  Change-Id:
+  I524764748b4acd83a48cdb6a3a611e0d51ccb389
+
+2013-08-13  Julien Nabet <serval2412@yahoo.fr>
+
+  * libavogadro/src/extensions/cartesianextension.cpp,
+  .../src/extensions/crystallography/crystallographyextension.cpp,
+  libavogadro/src/extensions/forcefieldextension.cpp,
+  libavogadro/src/glwidget.h, libavogadro/src/pluginmanager.cpp,
+  libavogadro/src/tools/aligntool.cpp, libavogadro/src/tools/autoopttool.cpp,
+  libavogadro/src/tools/bondcentrictool.h,
+  libavogadro/src/tools/clickmeasuretool.h, libavogadro/src/tools/drawtool.h,
+  libavogadro/src/tools/selectrotatetool.cpp: Fix some warnings part2 
+  Change-Id: Ic70ec3d18e999d05292a84e5df614aaec5d97cd6
+
+2013-08-07  Julien Nabet <serval2412@yahoo.fr>
+
+  * .../extensions/surfaces/openqube/gamessukout.cpp,
+  .../src/extensions/surfaces/openqube/gamessus.cpp,
+  .../src/extensions/surfaces/openqube/molden.cpp,
+  .../src/extensions/surfaces/openqube/mopacaux.cpp,
+  libavogadro/src/glwidget.cpp, libavogadro/src/molecule.cpp,
+  libavogadro/src/plotwidget.cpp: Fix some warnings  Change-Id:
+  I37005da0d650744b0811c6d98d62e99d0dc738f6
+
+2013-08-03  Julien Nabet <serval2412@yahoo.fr>
+
+  * libavogadro/src/extensions/qtaim/qtaimcubature.cpp,
+  .../extensions/quantuminput/gamessinputdialog.cpp: Cppcheck: fix duplicate
+  branches for if and else  Change-Id:
+  Idcadcca42053b05e5986c8bbc4f1d3fa671fb025
+
+  * avogadro/src/pluginsettings.cpp, avogadro/src/projecttreeeditor.cpp,
+  libavogadro/src/extensions/povpainter.cpp,
+  libavogadro/src/extensions/quantuminput/gamessinputdata.cpp,
+  libavogadro/src/extensions/surfaces/openqube/slaterset.cpp,
+  libavogadro/src/glwidget.cpp: Cppcheck: fix some reassignments  TODO:
+  src/extensions/surfaces/openqube/gaussianset.cpp needs to be changed. Indeed,
+  from line 356 there's a wrong use of switch Moreover indexMO is assigned but
+  not used  Change-Id: Ie69082b43a72f8b138af2feba406a2b935e5bcc6
+
+2013-08-02  Julien Nabet <serval2412@yahoo.fr>
+
+  * .../src/extensions/quantuminput/gamessextension.cpp,
+  .../src/extensions/quantuminput/gamessinputdata.cpp,
+  libavogadro/src/primitivelist.h: Cppcheck: fix Prefer prefix ++/-- operators
+  for non-primitive type  Change-Id: I9345e04ca9538028a340fba5bfcf2e58a9825bf9
+
+2013-04-08  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I8bde8aadd032497f211acfcc07b2f64d37e7a59b
+
+2013-04-01  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ic1198f50861ab4701335108ccc632cd4d4487ad0
+
+2013-03-25  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ie932a8f5a74d4a183e41ac904ab5af25648fb54f
+
+2013-03-18  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I6163f50df70c0c5b19a617d22f8442a529b3967b
+
+2013-03-11  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I4b9bedebe85c92c33fc52e5c31e198cc258424db
+
+2013-03-04  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ib50256b8c3f8e9991b4c31c6fee678b476893476
+
+2013-02-25  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I2520f8078592426318785ff421adb6c10b1dfdc0
+
+2013-02-18  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ifa1679c95c715e611260873f951a3a8d227bbe51
+
+2013-02-11  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I7361983a5ffd57cce38bd9eaf535aa38f331aa0b
+
+2013-02-04  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Iedd6b7f68b4f3e2c2958dfaee76ca4db8f918312
+
+2013-01-28  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I147b3cac87ea3904bd76f9b0547f7f0654037e81
+
+2013-01-21  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I393f81dd671a4e238b9905134a24642ecaee6440
+
+2013-01-14  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I7878764b0386a68ccd42344e4884adef15392d78
+
+2013-01-07  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I4588704dfe775353db7440324da624085298b52d
+
+2012-12-31  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I762a4cc98e82404c5815962090db40fcae8c2374
+
+2012-12-24  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I84f7822e51324952a35bda86b0e291c9ada87818
+
+2012-05-31  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * avogadro/src/mainwindow.cpp, avogadro/src/mainwindow.h,
+  avogadro/src/mainwindow.ui: Add a new "Copy As" SMILES or InChI command.  The
+  SMILES, in particular, is useful for the new SMILES-based polymer builder. 
+  Change-Id: I532923b78ca7e3c7334a7ea3bc7424d1cfd977dd
+
+2012-12-17  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Icf387412235fd9ed7b29b5ecfa3db669034cfc9c
+
+2012-12-12  Matthew Kennedy <matthew.kennedy.6@gmail.com>
+
+  * .../src/extensions/quantuminput/CMakeLists.txt,
+  .../extensions/quantuminput/inputfileextension.cpp,
+  .../extensions/quantuminput/psi4inputdialog.cpp,
+  .../src/extensions/quantuminput/psi4inputdialog.h,
+  .../src/extensions/quantuminput/psi4inputdialog.ui: PSI4 Interface added. 
+  Change-Id: I215c0d9f5f9b2e4c95790d2c278ff4f9ddb7aa75
+
+2012-12-10  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I311675a1b101a3eeb779ed85f1f83531a2c7bc24
+
+2012-12-03  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: If65fc6ab1c6b2251396d9110115d0c38a7224da5
+
+2012-11-26  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I4248d48233a9afb8e960848d49ca26a70680da9f
+
+2012-11-19  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I823eb6c0c45253d127ac80ce0a7c2d65b0992ea6
+
+2012-11-12  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: If2dbf0997c9adbb158ca937ee6c2a9a781d174c8
+
+2012-11-05  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I7ab3bf618b12624b13c21be54a2e4365c83d0a6d
+
+2012-10-29  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I4f2bf5b08cceb085273610cafe6e80651f2ee4f9
+
+2012-10-22  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I5611339f755c84cf8a78299b61bd652eedaae738
+
+2012-10-15  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I1b69d3122b0f2c63c3fb94c2e19e249cc26e14ab
+
+2012-10-08  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I2476b9504742fc8311ce12909d1a7c2d0f5fa4ad
+
+2012-10-01  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I9beee811d9723dfae5def9e6f1199306722d0418
+
+2012-09-24  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I1d58396d32862747bd76b8d99eaefaff9145610d
+
+2012-09-17  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/et.po,
+  i18n/avogadro/eu.po, i18n/avogadro/fi.po, i18n/avogadro/fr.po,
+  i18n/avogadro/gl.po, i18n/avogadro/he.po, i18n/avogadro/hi.po,
+  i18n/avogadro/hr.po, i18n/avogadro/hu.po, i18n/avogadro/id.po,
+  i18n/avogadro/it.po, i18n/avogadro/ja.po, i18n/avogadro/kn.po,
+  i18n/avogadro/ko.po, i18n/avogadro/ms.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sl.po, i18n/avogadro/sq.po,
+  i18n/avogadro/sr.po, i18n/avogadro/sv.po, i18n/avogadro/ta.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/et.po,
+  i18n/libavogadro/eu.po, i18n/libavogadro/fi.po, i18n/libavogadro/fr.po,
+  i18n/libavogadro/gl.po, i18n/libavogadro/he.po, i18n/libavogadro/hi.po,
+  i18n/libavogadro/hu.po, i18n/libavogadro/id.po, i18n/libavogadro/it.po,
+  i18n/libavogadro/ja.po, i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/ms.po,
+  i18n/libavogadro/nb.po, i18n/libavogadro/nl.po, i18n/libavogadro/oc.po,
+  i18n/libavogadro/pl.po, i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po,
+  i18n/libavogadro/ru.po, i18n/libavogadro/sk.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Idc8f8ad61c1f600e9502a28952f4c0098248eec4
+
+2012-09-11  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/et.po, i18n/avogadro/hi.po, i18n/avogadro/ms.po,
+  i18n/avogadro/sl.po, i18n/avogadro/sq.po, i18n/avogadro/ta.po,
+  i18n/libavogadro/et.po, i18n/libavogadro/ms.po, i18n/libavogadro/sl.po,
+  i18n/libavogadro/sq.po: New translation PO files from Launchpad.  Change-Id:
+  I60e26bffa4f95968a2f47e4138bd5e8753495276
+
+2012-09-10  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/eu.po,
+  i18n/avogadro/fi.po, i18n/avogadro/fr.po, i18n/avogadro/gl.po,
+  i18n/avogadro/he.po, i18n/avogadro/hr.po, i18n/avogadro/hu.po,
+  i18n/avogadro/id.po, i18n/avogadro/it.po, i18n/avogadro/ja.po,
+  i18n/avogadro/kn.po, i18n/avogadro/ko.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sr.po, i18n/avogadro/sv.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/eu.po,
+  i18n/libavogadro/fi.po, i18n/libavogadro/fr.po, i18n/libavogadro/gl.po,
+  i18n/libavogadro/he.po, i18n/libavogadro/hi.po, i18n/libavogadro/hu.po,
+  i18n/libavogadro/id.po, i18n/libavogadro/it.po, i18n/libavogadro/ja.po,
+  i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/nb.po,
+  i18n/libavogadro/nl.po, i18n/libavogadro/oc.po, i18n/libavogadro/pl.po,
+  i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po, i18n/libavogadro/ru.po,
+  i18n/libavogadro/sk.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: Ie39643ae96e28879b4505e0e972f05da89ca5b7c
+
+2012-09-03  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
+  i18n/avogadro/bg.po, i18n/avogadro/ca.po, i18n/avogadro/ca@valencia.po,
+  i18n/avogadro/cs.po, i18n/avogadro/da.po, i18n/avogadro/de.po,
+  i18n/avogadro/el.po, i18n/avogadro/en_AU.po, i18n/avogadro/en_CA.po,
+  i18n/avogadro/en_GB.po, i18n/avogadro/es.po, i18n/avogadro/eu.po,
+  i18n/avogadro/fi.po, i18n/avogadro/fr.po, i18n/avogadro/gl.po,
+  i18n/avogadro/he.po, i18n/avogadro/hr.po, i18n/avogadro/hu.po,
+  i18n/avogadro/id.po, i18n/avogadro/it.po, i18n/avogadro/ja.po,
+  i18n/avogadro/kn.po, i18n/avogadro/ko.po, i18n/avogadro/nb.po,
+  i18n/avogadro/nl.po, i18n/avogadro/oc.po, i18n/avogadro/pl.po,
+  i18n/avogadro/pt.po, i18n/avogadro/pt_BR.po, i18n/avogadro/ru.po,
+  i18n/avogadro/sk.po, i18n/avogadro/sr.po, i18n/avogadro/sv.po,
+  i18n/avogadro/th.po, i18n/avogadro/tr.po, i18n/avogadro/ug.po,
+  i18n/avogadro/uk.po, i18n/avogadro/vi.po, i18n/avogadro/zh_CN.po,
+  i18n/avogadro/zh_TW.po, i18n/libavogadro/ar.po, i18n/libavogadro/bg.po,
+  i18n/libavogadro/bs.po, i18n/libavogadro/ca.po,
+  i18n/libavogadro/ca@valencia.po, i18n/libavogadro/cs.po,
+  i18n/libavogadro/da.po, i18n/libavogadro/de.po, i18n/libavogadro/el.po,
+  i18n/libavogadro/en_AU.po, i18n/libavogadro/en_CA.po,
+  i18n/libavogadro/en_GB.po, i18n/libavogadro/es.po, i18n/libavogadro/eu.po,
+  i18n/libavogadro/fi.po, i18n/libavogadro/fr.po, i18n/libavogadro/gl.po,
+  i18n/libavogadro/he.po, i18n/libavogadro/hi.po, i18n/libavogadro/hu.po,
+  i18n/libavogadro/id.po, i18n/libavogadro/it.po, i18n/libavogadro/ja.po,
+  i18n/libavogadro/kn.po, i18n/libavogadro/ko.po,
+  i18n/libavogadro/libavogadro.pot, i18n/libavogadro/nb.po,
+  i18n/libavogadro/nl.po, i18n/libavogadro/oc.po, i18n/libavogadro/pl.po,
+  i18n/libavogadro/pt.po, i18n/libavogadro/pt_BR.po, i18n/libavogadro/ru.po,
+  i18n/libavogadro/sk.po, i18n/libavogadro/sr.po, i18n/libavogadro/sv.po,
+  i18n/libavogadro/tr.po, i18n/libavogadro/ug.po, i18n/libavogadro/uk.po,
+  i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
+  Automated update of translation templates (POT) using latest strings. 
+  Change-Id: I67b31c4793b67436ccb8ea141158bf3dccd0c7c9
+
 2012-08-27  Geoff Hutchison <geoff.hutchison@gmail.com>
 
   * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
@@ -362,6 +2135,19 @@
   (B2H6), C4H4, and HCO2. These files will be used for a tutorial.  Change-Id:
   I0489ea1b23ea4683596069bd219ef8cb3c9874d1
 
+2011-12-22  Albert DeFusco <defusco@pitt.edu>
+
+  * .../src/extensions/quantuminput/CMakeLists.txt,
+  .../extensions/quantuminput/inputfileextension.cpp,
+  .../extensions/quantuminput/lammpsinputdialog.cpp,
+  .../extensions/quantuminput/lammpsinputdialog.h,
+  .../extensions/quantuminput/lammpsinputdialog.ui: simple lammps input
+  generator for water  This input generator along with the OpenBabel lmpdat
+  format can be used to create input files for MD simulations.  The SPC and
+  SPC/E water models are programmed.  J. Phys. Chem. A, 2001, 105 (43), pp
+  9954–9960 DOI: 10.1021/jp003020w  Change-Id:
+  Icf27536174cfa7a720ec3e625849310e71ff1bfd
+
 2012-06-18  Geoff Hutchison <geoff.hutchison@gmail.com>
 
   * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
@@ -563,6 +2349,17 @@
   Automated update of translation templates (POT) using latest strings. 
   Change-Id: I15ec3b28e39a19e9a06f713dfeae5a5b947dc2b2
 
+2012-05-23  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * libavogadro/src/extensions/CMakeLists.txt,
+  libavogadro/src/extensions/insertdnadialog.ui,
+  libavogadro/src/extensions/insertdnaextension.cpp,
+  libavogadro/src/extensions/insertdnaextension.h,
+  .../src/extensions/insertpeptideextension.h: Add a DNA/RNA builder.  Uses
+  Open Babel's FASTA format support. In OB 2.3.1, this enables single/double
+  strand DNA and modifying the # of bp per turn.  Change-Id:
+  I82e13b1ac9bd66eea18adadbd94dc7fc9c0793ff
+
 2012-05-21  Geoff Hutchison <geoff.hutchison@gmail.com>
 
   * i18n/avogadro/af.po, i18n/avogadro/ar.po, i18n/avogadro/avogadro.pot,
@@ -597,6 +2394,30 @@
   i18n/libavogadro/vi.po, i18n/libavogadro/zh_CN.po, i18n/libavogadro/zh_TW.po:
   Automated update of translation templates (POT) using latest strings. 
   Change-Id: I30dffaf9ac5e7f592e611ecead27d42e4f030af6
+
+2012-05-17  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * .../src/extensions/insertfragmentdialog.cpp,
+  libavogadro/src/extensions/insertfragmentdialog.h,
+  libavogadro/src/molecule.cpp: Modify the setOBMol method to fill crystal
+  cells.  The existing code will import only the asymmetric unit cell, which is
+  surprising for most inorganic crystals. (It works fine for molecular
+  crystals.) This patch adds a heuristic to fill the unit cell when presented
+  with a crystal < 4 carbon atoms.  This also removes similar code from the
+  insert crystal extension.  Change-Id:
+  I07f613cebaa72bb6b51c7c6714f1e2d8533ab792
+
+2011-08-23  Geoff Hutchison <geoff.hutchison@gmail.com>
+
+  * libavogadro/src/tools/CMakeLists.txt,
+  libavogadro/src/tools/manipulatesettingswidget.ui,
+  libavogadro/src/tools/manipulatetool.cpp,
+  libavogadro/src/tools/manipulatetool.h,
+  libavogadro/src/tools/moveatomcommand.cpp: Allow manual translation or
+  rotation.  Adds a settings widget to the manipulate tool. This allows manual
+  translation or rotation around the origin or the center of geometry. Also
+  supports undo of manipulations.  Change-Id:
+  I45a9e02dc6251dfc6f2f0f55d79ed6039ce88697
 
 2012-05-14  Geoff Hutchison <geoff.hutchison@gmail.com>
 
@@ -6276,6 +8097,11 @@
   libavogadro/src/extensions/cartesianextension.cpp,
   libavogadro/src/extensions/cartesianextension.h,
   libavogadro/src/extensions/edit.qrc,
+  libavogadro/src/extensions/icons/amarok_back.png,
+  libavogadro/src/extensions/icons/amarok_next.png,
+  libavogadro/src/extensions/icons/amarok_pause.png,
+  libavogadro/src/extensions/icons/amarok_play.png,
+  libavogadro/src/extensions/icons/amarok_stop.png,
   .../src/extensions/icons/document-revert.png,
   libavogadro/src/extensions/icons/edit-clear.png,
   libavogadro/src/extensions/icons/edit-copy.png,
@@ -6382,6 +8208,9 @@
   i18n/libavogadro-sv.po, i18n/libavogadro-tr.po, i18n/libavogadro-uk.po,
   i18n/libavogadro-zh_CN.po, i18n/libavogadro-zh_TW.po, i18n/libavogadro.pot:
   Updated POTs and translations.
+
+  * scripts/find-po-email.py, scripts/find-translators.sh: Update scripts --
+  used to grab contributors for Avo 1.0.
 
   * i18n/avogadro-ar.po, i18n/avogadro-ca.po, i18n/avogadro-cs.po,
   i18n/avogadro-de.po, i18n/avogadro-en_CA.po, i18n/avogadro-en_GB.po,
@@ -7638,13 +9467,13 @@
   avogadro/src/icons/filesaveas.png, avogadro/src/icons/fill-color.png,
   avogadro/src/icons/forward.png, avogadro/src/icons/minus.png,
   avogadro/src/icons/paste.png, avogadro/src/icons/plus.png,
-  avogadro/src/icons/preferences-plugin.png, avogadro/src/icons/redo.png,
-  avogadro/src/icons/revert.png, avogadro/src/icons/tab-close.png,
-  avogadro/src/icons/tab-detach.png, avogadro/src/icons/tab-duplicate.png,
-  avogadro/src/icons/tab-new.png, avogadro/src/icons/tab_new.png,
-  avogadro/src/icons/tab_remove.png, avogadro/src/icons/tools-report-bug.png,
-  avogadro/src/icons/undo.png, avogadro/src/icons/up.png,
-  avogadro/src/icons/view-fullscreen.png,
+  avogadro/src/icons/preferences-plugin.png, avogadro/src/icons/rebuild.png,
+  avogadro/src/icons/redo.png, avogadro/src/icons/revert.png,
+  avogadro/src/icons/tab-close.png, avogadro/src/icons/tab-detach.png,
+  avogadro/src/icons/tab-duplicate.png, avogadro/src/icons/tab-new.png,
+  avogadro/src/icons/tab_new.png, avogadro/src/icons/tab_remove.png,
+  avogadro/src/icons/tools-report-bug.png, avogadro/src/icons/undo.png,
+  avogadro/src/icons/up.png, avogadro/src/icons/view-fullscreen.png,
   avogadro/src/icons/view-list-tree.png, avogadro/src/icons/view-restore.png,
   avogadro/src/icons/window_fullscreen.png,
   avogadro/src/icons/window_nofullscreen.png, avogadro/src/mainwindow.cpp,
@@ -10461,8 +12290,8 @@
 
 2009-02-16  Geoff Hutchison <babel@geoffhutchison.net>
 
-  * authors.txt, authors.xml, avogadro/COPYING, avogadro/README, gpltemplate:
-  Remove unused files.
+  * authors.txt, authors.xml, avogadro/AUTHORS, avogadro/COPYING,
+  avogadro/NEWS, avogadro/README, gpltemplate: Remove unused files.
 
   * CMakeLists.txt, cmake/modules/AvoCTestConfig.cmake,
   cmake/modules/CTestConfig.cmake: Look for cmake files as "modules"
@@ -11669,7 +13498,8 @@
   libavogadro/src/python/unittest/molecule.py,
   libavogadro/src/python/unittest/primitivelist.py,
   libavogadro/src/python/unittest/residue.py, libavogadro/src/pythonerror.cpp,
-  libavogadro/src/pythonerror.h, libavogadro/src/tools/drawcommand.cpp,
+  libavogadro/src/pythonerror.h, libavogadro/src/tools/autoopttool.cpp,
+  libavogadro/src/tools/autoopttool.h, libavogadro/src/tools/drawcommand.cpp,
   libavogadro/src/tools/drawtool.cpp, libavogadro/src/tools/drawtool.h,
   libavogadro/tests/moleculetest.cpp: Change syntax of atoms and molecules. All
   references to "new" are now "add" and all references to "delete" are now
@@ -15195,6 +17025,9 @@
   krazy/libavogadro-src-extensions.html, krazy/libavogadro-src-tools.html,
   krazy/libavogadro-src.html, krazy/runkrazy.rb: Reran Krazy.  
 
+  * krazy/avogadro-src-extensions.html, krazy/libavogadro-src-extensions.html:
+  new directory (src/extensions moved)  
+
   * krazy/avogadro-src-extensions.html, krazy/avogadro-src.html,
   krazy/libavogadro-src-engines.html, krazy/libavogadro-src-tools.html,
   krazy/libavogadro-src.html: Updating the Krazy files  
@@ -15584,7 +17417,8 @@
 
 2008-03-02  Carsten Niehaus <carsten.niehaus@gmail.com>
 
-  * CMakeLists.txt, doc/index.docbook: First version of the new handbook  
+  * CMakeLists.txt, doc/CMakeLists.txt, doc/index.docbook: First version of the
+  new handbook  
 
 2008-03-01  Marcus D. Hanwell <marcus@cryos.org>
 
@@ -20384,18 +22218,19 @@
   libavogadro/src/sphere.cpp, libavogadro/src/sphere.h: Added cmake/modules for
   CMAKE building.   
 
-  * COPYING, ChangeLog, Doxyfile, INSTALL, README, avogadro.pro,
-  avogadro/CMakeLists.txt, avogadro/COPYING, avogadro/ChangeLog,
-  avogadro/Doxyfile, avogadro/FindAvogadro.cmake, avogadro/FindOpenBabel.cmake,
-  avogadro/INSTALL, avogadro/README, avogadro/avogadro.pro,
-  avogadro/src/avogadro.pro, avogadro/src/avogadro.ui, avogadro/src/main.cpp,
-  avogadro/src/mainwindow.cpp, avogadro/src/mainwindow.h, avogadro/src/src.pro,
-  avogadro/src/tool.cpp, avogadro/src/tool.h,
-  avogadro/src/tools/SelectRotate.cpp, avogadro/src/tools/SelectRotate.h,
-  avogadro/src/tools/SelectRotate.pro, avogadro/src/tools/tools.pro,
-  avogadro/untitled01.gpr, libavogadro/CMakeLists.txt,
-  libavogadro/FindOpenBabel.cmake, libavogadro/src/CMakeLists.txt,
-  libavogadro/src/color.cpp, libavogadro/src/color.h, libavogadro/src/engine.h,
+  * AUTHORS, COPYING, ChangeLog, Doxyfile, INSTALL, NEWS, README, avogadro.pro,
+  avogadro/AUTHORS, avogadro/CMakeLists.txt, avogadro/COPYING,
+  avogadro/ChangeLog, avogadro/Doxyfile, avogadro/FindAvogadro.cmake,
+  avogadro/FindOpenBabel.cmake, avogadro/INSTALL, avogadro/NEWS,
+  avogadro/README, avogadro/avogadro.pro, avogadro/src/avogadro.pro,
+  avogadro/src/avogadro.ui, avogadro/src/main.cpp, avogadro/src/mainwindow.cpp,
+  avogadro/src/mainwindow.h, avogadro/src/src.pro, avogadro/src/tool.cpp,
+  avogadro/src/tool.h, avogadro/src/tools/SelectRotate.cpp,
+  avogadro/src/tools/SelectRotate.h, avogadro/src/tools/SelectRotate.pro,
+  avogadro/src/tools/tools.pro, avogadro/untitled01.gpr,
+  libavogadro/CMakeLists.txt, libavogadro/FindOpenBabel.cmake,
+  libavogadro/src/CMakeLists.txt, libavogadro/src/color.cpp,
+  libavogadro/src/color.h, libavogadro/src/engine.h,
   libavogadro/src/engines/CMakeLists.txt,
   libavogadro/src/engines/ResidueSphereEngine.cpp,
   libavogadro/src/engines/ResidueSphereEngine.h,
@@ -20612,8 +22447,6 @@
   * autogen.sh, configure.ac: Cleaning up old GNU stuff from the main
   directory.   
 
-  * : We may need this back.  Not sure how it got here.   
-
   * src/MainWindow.cpp, src/MainWindow.h: MainWindow now dynamically loads
   rendering engines.  There is currently no way to select the default and there
   is not NULL check as of yet.  Thats is to come.   
@@ -20722,10 +22555,11 @@
 
 2006-04-28  Donald Ephraim Curtis <dcurtis3@sourceforge.net>
 
-  * COPYING, INSTALL, src/main.cpp: Tutorial time.   
+  * AUTHORS, COPYING, ChangeLog, INSTALL, NEWS, src/main.cpp: Tutorial time.   
 
   * src/AWindow.cpp, src/AWindow.h: Fixed   
 
-  * src/AWindow.cpp, src/AWindow.h, src/main.cpp: Bad Changes.   
+  * src/AWindow.cpp, src/AWindow.h, src/main.cpp, src/main.h: Bad Changes.   
 
-  * Makefile.am, autogen.sh, configure.ac, src/Makefile.am: GNU Basics 
+  * Makefile.am, autogen.sh, configure.ac, src/Makefile.am, src/defines.h,
+  src/main.cpp, src/main.h: GNU Basics 

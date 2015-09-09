@@ -59,6 +59,11 @@ avogadro_plugin_nogl(insertpeptideextension
   "insertpeptideextension.cpp;insertcommand.cpp"
   insertpeptidedialog.ui)
 
+### insert dna (builder)
+avogadro_plugin_nogl(insertdnaextension
+  "insertdnaextension.cpp;insertcommand.cpp"
+  insertdnadialog.ui)
+
 ### h->methyl
 avogadro_plugin_nogl(h2methylextension h2methylextension.cpp)
 
@@ -121,7 +126,5 @@ add_subdirectory(crystallography)
 add_subdirectory(spectra)
 add_subdirectory(surfaces)
 add_subdirectory(swcntbuilder)
-if (NOT WIN32)
-  add_subdirectory(qtaim)
-endif(NOT WIN32)
+add_subdirectory(qtaim)
 add_subdirectory(quantuminput)
