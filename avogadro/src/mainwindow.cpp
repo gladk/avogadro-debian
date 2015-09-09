@@ -2036,14 +2036,13 @@ protected:
     // Format definition, will be used for parsing
     int NameCol=-1, Xcol=-1, Ycol=-1, Zcol=-1;
     QString format("");
-    int a;
     double b;
     bool ok;
     for (int i=0; i<data.size(); i++)
       {
         if (data.at(i) == "") continue;
 
-        a = data.at(i).toInt(&ok);
+        data.at(i).toInt(&ok);
         if (ok)
           {
             format += "i";
@@ -2146,8 +2145,8 @@ protected:
           return false;
         for (int i=0; i<s_data.size(); i++)
           {
-            double x, y, z;
-            int _n,_iso;
+            double x(0.0), y(0.0), z(0.0);
+            int _n(0),_iso;
             bool ok = true;
             if (i == Xcol)
               x = s_data.at(i).toDouble(&ok);
@@ -2224,9 +2223,7 @@ protected:
     // Sort lists
     QString curId;
     QStringList::iterator idit;
-    QStringList::iterator idit_end = ids->end();
     QList<Eigen::Vector3d>::iterator coordit;
-    QList<Eigen::Vector3d>::iterator coordit_end = coords->end();
     unsigned int sorted = 0;
     for (int uniqInd = 0; uniqInd < uniqueIds->size();
          ++uniqInd) {
@@ -2237,8 +2234,8 @@ protected:
       coordit = coords->begin() + sorted;
       while (found < count) {
         // Should never reach the end
-        Q_ASSERT(idit != idit_end);
-        Q_ASSERT(coordit != coordit_end);
+        Q_ASSERT(idit != ids->end());
+        Q_ASSERT(coordit != coords->end());
         if (idit->compare(curId) == 0) {
           qSwap(*idit, (*ids)[sorted]);
           qSwap(*coordit, (*coords)[sorted]);
@@ -2357,19 +2354,11 @@ protected:
 
   // Helper function -- works for "cut" or "copy"
   // FIXME add parameter to set "Copy" or "Cut" in messages
-  QMimeData* MainWindow::prepareClipboardData(PrimitiveList selectedItems)
+  QMimeData* MainWindow::prepareClipboardData(PrimitiveList selectedItems,
+                                              const char* format)
   {
     QMimeData *mimeData = new QMimeData;
-    // we also save an image for copy/paste to office programs, presentations, etc.
     QImage clipboardImage;
-    d->glWidget->raise();
-    d->glWidget->repaint();
-    if (QGLFramebufferObject::hasOpenGLFramebufferObjects()) {
-      clipboardImage = d->glWidget->grabFrameBuffer( true );
-    } else {
-      QPixmap pixmap = QPixmap::grabWindow( d->glWidget->winId() );
-      clipboardImage = pixmap.toImage();
-    }
 
     Molecule *moleculeCopy = d->molecule;
     if (!selectedItems.isEmpty()) { // we only want to copy the selected items
@@ -2402,58 +2391,87 @@ protected:
       }
     } // should now have a copy of our selected fragment
 
-    OBConversion conv;
-    // MDL format is used for main copy -- atoms, bonds, chirality
-    // supports either 2D or 3D, generic data
-    // CML is another option, but not as well tested in Open Babel
-    OBFormat *mdlFormat = conv.FindFormat("mdl");
-    if (!mdlFormat || !conv.SetOutFormat(mdlFormat)) {
-      statusBar()->showMessage( tr( "Copy failed (mdl unavailable)." ), 5000 );
-      return NULL; // nothing in it yet
-    }
-
-    // write an MDL file first (with bond orders, radicals, etc.)
-    // (CML might be better in the future, but this works well now)
-    OBMol obmol = moleculeCopy->OBMol();
-    string output = conv.WriteString(&obmol);
-    QByteArray copyData(output.c_str(), output.length());
-    mimeData->setData("chemical/x-mdl-molfile", copyData);
-
-    // we embed the molfile into the image
-    // e.g. http://baoilleach.blogspot.com/2007/08/access-embedded-molecular-information.html
-    clipboardImage.setText("molfile", copyData);
-
-    // save a canonical SMILES too
-    OBFormat *canFormat = conv.FindFormat("can");
-    if ( canFormat && conv.SetOutFormat( canFormat ) ) {
-      output = conv.WriteString(&obmol);
-      copyData = output.c_str();
-      clipboardImage.setText("SMILES", copyData);
-    }
-
-    // Copy XYZ coordinates to the text selection buffer for finite
-    // systems, or POSCAR if a unit cell is available
-    OBUnitCell *cell = moleculeCopy->OBUnitCell();
-    if (!cell) {
-      OBFormat *xyzFormat = conv.FindFormat("xyz");
-      if ( xyzFormat && conv.SetOutFormat(xyzFormat)) {
-        output = conv.WriteString(&obmol);
-        copyData = output.c_str();
-        mimeData->setText(QString(copyData));
+    if (!format) {
+      // Default:
+      // we also save an image for copy/paste to office programs, presentations, etc.
+      // we do this first, so we can embed the molecular data too
+      d->glWidget->raise();
+      d->glWidget->repaint();
+      if (QGLFramebufferObject::hasOpenGLFramebufferObjects()) {
+        clipboardImage = d->glWidget->grabFrameBuffer( true );
+      } else {
+        QPixmap pixmap = QPixmap::grabWindow( d->glWidget->winId() );
+        clipboardImage = pixmap.toImage();
       }
     }
+
+    OBConversion conv;
+    if (format) {
+      // The user specified a format (e.g., SMILES) so use it
+      OBFormat *pFormat = conv.FindFormat(format);
+      if (!pFormat || !conv.SetOutFormat(pFormat)) {
+        statusBar()->showMessage( tr( "Copy failed (format unavailable)." ), 5000 );
+        return NULL; // nothing in it yet
+      }
+
+      OBMol obmol = moleculeCopy->OBMol();
+      string output = conv.WriteString(&obmol);
+      QString copyData(output.c_str());
+      mimeData->setText(copyData.trimmed()); // remove any newlines or whitespace
+    }
     else {
-      QString poscar = getPOSCAR(moleculeCopy);
-      mimeData->setText(poscar);
+      // MDL format is used for main copy -- atoms, bonds, chirality
+      // supports either 2D or 3D, generic data
+      // CML is another option, but not as well tested in Open Babel
+      OBFormat *mdlFormat = conv.FindFormat("mdl");
+      if (!mdlFormat || !conv.SetOutFormat(mdlFormat)) {
+        statusBar()->showMessage( tr( "Copy failed (mdl unavailable)." ), 5000 );
+        return NULL; // nothing in it yet
+      }
+
+      // write an MDL file first (with bond orders, radicals, etc.)
+      // (CML might be better in the future, but this works well now)
+      OBMol obmol = moleculeCopy->OBMol();
+      string output = conv.WriteString(&obmol);
+      QByteArray copyData(output.c_str(), output.length());
+      mimeData->setData("chemical/x-mdl-molfile", copyData);
+
+      // we embed the molfile into the image
+      // e.g. http://baoilleach.blogspot.com/2007/08/access-embedded-molecular-information.html
+      clipboardImage.setText("molfile", copyData);
+
+      // save a canonical SMILES too
+      OBFormat *canFormat = conv.FindFormat("can");
+      if ( canFormat && conv.SetOutFormat( canFormat ) ) {
+        output = conv.WriteString(&obmol);
+        copyData = output.c_str();
+        clipboardImage.setText("SMILES", copyData);
+      }
+
+      // Copy XYZ coordinates to the text selection buffer for finite
+      // systems, or POSCAR if a unit cell is available
+      OBUnitCell *cell = moleculeCopy->OBUnitCell();
+      if (!cell) {
+        OBFormat *xyzFormat = conv.FindFormat("xyz");
+        if ( xyzFormat && conv.SetOutFormat(xyzFormat)) {
+          output = conv.WriteString(&obmol);
+          copyData = output.c_str();
+          mimeData->setText(QString(copyData));
+        }
+      }
+      else {
+        QString poscar = getPOSCAR(moleculeCopy);
+        mimeData->setText(poscar);
+      }
+
+      // save the image to the clipboard too
+      mimeData->setImageData(clipboardImage);
     }
 
     // need to free our temporary moleculeCopy
     if (!selectedItems.isEmpty()) {
       delete moleculeCopy;
     }
-
-    // save the image to the clipboard too
-    mimeData->setImageData(clipboardImage);
 
     return mimeData;
   }
@@ -2472,6 +2490,34 @@ protected:
   void MainWindow::copy()
   {
     QMimeData *mimeData = prepareClipboardData( d->glWidget->selectedPrimitives() );
+
+    if ( mimeData ) {
+      QApplication::clipboard()->setMimeData(mimeData, QClipboard::Clipboard);
+      // For X11 middle click
+      if (QApplication::clipboard()->supportsSelection()) {
+        QApplication::clipboard()->setMimeData(mimeData, QClipboard::Selection);
+      }
+    }
+  }
+
+  void MainWindow::copyAsSMILES()
+  {
+    QMimeData *mimeData = prepareClipboardData(d->glWidget->selectedPrimitives(),
+                                               "smi");
+
+    if ( mimeData ) {
+      QApplication::clipboard()->setMimeData(mimeData, QClipboard::Clipboard);
+      // For X11 middle click
+      if (QApplication::clipboard()->supportsSelection()) {
+        QApplication::clipboard()->setMimeData(mimeData, QClipboard::Selection);
+      }
+    }
+  }
+
+  void MainWindow::copyAsInChI()
+  {
+    QMimeData *mimeData = prepareClipboardData(d->glWidget->selectedPrimitives(),
+                                               "inchi");
 
     if ( mimeData ) {
       QApplication::clipboard()->setMimeData(mimeData, QClipboard::Clipboard);
@@ -2739,7 +2785,7 @@ protected:
     }
 
     // if smooth transitions are disabled, center now and return
-    if( !d->molecule->numAtoms() >= 1000 ) {
+    if( !d->molecule || d->molecule->numAtoms() >= 1000 ) {
       camera->setModelview(goal);
       d->glWidget->update();
       return;
@@ -2804,7 +2850,7 @@ protected:
     }
 
     // if smooth transitions are disabled, center now and return
-    if( !d->molecule->numAtoms() >= 1000 ) {
+    if( !d->molecule || d->molecule->numAtoms() >= 1000 ) {
       camera->setModelview(goal);
       d->glWidget->update();
       return;
@@ -2837,7 +2883,7 @@ protected:
 
   void MainWindow::showAndActivate()
   {
-    setWindowState(windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
+    setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
     raise();
   }
 
@@ -2956,6 +3002,8 @@ protected:
 
     connect( ui.actionCut, SIGNAL( triggered() ), this, SLOT( cut() ) );
     connect( ui.actionCopy, SIGNAL( triggered() ), this, SLOT( copy() ) );
+    connect( ui.actionSMILES, SIGNAL( triggered() ), this, SLOT( copyAsSMILES() ) );
+    connect( ui.actionInChI, SIGNAL( triggered() ), this, SLOT( copyAsInChI() ) );
     connect( ui.actionPaste, SIGNAL( triggered() ), this, SLOT( paste() ) );
     connect( ui.actionClear, SIGNAL( triggered() ), this, SLOT( clear() ) );
 

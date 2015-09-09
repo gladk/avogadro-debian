@@ -122,6 +122,11 @@ void MopacAux::processLine()
 
 void MopacAux::load(SlaterSet* basis)
 {
+  if (m_atomPos.size() == 0) {
+    qWarning() << "No atoms found in .aux file. Bailing out.";
+    basis->setIsValid(false);
+    return;
+  }
   // Now load up our basis set
   basis->addAtoms(m_atomPos);
   basis->addSlaterIndices(m_atomIndex);
@@ -136,14 +141,16 @@ void MopacAux::load(SlaterSet* basis)
   Molecule &mol = basis->moleculeRef();
   mol.clearAtoms();
   if (m_atomPos.size() == m_atomNums.size()) {
-    for (int i = 0; i < m_atomPos.size(); ++i) {
+    for (size_t i = 0; i < m_atomPos.size(); ++i) {
       mol.addAtom(m_atomPos[i], m_atomNums[i]);
     }
   }
-  else
+  else {
     qWarning() << "Number of atomic numbers (" << m_atomNums.size()
                << ") does not equal the number of atomic positions ("
                << m_atomPos.size() << "). Not populating molecule.";
+    basis->setIsValid(false);
+  }
 }
 
 vector<int> MopacAux::readArrayI(unsigned int n)

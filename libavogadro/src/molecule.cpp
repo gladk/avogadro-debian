@@ -777,23 +777,8 @@ namespace Avogadro{
     else {
       // Calculate a new estimate (e.g., the geometry changed
       Vector3d dipoleMoment(0.0, 0.0, 0.0);
-      // Use MMFF94 charges -- good estimate of dipole moment
-      OpenBabel::OBForceField *ff = OpenBabel::OBForceField::FindForceField("MMFF94")->MakeNewInstance();
-      OpenBabel::OBMol obmol = OBMol();
-      if (ff->Setup(obmol)) {
-        ff->GetPartialCharges(obmol);
-        for( OpenBabel::OBMolAtomIter atom(obmol); atom; ++atom ) {
-          OpenBabel::OBPairData *chg = (OpenBabel::OBPairData*) atom->GetData("FFPartialCharge");
-          if (chg)
-            dipoleMoment += Vector3d(atom->GetVector().AsArray()) * atof(chg->GetValue().c_str());
-        }
-        delete ff; // the new instance
-        dipoleMoment *= 3.60; // fit from regression, R^2 = 0.769
-      }
-      else {
-        foreach (Atom *a, atoms())
-          dipoleMoment += *a->pos() * a->partialCharge();
-      }
+      foreach (Atom *a, atoms())
+        dipoleMoment += *a->pos() * a->partialCharge();
 
       if (estimate)
         *estimate = true;
@@ -1306,9 +1291,40 @@ namespace Avogadro{
     // Copy all the parts of the OBMol to our Molecule
     blockSignals(true);
 
-    // Begin by copying all of the atoms
     std::vector<OpenBabel::OBAtom*>::iterator i;
 
+    // If available, copy the unit cell
+    // We actually do this first, since the obmol will have more atoms afterwards
+    OpenBabel::OBUnitCell *obunitcell = static_cast<OpenBabel::OBUnitCell *>
+      (obmol->GetData(OpenBabel::OBGenericDataType::UnitCell));
+    if (obunitcell) {
+      d->obunitcell = new OpenBabel::OBUnitCell;
+      *d->obunitcell = *obunitcell;
+
+      // Check if there's a space group set
+      // If so, chances are good that we should fill the unit cell
+      const OpenBabel::SpaceGroup *sg = d->obunitcell->GetSpaceGroup();
+      if (sg) {
+        // Check if it's likely an organic system
+        int numCarbons = 0;
+        int numHydrogens = 0;
+        for (OpenBabel::OBAtom *obatom = obmol->BeginAtom(i); obatom; obatom = obmol->NextAtom(i)) {
+          if (obatom->IsCarbon())
+            numCarbons++;
+          if (obatom->IsHydrogen())
+            numHydrogens++;
+        }
+        // Here's the heuristic. If there are >4 carbons and/or carbon + hydrogen (e.g. methane),
+        // then we assume it's organic or other molecular solid and leave it alone
+        // If there wasn't an assigned space group, it's likely from a comp package (e.g., VASP)
+        // and we don't need to bother
+        if (numCarbons < 4 && !(numCarbons && numHydrogens)){
+          d->obunitcell->FillUnitCell(obmol);
+        }
+      }
+    }
+
+    // Begin by copying all of the atoms
     for (OpenBabel::OBAtom *obatom = obmol->BeginAtom(i); obatom; obatom = obmol->NextAtom(i)) {
       Atom *atom = addAtom();
       atom->setOBAtom(obatom);
@@ -1373,14 +1389,6 @@ namespace Avogadro{
         residue->addBond(bond(obbond->GetIdx())->id());
       }
     }
-
-    // If available, copy the unit cell
-    OpenBabel::OBUnitCell *obunitcell = static_cast<OpenBabel::OBUnitCell *>(obmol->GetData(OpenBabel::OBGenericDataType::UnitCell));
-    if (obunitcell) {
-      d->obunitcell = new OpenBabel::OBUnitCell;
-      *d->obunitcell = *obunitcell;
-    }
-    // (that could return NULL, but other methods know they could get NULL)
 
     // Copy conformers, if present
     if (obmol->NumConformers() > 1) {
@@ -1652,7 +1660,7 @@ namespace Avogadro{
     // Copy the atoms and bonds over
     unsigned int size = other.m_atoms.size();
     for (unsigned int i = 0; i < size; ++i) {
-      if (other.m_atoms.at(i) > 0) {
+      if (other.m_atoms.at(i) != 0) {
         Atom *atom = new Atom(this);
         atom->setId(other.m_atoms[i]->id());
         atom->setIndex(other.m_atoms[i]->index());

@@ -66,9 +66,9 @@ namespace Avogadro {
     void setStructureType(int);
     void setPhi(double);
     void setPsi(double);
-    
+
     void setStereo(int);
-    
+
     void dialogDestroyed();
 
   private:
