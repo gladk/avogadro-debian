@@ -2,6 +2,7 @@ avogadro (1.1.1-1~exp1) experimental; urgency=medium
 
   * Non-maintainer upload.
   * Fix compilation against eigen3.3. (Closes: #786355)
+    Thanks to Kirill Okhotnikov for assistance.
   * Use libeigen3-dev instead of libeigen2-dev. (Closes: #776914)
   * Merge Ubuntu-changes.
 
