@@ -33,6 +33,10 @@
 #include <QUndoCommand>
 #include <QCloseEvent>
 
+// Forward declarations
+class QNetworkAccessManager;
+class QNetworkReply;
+
 namespace Avogadro {
 
   class MolecularPropertiesDialog : public QDialog, public Ui::MolecularPropertiesDialog
@@ -79,6 +83,17 @@ namespace Avogadro {
       GLWidget *m_widget;
 
       MolecularPropertiesDialog *m_dialog;
+      // to query the NIH chemical resolver for an IUPAC name
+      QString                m_inchi;
+      QNetworkAccessManager *m_network;
+      bool m_nameRequestPending;
+
+      void clearName();
+
+      private Q_SLOTS:
+      void requestIUPACName();
+      void replyFinished(QNetworkReply*);
+
   };
 
   class MolecularPropertiesExtensionFactory : public QObject, public PluginFactory

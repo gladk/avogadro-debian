@@ -28,21 +28,25 @@
 #include <avogadro/glwidget.h>
 #include <avogadro/toolgroup.h>
 
-#include <QAction>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QFileInfo>
-#include <QDebug>
+#include <QtGui/QAction>
+#include <QtGui/QInputDialog>
+#include <QtGui/QMessageBox>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtCore/QFileInfo>
+#include <QtCore/QDebug>
 
 #include <openbabel/mol.h>
 #include <openbabel/obconversion.h>
+//#include <openbabel/builder.h>
+//#include <openbabel/forcefield.h>
 
 namespace Avogadro
 {
   using OpenBabel::OBConversion;
   using OpenBabel::OBMol;
+  /*using OpenBabel::OBBuilder;
+  using OpenBabel::OBForceField;*/
 
   NetworkFetchExtension::NetworkFetchExtension(QObject* parent)
     : Extension(parent),
@@ -53,7 +57,7 @@ namespace Avogadro
     action->setData("PDB");
     m_actions.append(action);
     action = new QAction(this);
-    action->setText(tr("Fetch chemical structure..."));
+    action->setText(tr("Fetch by chemical name..."));
     action->setData("NIH");
     m_actions.append(action);
     action = new QAction(this);
@@ -113,9 +117,11 @@ namespace Avogadro
                                                     "", &ok);
       if (!ok || structureName.isEmpty())
         return 0;
-      // Hard coding the PDB download URL - this could be used for other services
+      // Hard coding the NIH resolver download URL - this could be used for other services
       m_network->get(QNetworkRequest(
-          QUrl("http://cactus.nci.nih.gov/chemical/structure/" + structureName + "/sdf?get3d=true")));
+          QUrl("http://cactus.nci.nih.gov/chemical/structure/" + structureName + "/sdf?get3d=true"
+               + "&resolver=name_by_opsin,name_by_cir,name_by_chemspider"
+               + "&requester=Avogadro")));
 
       *m_moleculeName = structureName + ".sdf";
     }
@@ -129,7 +135,7 @@ namespace Avogadro
                                           "", &ok);
       if (!ok || url.isEmpty())
         return 0;
-      // Hard coding the PDB download URL - this could be used for other services
+      // Arbitrary URL
       m_network->get(QNetworkRequest(QUrl(url)));
 
       *m_moleculeName = url;
@@ -184,6 +190,18 @@ namespace Avogadro
     conv.SetInFormat(info.suffix().toAscii());
     OBMol *obmol = new OBMol;
     if (conv.ReadString(obmol, QString(data).toStdString())) {
+	  /*if (info.suffix() == "smi") {
+	    OBBuilder builder;
+	    builder.Build(*obmol);
+	    obmol->AddHydrogens(); // Add some hydrogens before running force field
+        OBForceField* pFF =  OBForceField::FindForceField("MMFF94");
+        if (!pFF || !pFF->Setup(*obmol)) {
+          pFF = OBForceField::FindForceField("UFF");
+          if (!pFF || !pFF->Setup(*obmol)) return; // can't do anything more
+        }
+        pFF->ConjugateGradients(250, 1.0e-4);
+        pFF->UpdateCoordinates(*obmol);
+	  }*/
       Molecule *mol = new Molecule;
       mol->setOBMol(obmol);
       mol->setFileName(*m_moleculeName);

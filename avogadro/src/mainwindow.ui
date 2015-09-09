@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>621</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -55,7 +55,6 @@
       <string>Export</string>
      </property>
      <addaction name="actionExportGraphics"/>
-     <addaction name="actionExportGL2PS"/>
     </widget>
     <widget class="QMenu" name="menuImport">
      <property name="title">
@@ -98,18 +97,26 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuProjection">
+     <property name="title">
+      <string>Projection</string>
+     </property>
+     <addaction name="actionPerspective"/>
+     <addaction name="actionOrthographic"/>
+    </widget>
     <addaction name="actionNewView"/>
     <addaction name="actionDuplicateView"/>
     <addaction name="actionDetachView"/>
     <addaction name="actionCloseView"/>
     <addaction name="actionCenter"/>
+    <addaction name="actionAlignViewToAxes"/>
     <addaction name="separator"/>
     <addaction name="actionFullScreen"/>
     <addaction name="actionResetDisplayTypes"/>
     <addaction name="actionSetBackgroundColor"/>
     <addaction name="separator"/>
+    <addaction name="menuProjection"/>
     <addaction name="actionDisplayAxes"/>
-    <addaction name="actionDisplayUnitCellAxes"/>
     <addaction name="actionDebugInformation"/>
     <addaction name="actionQuickRender"/>
     <addaction name="separator"/>
@@ -248,10 +255,6 @@
    </attribute>
   </widget>
   <action name="actionOpen">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-open.png</normaloff>:/icons/document-open.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
@@ -260,19 +263,11 @@
    </property>
   </action>
   <action name="actionOpenTool">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-open.png</normaloff>:/icons/document-open.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
   </action>
   <action name="actionQuit">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/application-exit.png</normaloff>:/icons/application-exit.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Quit</string>
    </property>
@@ -284,10 +279,6 @@
    </property>
   </action>
   <action name="actionQuitTool">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/application-exit.png</normaloff>:/icons/application-exit.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Quit</string>
    </property>
@@ -303,10 +294,6 @@
    </property>
   </action>
   <action name="actionNew">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-new.png</normaloff>:/icons/document-new.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
@@ -315,19 +302,11 @@
    </property>
   </action>
   <action name="actionNewTool">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-new.png</normaloff>:/icons/document-new.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
   </action>
   <action name="actionClose">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-close.png</normaloff>:/icons/document-close.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Close</string>
    </property>
@@ -336,19 +315,11 @@
    </property>
   </action>
   <action name="actionCloseTool">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-close.png</normaloff>:/icons/document-close.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Close</string>
    </property>
   </action>
   <action name="actionSave">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-save.png</normaloff>:/icons/document-save.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -357,19 +328,11 @@
    </property>
   </action>
   <action name="actionSaveTool">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-save.png</normaloff>:/icons/document-save.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
   </action>
   <action name="actionSaveAs">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-save-as.png</normaloff>:/icons/document-save-as.png</iconset>
-   </property>
    <property name="text">
     <string>Save &amp;As...</string>
    </property>
@@ -378,19 +341,11 @@
    </property>
   </action>
   <action name="actionRevert">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-revert.png</normaloff>:/icons/document-revert.png</iconset>
-   </property>
    <property name="text">
     <string>Revert To Saved</string>
    </property>
   </action>
   <action name="actionExportGraphics">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-export.png</normaloff>:/icons/document-export.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Graphics...</string>
    </property>
@@ -478,11 +433,16 @@
     <string>Center</string>
    </property>
   </action>
-  <action name="actionPaste">
+  <action name="actionAlignViewToAxes">
    <property name="icon">
     <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/edit-paste.png</normaloff>:/icons/edit-paste.png</iconset>
+     <normaloff>:/icons/navigateN.png</normaloff>:/icons/navigateN.png</iconset>
    </property>
+   <property name="text">
+    <string>Align View To Axes</string>
+   </property>
+  </action>
+  <action name="actionPaste">
    <property name="text">
     <string>&amp;Paste</string>
    </property>
@@ -491,10 +451,6 @@
    </property>
   </action>
   <action name="actionCopy">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/edit-copy.png</normaloff>:/icons/edit-copy.png</iconset>
-   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -503,10 +459,6 @@
    </property>
   </action>
   <action name="actionCut">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/edit-cut.png</normaloff>:/icons/edit-cut.png</iconset>
-   </property>
    <property name="text">
     <string>Cut</string>
    </property>
@@ -515,10 +467,6 @@
    </property>
   </action>
   <action name="actionClear">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/edit-clear.png</normaloff>:/icons/edit-clear.png</iconset>
-   </property>
    <property name="text">
     <string>Clear</string>
    </property>
@@ -640,10 +588,6 @@
    </property>
   </action>
   <action name="actionImport_File">
-   <property name="icon">
-    <iconset resource="avogadro.qrc">
-     <normaloff>:/icons/document-import.png</normaloff>:/icons/document-import.png</iconset>
-   </property>
    <property name="text">
     <string>Molecule File...</string>
    </property>
@@ -683,6 +627,25 @@
   <action name="actionResetDisplayTypes">
    <property name="text">
     <string>Reset Display Types</string>
+   </property>
+  </action>
+  <action name="actionPerspective">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Perspective</string>
+   </property>
+  </action>
+  <action name="actionOrthographic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Orthographic</string>
    </property>
   </action>
  </widget>

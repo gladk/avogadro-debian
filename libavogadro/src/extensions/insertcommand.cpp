@@ -3,7 +3,7 @@
 
   Copyright (C) 2007 Donald Ephraim Curtis
   Copyright (C) 2008,2009 Tim Vandermeersch
-  Copyright (C) 2008 Geoffrey Hutchison
+  Copyright (C) 2008-2011 Geoffrey Hutchison
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -32,6 +32,10 @@
 #include <avogadro/glwidget.h>
 #include <avogadro/toolgroup.h>
 
+#include <openbabel/mol.h>
+#include <openbabel/builder.h>
+
+#include <QDebug>
 
 namespace Avogadro {
 
@@ -41,19 +45,21 @@ namespace Avogadro {
 
   class InsertFragmentCommandPrivate {
     public:
-      InsertFragmentCommandPrivate() : 
-        molecule(0), 
-        generatedMolecule(0), widget(0) {};
-    
+      InsertFragmentCommandPrivate() :
+        molecule(0),
+        generatedMolecule(0), widget(0),
+        startAtom(-1), endAtom(-1) {};
+
     Molecule *molecule;
     Molecule moleculeCopy, generatedMolecule;
     GLWidget *widget;
+    int startAtom, endAtom; // if we're using OBBuilder::Connect()
   };
 
-  InsertFragmentCommand::InsertFragmentCommand(Molecule *molecule, 
+  InsertFragmentCommand::InsertFragmentCommand(Molecule *molecule,
                                                const Molecule &generatedMolecule,
                                                GLWidget *widget,
-                                               const QString commandName)
+                                               const QString commandName, int start, int end)
       : d(new InsertFragmentCommandPrivate)
   {
     setText(commandName);
@@ -61,6 +67,8 @@ namespace Avogadro {
     d->moleculeCopy = *molecule;
     d->generatedMolecule = generatedMolecule;
     d->widget = widget;
+    d->startAtom = start;
+    d->endAtom = end;
   }
 
   InsertFragmentCommand::~InsertFragmentCommand()
@@ -78,13 +86,61 @@ namespace Avogadro {
   {
     unsigned int initialAtoms = d->molecule->numAtoms() - 1;
     bool emptyMol = (d->molecule->numAtoms() == 0);
+    Atom *endAtom, *startAtom;
+
     if (emptyMol)
       initialAtoms = 0;
 
     *(d->molecule) += d->generatedMolecule;
+    // OK, now get the first atom of the newly placed fragment
+    // We need to do this before removing hydrogens
+    // (when all the indices will change)
+    if (d->endAtom == -1) {
+      // We'll connect to the first atom of the fragment
+      d->endAtom = initialAtoms + 1;
+      endAtom = d->molecule->atom(initialAtoms + 1);
+    } else {
+      endAtom = d->molecule->atomById(d->endAtom);
+    }
+
+    // Do we need to connect the fragment to the original molecule?
+    if (d->startAtom != -1 && !emptyMol) {
+      // OK, first, we should see if this atom is a hydrogen
+      startAtom = d->molecule->atomById(d->startAtom);
+      if (startAtom->isHydrogen()) {
+        // get the bonded non-hydrogen and remove this atom
+        Atom *hydrogen = startAtom;
+        if (hydrogen->neighbors().size()) {
+          startAtom = d->molecule->atomById(hydrogen->neighbors()[0]); // the first bonded atom to this "H"
+          d->molecule->removeAtom(hydrogen);
+        }
+      } else { // heavy atom -- remove attached hydrogens
+        d->molecule->removeHydrogens(startAtom);
+      }
+
+      // same procedure as the start atom -- check if endAtom is an H
+      if (endAtom->isHydrogen()) {
+        // get the bonded non-hydrogen and remove this atom
+        Atom *hydrogen = endAtom;
+        if (hydrogen->neighbors().size()) {
+          endAtom = d->molecule->atomById(hydrogen->neighbors()[0]); // the first bonded atom to this "H"
+          d->molecule->removeAtom(hydrogen);
+        }
+      } else { // heavy atom -- remove attached hydrogens
+        d->molecule->removeHydrogens(endAtom);
+      }
+
+      OpenBabel::OBMol mol = d->molecule->OBMol();
+      // Open Babel indexes atoms from 1, not 0
+      OpenBabel::OBBuilder::Connect(mol, startAtom->index() + 1, endAtom->index() + 1);
+      d->molecule->setOBMol(&mol);
+      d->molecule->addHydrogens();
+    }
+
+    // now tell the molecule to update
     d->molecule->update();
 
-    if (d->widget) {
+    if (d->widget && d->startAtom == -1) {
       QList<Primitive *> matchedAtoms;
 
       if (emptyMol) // we'll miss atom 0, so add it now
@@ -97,10 +153,13 @@ namespace Avogadro {
 
       d->widget->clearSelected();
       d->widget->setSelected(matchedAtoms, true);
-      d->widget->update();
 
       d->widget->toolGroup()->setActiveTool("Manipulate");
     }
+
+    // in either case, update the widget
+    if (d->widget)
+      d->widget->update();
   }
 
 } // end namespace Avogadro

@@ -41,7 +41,7 @@
 
   Bond::Bond(QObject *parent) : Primitive(BondType, parent),
     m_beginAtomId(FALSE_ID), m_endAtomId(FALSE_ID), m_order(1),
-    m_isAromatic(false)
+    m_isAromatic(false), m_customLabel("")
   {
     m_molecule = static_cast<Molecule*>(parent);
     m_id = ULONG_MAX;
@@ -154,6 +154,10 @@
   bool Bond::setOBBond(OpenBabel::OBBond *obbond)
   {
     m_order = obbond->GetBondOrder();
+
+    // Read custom label
+    if (obbond->HasData("label"))
+      m_customLabel = obbond->GetData("label")->GetValue().c_str();
     return true;
   }
 
@@ -162,9 +166,8 @@
     m_beginAtomId = other.m_beginAtomId;
     m_endAtomId = other.m_endAtomId;
     m_order = other.m_order;
+    m_customLabel = other.m_customLabel;
     return *this;
   }
 
 } // End namespace Avogadro
-
-#include "bond.moc"

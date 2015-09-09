@@ -26,8 +26,7 @@
 #include "periodictablescene_p.h"
 #include "elementitem_p.h"
 #include "elementdetail_p.h"
-
-#include <avogadro/elementtranslator.h>
+#include "elementtranslator.h"
 
 #include <openbabel/data.h>
 
@@ -163,8 +162,8 @@ namespace Avogadro {
     addItem(item);
 
     element = 103;
-
-    for (int i = 2; i < 16; ++i) {
+    // Goes up to element 118
+    for (int i = 2; i < 18; ++i) {
       item = new ElementItem(element++);
       item->setPos(i * width, 6 * height);
       addItem(item);
@@ -212,6 +211,18 @@ namespace Avogadro {
     QGraphicsScene::mouseReleaseEvent(event);
   }
 
-} // End namespace Avogadro
+  void PeriodicTableScene::changeElement(int element)
+  {
+    // Find the item to select
+    foreach(QGraphicsItem *item, items()) {
+      if (item->data(0).toInt() == element)
+        item->setSelected(true);
+      else
+        item->setSelected(false);
+    }
 
-#include "periodictablescene_p.moc"
+    // Also, update the detail
+    emit(elementChanged(element));
+  }
+
+} // End namespace

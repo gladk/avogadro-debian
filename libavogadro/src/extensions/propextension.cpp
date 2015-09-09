@@ -2,6 +2,7 @@
   propextension.h - Properties Plugin for Avogadro
 
   Copyright (C) 2007-2008 by Tim Vandermeersch
+  Some portions Copyright (C) 2009 by Konstantin Tokarev
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -27,19 +28,21 @@
 #include <avogadro/bond.h>
 #include <avogadro/primitivelist.h>
 
-#include <QAbstractTableModel>
-#include <QSortFilterProxyModel>
-#include <QHeaderView>
-#include <QAction>
-#include <QDialog>
-#include <QVBoxLayout>
+#include <QtCore/QAbstractTableModel>
+#include <QtGui/QSortFilterProxyModel>
+#include <QtGui/QSizePolicy>
+#include <QtGui/QHeaderView>
+#include <QtGui/QAction>
+#include <QtGui/QDialog>
+#include <QtGui/QScrollBar>
+#include <QtGui/QVBoxLayout>
 
-#include <QDebug>
-
-#include <openbabel/generic.h>
+#include <QtCore/QDebug>
 
 using namespace std;
 using namespace OpenBabel;
+using OpenBabel::OBGenericDataType::AngleData;
+using OpenBabel::OBGenericDataType::TorsionData;
 
 namespace Avogadro
 {
@@ -49,7 +52,7 @@ namespace Avogadro
     BondPropIndex,
     AnglePropIndex,
     TorsionPropIndex,
-    CartesianIndex,
+    //CartesianIndex,
     ConformerIndex
   };
 
@@ -87,10 +90,10 @@ namespace Avogadro
     action->setData(ConformerIndex);
     m_actions.append( action );
 
-    action = new QAction( this );
+    /*action = new QAction( this );
     action->setText( tr("Cartesian Editor..." ));
     action->setData(CartesianIndex);
-    m_actions.append( action );
+    m_actions.append( action );*/
   }
 
   PropertiesExtension::~PropertiesExtension()
@@ -113,10 +116,6 @@ namespace Avogadro
     case TorsionPropIndex:
     case ConformerIndex:
       return tr("&View") + '>' + tr("&Properties");
-    case CartesianIndex:
-    default:
-      return tr("&Build");
-      break;
     };
     return QString();
   }
@@ -134,6 +133,7 @@ namespace Avogadro
     PropertiesView  *view;
     QDialog *dialog = new QDialog(qobject_cast<QWidget *>(parent()));
     QVBoxLayout *layout = new QVBoxLayout(dialog);
+    dialog->setLayout(layout);
     // Don't show whitespace around the PropertiesView
     layout->setSpacing(0);
     layout->setContentsMargins(0,0,0,0);
@@ -176,7 +176,7 @@ namespace Avogadro
       // view will delete itself in PropertiesView::hideEvent using deleteLater().
       view = new PropertiesView(PropertiesView::TorsionType, widget);
       break;
-    case CartesianIndex: // cartesian editor
+    /*case CartesianIndex: // cartesian editor
       // m_angleModel will be deleted in PropertiesView::hideEvent using deleteLater().
       model = new PropertiesModel(PropertiesModel::CartesianType);
       model->setMolecule( m_molecule );
@@ -184,7 +184,7 @@ namespace Avogadro
       view = new PropertiesView(PropertiesView::CartesianType, widget);
       connect(m_molecule, SIGNAL(atomAdded(Atom*)), model, SLOT( atomAdded(Atom*)));
       connect(m_molecule, SIGNAL(atomRemoved(Atom*)), model, SLOT(atomRemoved(Atom*)));
-      break;
+      break;*/
     case ConformerIndex: // conformers
       // model will be deleted in PropertiesView::hideEvent using deleteLater().
       model = new PropertiesModel(PropertiesModel::ConformerType, dialog);
@@ -211,12 +211,21 @@ namespace Avogadro
     view->setMolecule( m_molecule );
     view->setWidget( widget );
     view->setModel( proxyModel );
-
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->resizeColumnsToContents();
     layout->addWidget(view);
     dialog->setWindowTitle(view->windowTitle());
     QSize dialogSize = dialog->size();
-    dialogSize.setWidth(550);
+    double width = view->horizontalHeader()->length()+view->verticalHeader()->width()+5;
+	if (model->rowCount() < 13) { // no scrollbar
+	  dialogSize.setHeight(view->horizontalHeader()->height()+model->rowCount()*30+5);
+      dialogSize.setWidth(width);
+    } else { // scrollbar is needed
+      dialogSize.setHeight(width/1.618);
+      dialogSize.setWidth(width+view->verticalScrollBar()->width());
+    }
     dialog->resize(dialogSize);
+	//dialog->setWindowFlags(Qt::Window);
     dialog->show();
 
     return undo;
@@ -241,9 +250,9 @@ namespace Avogadro
     case TorsionType:
       title = tr("Torsion Properties");
       break;
-    case CartesianType:
+    /*case CartesianType:
       title = tr("Cartesian Properties");
-      break;
+      break;*/
     case ConformerType:
       title = tr("Conformer Properties");
       break;
@@ -253,9 +262,12 @@ namespace Avogadro
     this->setWindowTitle(title);
 
     QHeaderView *horizontal = this->horizontalHeader();
-    horizontal->setResizeMode(QHeaderView::Stretch);
+    horizontal->setResizeMode(QHeaderView::Interactive);
+    horizontal->setMinimumSectionSize(75);
     QHeaderView *vertical = this->verticalHeader();
-    vertical->setResizeMode(QHeaderView::Stretch);
+    vertical->setResizeMode(QHeaderView::Interactive);
+    vertical->setMinimumSectionSize(30);
+    vertical->setDefaultAlignment(Qt::AlignCenter);
 
     // Don't allow selecting everything
     setCornerButtonEnabled(false);
@@ -274,8 +286,7 @@ namespace Avogadro
     foreach (const QModelIndex &index, selected.indexes()) {
       if (!index.isValid())
         return;
-
-      int rowNum = model()->headerData(index.row(), Qt::Vertical).toString().split(" ").at(1).toLong(&ok) - 1;
+      int rowNum = model()->headerData(index.row(), Qt::Vertical).toString().split(" ").last().toLong(&ok) - 1;
       if (!ok)
         return;
       
@@ -296,13 +307,14 @@ namespace Avogadro
         m_widget->setSelected(matchedPrimitives, true);
         m_widget->update();
       } else if (m_type == AngleType && model() != 0) {
-        OBMol mol = m_molecule->OBMol();
-        mol.FindAngles();
-        OBAngleData *ad = static_cast<OBAngleData *>(mol.GetData(OBGenericDataType::AngleData));
+        OBMol *mol = new OBMol(m_molecule->OBMol());
+        mol->FindAngles();
+        OBAngleData *ad = static_cast<OBAngleData *>(mol->GetData(AngleData));
         if (!ad)
           return;
         vector<vector<unsigned int> > angles;
         ad->FillAngleArray(angles);
+        delete mol;
 
         Atom *startAtom = m_molecule->atom((angles[rowNum][1]));
         Atom *vertex = m_molecule->atom((angles[rowNum][0]));
@@ -320,13 +332,14 @@ namespace Avogadro
         m_widget->setSelected(matchedPrimitives, true);
         m_widget->update();
       } else if (m_type == TorsionType && model() != 0) {
-        OBMol mol = m_molecule->OBMol();
-        mol.FindTorsions();
-        OBTorsionData *td = static_cast<OBTorsionData *>(mol.GetData(OBGenericDataType::TorsionData));
+        OBMol *mol = new OBMol(m_molecule->OBMol());
+        mol->FindTorsions();
+        OBTorsionData *td = static_cast<OBTorsionData *>(mol->GetData(TorsionData));
         if (!td)
           return;
         vector<vector<unsigned int> > torsions;
         td->FillTorsionArray(torsions);
+        delete mol;
 
         Atom *a = m_molecule->atom( torsions[rowNum][0] );
         Atom *b = m_molecule->atom( torsions[rowNum][1] );
@@ -336,13 +349,13 @@ namespace Avogadro
         Bond *bond2 = b->bond(c);
         Bond *bond3 = c->bond(d);
         
-        matchedPrimitives.append( a );
-        matchedPrimitives.append( b );
-        matchedPrimitives.append( c );
-        matchedPrimitives.append( d );
-        matchedPrimitives.append( bond1 );
-        matchedPrimitives.append( bond2 );
-        matchedPrimitives.append( bond3 );
+        matchedPrimitives.append(a);
+        matchedPrimitives.append(b);
+        matchedPrimitives.append(c);
+        matchedPrimitives.append(d);
+        matchedPrimitives.append(bond1);
+        matchedPrimitives.append(bond2);
+        matchedPrimitives.append(bond3);
 
         m_widget->clearSelected();
         m_widget->setSelected(matchedPrimitives, true);
@@ -370,12 +383,10 @@ namespace Avogadro
 
   void PropertiesView::hideEvent(QHideEvent *)
   {
-    if (m_widget)
+    if ((m_widget) && model()) {
       m_widget->clearSelected();
-
-    QAbstractItemModel *m_model = model();
-    if (m_model)
-      m_model->deleteLater();
+      model()->deleteLater();
+    }
 
     this->deleteLater();
   }

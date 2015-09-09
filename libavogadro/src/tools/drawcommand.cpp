@@ -353,7 +353,6 @@ namespace Avogadro {
         if (d->adjustHydrogens & AdjustHydrogens::AddOnRedo)
           d->postCommand->redo();
       }
-      d->atom->update();
       d->atom = 0;
 #ifdef DEBUG_COMMANDS
       qDebug() << "AddAtomDrawCommand::redo(id = " << d->id << ")";
@@ -384,7 +383,7 @@ namespace Avogadro {
     qDebug() << "AddAtomDrawCommand::redo(id = " << d->id << ")";
 #endif
 
-    atom->update();
+    d->molecule->update();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -403,13 +402,13 @@ namespace Avogadro {
       QList<unsigned long> neighbors;
       Eigen::Vector3d pos;
       unsigned int element;
-      int adjustHydrogens;
+      bool adjustHydrogens;
 
       QUndoCommand *preCommand;
       QUndoCommand *postCommand;
   };
 
-  DeleteAtomDrawCommand::DeleteAtomDrawCommand(Molecule *molecule, int index, int adjustHydrogens)
+  DeleteAtomDrawCommand::DeleteAtomDrawCommand(Molecule *molecule, int index, bool adjustHydrogens)
       : d(new DeleteAtomDrawCommandPrivate)
   {
     setText(QObject::tr("Delete Atom"));
@@ -675,6 +674,7 @@ namespace Avogadro {
       }
 
       d->bond = 0;
+      d->molecule->update();
       return;
     }
 
@@ -701,14 +701,17 @@ namespace Avogadro {
     Atom *endAtom = d->molecule->atomById(d->endAtomId);
     Q_CHECK_PTR( endAtom );
 
-    if (!beginAtom || !endAtom)
+    if (!beginAtom || !endAtom) {
+      d->molecule->update();
       return;
+    }
 
     Bond *bond;
     if (d->id != FALSE_ID) {
       bond = d->molecule->addBond(d->id);
       Q_CHECK_PTR( bond );
-    } else {
+    }
+    else {
       bond = d->molecule->addBond();
       Q_CHECK_PTR( bond );
       d->id = bond->id();
@@ -750,10 +753,10 @@ namespace Avogadro {
       Molecule *molecule;
       Molecule moleculeCopy;
       unsigned long id;
-      int adjustHydrogens;
+      bool adjustHydrogens;
   };
 
-  DeleteBondDrawCommand::DeleteBondDrawCommand(Molecule *molecule, int index, int adjustHydrogens) : d(new DeleteBondDrawCommandPrivate)
+  DeleteBondDrawCommand::DeleteBondDrawCommand(Molecule *molecule, int index, bool adjustHydrogens) : d(new DeleteBondDrawCommandPrivate)
   {
     setText(QObject::tr("Delete Bond"));
     d->molecule = molecule;
@@ -817,14 +820,14 @@ namespace Avogadro {
       Molecule *molecule;
       unsigned int newElement, oldElement;
       unsigned long id;
-      int adjustHydrogens;
+      bool adjustHydrogens;
 
       QUndoCommand *preCommand;
       QUndoCommand *postCommand;
   };
 
   ChangeElementDrawCommand::ChangeElementDrawCommand(Molecule *molecule, Atom *atom, unsigned int oldElement,
-      int adjustHydrogens) : d(new ChangeElementDrawCommandPrivate)
+      bool adjustHydrogens) : d(new ChangeElementDrawCommandPrivate)
   {
 #ifdef DEBUG_COMMANDS
     qDebug() << "ChangeElementDrawCommand(id = " << atom->id() << ", old = " << oldElement
@@ -838,8 +841,8 @@ namespace Avogadro {
     d->id = atom->id();
     d->adjustHydrogens = adjustHydrogens;
   }
-
-  void ChangeElementDrawCommand::setAdjustHydrogens(int adjustHydrogens)
+    
+  void ChangeElementDrawCommand::setAdjustHydrogens(bool adjustHydrogens)
   {
     d->adjustHydrogens = adjustHydrogens;
   }
@@ -931,14 +934,14 @@ namespace Avogadro {
       Molecule *molecule;
       unsigned long id;
       unsigned int addBondOrder, oldBondOrder;
-      int adjustHydrogens;
+      bool adjustHydrogens;
 
       QUndoCommand *preCommand;
       QUndoCommand *postCommand;
   };
 
   ChangeBondOrderDrawCommand::ChangeBondOrderDrawCommand(Molecule *molecule, Bond *bond,
-      unsigned int oldBondOrder, int adjustHydrogens) : d(new ChangeBondOrderDrawCommandPrivate)
+      unsigned int oldBondOrder, bool adjustHydrogens) : d(new ChangeBondOrderDrawCommandPrivate)
   {
 #ifdef DEBUG_COMMANDS
     qDebug() << "ChangeBondOrderDrawCommand(id = " << bond->id() << ", old = " << oldBondOrder
@@ -1024,44 +1027,6 @@ namespace Avogadro {
 
       d->molecule->update();
     }
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Insert Fragment
-  /////////////////////////////////////////////////////////////////////////////
-
-  class InsertFragmentCommandPrivate {
-    public:
-      InsertFragmentCommandPrivate() : molecule(0), generatedMolecule(0) {};
-
-      Molecule *molecule;
-      Molecule moleculeCopy, generatedMolecule;
-  };
-
-  InsertFragmentCommand::InsertFragmentCommand(Molecule *molecule, Molecule &generatedMolecule)
-      : d(new InsertFragmentCommandPrivate)
-  {
-    setText(QObject::tr("Insert Fragment"));
-    d->molecule = molecule;
-    d->moleculeCopy = *molecule;
-    d->generatedMolecule = generatedMolecule;
-  }
-
-  InsertFragmentCommand::~InsertFragmentCommand()
-  {
-    delete d;
-  }
-
-  void InsertFragmentCommand::undo()
-  {
-    *(d->molecule) = d->moleculeCopy;
-    d->molecule->update();
-  }
-
-  void InsertFragmentCommand::redo()
-  {
-    *(d->molecule) += d->generatedMolecule;
-    d->molecule->update();
   }
 
 } // end namespace Avogadro

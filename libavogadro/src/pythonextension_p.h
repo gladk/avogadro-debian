@@ -68,6 +68,7 @@ namespace Avogadro {
 
     public Q_SLOTS:
       void dockWidgetDestroyed();
+      bool paint(GLWidget *widget);
 
     private:
       void loadScript(const QString &filename);

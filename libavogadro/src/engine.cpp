@@ -301,7 +301,6 @@ namespace Avogadro {
   {
     setEnabled(settings.value("enabled", false).toBool());
     QString engineID = settings.value("engineID", QString()).toString();
-    QString aliasSetting = settings.value("alias", QString()).toString();
     if (engineID == identifier()) {
       setAlias(settings.value("alias", QString()).toString());
       setDescription(settings.value("description", QString()).toString());
@@ -377,5 +376,3 @@ namespace Avogadro {
       return m_molecule->bonds();
   }
 }
-
-#include "engine.moc"

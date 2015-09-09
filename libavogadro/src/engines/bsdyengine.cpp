@@ -85,9 +85,26 @@ namespace Avogadro
     return false;
   } */
 
+
+  // Protect globally declared functions in an anonymous namespace
+  namespace
+  {
+    double radiusCovalent(const Atom *atom)
+    {
+      return OpenBabel::etab.GetCovalentRad(atom->atomicNumber());
+    }
+
+    double radiusVdW(const Atom *atom)
+    {
+      return OpenBabel::etab.GetVdwRad(atom->atomicNumber());
+    }
+  } // End of anonymous namespace
+
+
   BSDYEngine::BSDYEngine(QObject *parent) : Engine(parent),
-      m_settingsWidget(0), m_atomRadiusPercentage(0.3), m_bondRadius(0.1),
-      m_showMulti(2), m_alpha(1.)
+      m_settingsWidget(0), m_atomRadiusPercentage(0.3), m_atomRadiusScale(50.0),
+      m_bondRadius(0.1), m_bondRadiusScale(40.0),
+      m_atomRadiusType(1), m_showMulti(2), m_alpha(1.), pRadius(radiusVdW)
   {  }
 
   Engine *BSDYEngine::clone() const
@@ -97,6 +114,7 @@ namespace Avogadro
     engine->m_atomRadiusPercentage = m_atomRadiusPercentage;
     engine->m_bondRadius = m_bondRadius;
     engine->m_showMulti = m_showMulti;
+    engine->m_atomRadiusType = m_atomRadiusType;
     engine->m_alpha = m_alpha;
     engine->setEnabled(isEnabled());
 
@@ -142,11 +160,17 @@ namespace Avogadro
       if (m_showMulti) order = b->order();
 
       map->setFromPrimitive(atom1);
-      pd->painter()->setColor( map );
+      if (atom1->customColorName().isEmpty())
+        pd->painter()->setColor( map );
+      else
+        pd->painter()->setColor(atom1->customColorName());
       pd->painter()->drawMultiCylinder( v1, v3, m_bondRadius, order, shift );
 
       map->setFromPrimitive(atom2);
-      pd->painter()->setColor( map );
+      if (atom2->customColorName().isEmpty())
+        pd->painter()->setColor( map );
+      else
+        pd->painter()->setColor(atom2->customColorName());
       pd->painter()->drawMultiCylinder( v3, v2, m_bondRadius, order, shift );
     }
 
@@ -156,7 +180,10 @@ namespace Avogadro
     // Render the atoms
     foreach(const Atom *a, atoms()) {
       map->setFromPrimitive(a);
-      pd->painter()->setColor(map);
+      if (a->customColorName().isEmpty())
+        pd->painter()->setColor( map );
+      else
+        pd->painter()->setColor(a->customColorName());
       pd->painter()->drawSphere(a->pos(), radius(a));
     }
 
@@ -174,21 +201,29 @@ namespace Avogadro
     // Render selections when not renderquick
     Color *map = colorMap();
     if (!map) map = pd->colorMap();
+    Color selectionMap;
+    selectionMap.setToSelectionColor();
 
     glDisable( GL_NORMALIZE );
     glEnable( GL_RESCALE_NORMAL );
     foreach(const Atom *a, atoms()) {
       // First render the atom if it is transparent.
       if (m_alpha < 0.999 && m_alpha > 0.001) {
-        map->setFromPrimitive(a);
-        map->setAlpha(m_alpha);
-        pd->painter()->setColor(map);
+        if (a->customColorName().isEmpty()) {
+          map->setFromPrimitive(a);
+          map->setAlpha(m_alpha);
+          pd->painter()->setColor( map );
+        }
+        else {
+          QColor customColor (a->customColorName());
+          customColor.setAlphaF(m_alpha);
+          pd->painter()->setColor(&customColor);
+        }
         pd->painter()->drawSphere(a->pos(), radius(a));
       }
       // If the atom is selected render the selection
       if (pd->isSelected(a)) {
-        map->setToSelectionColor();
-        pd->painter()->setColor(map);
+        pd->painter()->setColor(&selectionMap);
         pd->painter()->drawSphere(a->pos(), SEL_ATOM_EXTRA_RADIUS + radius(a));
       }
     }
@@ -219,21 +254,34 @@ namespace Avogadro
 
       // The "inner" bond has to be rendered first.
       if (m_alpha < 0.999 && m_alpha > 0.001) {
-        map->setFromPrimitive(atom1);
-        map->setAlpha(m_alpha);
-        pd->painter()->setColor( map );
+        if (atom1->customColorName().isEmpty()) {
+          map->setFromPrimitive(atom1);
+          map->setAlpha(m_alpha);
+          pd->painter()->setColor( map );
+        }
+        else {
+          QColor customColor (atom1->customColorName());
+          customColor.setAlphaF(m_alpha);
+          pd->painter()->setColor(&customColor);
+        }
         pd->painter()->drawMultiCylinder( v1, v3, m_bondRadius, order, shift );
 
-        map->setFromPrimitive(atom2);
-        map->setAlpha(m_alpha);
-        pd->painter()->setColor( map );
+        if (atom2->customColorName().isEmpty()) {
+          map->setFromPrimitive(atom2);
+          map->setAlpha(m_alpha);
+          pd->painter()->setColor( map );
+        }
+        else {
+          QColor customColor (atom2->customColorName());
+          customColor.setAlphaF(m_alpha);
+          pd->painter()->setColor(&customColor);
+        }
         pd->painter()->drawMultiCylinder( v3, v2, m_bondRadius, order, shift );
       }
 
       // Render the selected bond.
       if (pd->isSelected(b)) {
-        map->setToSelectionColor();
-        pd->painter()->setColor(map);
+        pd->painter()->setColor(&selectionMap);
         pd->painter()->drawMultiCylinder( v1, v2,
                            SEL_BOND_EXTRA_RADIUS + m_bondRadius, order, shift );
       }
@@ -326,20 +374,34 @@ namespace Avogadro
 
   inline double BSDYEngine::radius(const Atom *atom) const
   {
-    if (atom->atomicNumber())
-      return OpenBabel::etab.GetVdwRad(atom->atomicNumber()) * m_atomRadiusPercentage;
+    if (atom->customRadius())
+      return atom->customRadius()* m_atomRadiusPercentage;
+    else {
+      if (atom->atomicNumber())
+        return pRadius(atom) * m_atomRadiusPercentage;
+    }
     return m_atomRadiusPercentage;
   }
 
-  void BSDYEngine::setAtomRadiusPercentage( int percent )
+  void BSDYEngine::setAtomRadiusPercentage(int value)
   {
-    m_atomRadiusPercentage = 0.02 * percent;
+    m_atomRadiusPercentage = value / m_atomRadiusScale;
     emit changed();
   }
 
-  void BSDYEngine::setBondRadius( int value )
+  void BSDYEngine::setAtomRadiusType(int type)
   {
-    m_bondRadius = value * 0.05;
+    m_atomRadiusType = type;
+    if (type == 0)
+      pRadius = radiusCovalent;
+    else
+      pRadius = radiusVdW;
+    emit changed();
+  }
+
+  void BSDYEngine::setBondRadius(int value)
+  {
+    m_bondRadius = value / m_bondRadiusScale;
     emit changed();
   }
 
@@ -394,6 +456,8 @@ namespace Avogadro
       m_settingsWidget = new BSDYSettingsWidget();
       connect(m_settingsWidget->atomRadiusSlider, SIGNAL(valueChanged(int)),
               this, SLOT(setAtomRadiusPercentage(int)));
+      connect(m_settingsWidget->combo_radius, SIGNAL(currentIndexChanged(int)),
+              this, SLOT(setAtomRadiusType(int)));
       connect(m_settingsWidget->bondRadiusSlider, SIGNAL(valueChanged(int)),
               this, SLOT(setBondRadius(int)));
       connect(m_settingsWidget->showMulti, SIGNAL(stateChanged(int)),
@@ -402,10 +466,13 @@ namespace Avogadro
               this, SLOT(setOpacity(int)));
       connect(m_settingsWidget, SIGNAL(destroyed()),
               this, SLOT(settingsWidgetDestroyed()));
-      m_settingsWidget->atomRadiusSlider->setValue(int(50*m_atomRadiusPercentage));
-      m_settingsWidget->bondRadiusSlider->setValue(int(20*m_bondRadius));
+      m_settingsWidget->atomRadiusSlider
+          ->setValue(int(m_atomRadiusScale * m_atomRadiusPercentage));
+      m_settingsWidget->bondRadiusSlider
+          ->setValue(int(m_bondRadiusScale * m_bondRadius));
       m_settingsWidget->showMulti->setCheckState((Qt::CheckState)m_showMulti);
-      m_settingsWidget->opacitySlider->setValue(int(20*m_alpha));
+      m_settingsWidget->opacitySlider->setValue(int(20 * m_alpha));
+      m_settingsWidget->combo_radius->setCurrentIndex(m_atomRadiusType);
     }
     return m_settingsWidget;
   }
@@ -419,30 +486,36 @@ namespace Avogadro
   void BSDYEngine::writeSettings(QSettings &settings) const
   {
     Engine::writeSettings(settings);
-    settings.setValue("atomRadius", 50*m_atomRadiusPercentage);
-    settings.setValue("bondRadius", 20*m_bondRadius);
+    settings.setValue("atomRadius",
+                      m_atomRadiusScale * m_atomRadiusPercentage);
+    settings.setValue("radiusType", m_atomRadiusType);
+    settings.setValue("bondRadius",
+                      m_bondRadiusScale * m_bondRadius);
     settings.setValue("showMulti", m_showMulti);
-    settings.setValue("opacity", 20*m_alpha);
+    settings.setValue("opacity", 20 * m_alpha);
   }
 
   void BSDYEngine::readSettings(QSettings &settings)
   {
     Engine::readSettings(settings);
-    setAtomRadiusPercentage(settings.value("atomRadius", 3).toInt());
-    setBondRadius(settings.value("bondRadius", 2).toInt());
+    setAtomRadiusPercentage(settings.value("atomRadius", 25).toDouble());
+    setBondRadius(settings.value("bondRadius", 4).toDouble());
     setShowMulti(settings.value("showMulti", 2).toInt());
     setOpacity(settings.value("opacity", 100).toInt());
+    setAtomRadiusType(settings.value("radiusType", 1).toInt());
 
     if (m_settingsWidget) {
-      m_settingsWidget->atomRadiusSlider->setValue(int(50*m_atomRadiusPercentage));
-      m_settingsWidget->bondRadiusSlider->setValue(int(20*m_bondRadius));
+      m_settingsWidget->atomRadiusSlider
+          ->setValue(int(m_atomRadiusScale * m_atomRadiusPercentage));
+      m_settingsWidget->combo_radius->setCurrentIndex(m_atomRadiusType);
+      m_settingsWidget->bondRadiusSlider
+          ->setValue(int(m_bondRadiusScale * m_bondRadius));
       m_settingsWidget->showMulti->setCheckState((Qt::CheckState)m_showMulti);
-      m_settingsWidget->opacitySlider->setValue(int(20*m_alpha));
+      m_settingsWidget->opacitySlider->setValue(int(20 * m_alpha));
+      m_settingsWidget->combo_radius->setCurrentIndex(m_atomRadiusType);
     }
   }
 
 }
 
-#include "bsdyengine.moc"
-// This is a static engine...
-// Q_EXPORT_PLUGIN2( bsdyengine, Avogadro::BSDYEngineFactory )
+ Q_EXPORT_PLUGIN2( bsdyengine, Avogadro::BSDYEngineFactory )

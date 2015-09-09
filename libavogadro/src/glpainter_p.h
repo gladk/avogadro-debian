@@ -4,6 +4,8 @@
   Copyright (C) 2007 Benoit Jacob
   Copyright (C) 2007 Donald Ephraim Curtis
   Copyright (C) 2007-2009 Marcus D. Hanwell
+  Copyright (C) 2010 Konstantin Tokarev
+  Copyright (C) 2011 David C. Lonie
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -109,6 +111,12 @@ namespace Avogadro
      * @param alpha component of the color.
      */
     void setColor(float red, float green, float blue, float alpha = 1.0);
+
+    /**
+     * Set the color to paint elements by its name 
+     * @param name name of the color to be used
+     */    
+    void setColor(QString name);
 
     /**
      * Draws a sphere, leaving the Painter choose the appropriate detail level based on the
@@ -284,6 +292,15 @@ namespace Avogadro
                            double lineWidth);
 
     /**
+     * Draws a closed line loop connecting each of the points in \a points,
+     *
+     * @param points A list of consecutive points defining the line loop
+     * @param lineWidth the thickness of the line the pentagon will be drawn with.
+     */
+    void drawLineLoop(const QList<Eigen::Vector3d> & points,
+                      const double lineWidth);
+
+    /**
      * Draws a continuous mesh of triangles.
      * @param mesh the mesh to be drawn.
      * @param mode the mode to use. 0 = filled, 1 = lines and 2 = points.
@@ -344,6 +361,8 @@ namespace Avogadro
      */
     int drawText(const Eigen::Vector3d & pos, const QString &string);
 
+    int drawText(const Eigen::Vector3d &pos, const QString &string, const QFont &font);
+
     /**
      * Placeholder to draw a box.
      * @param corner1 First corner of the box.
@@ -352,6 +371,75 @@ namespace Avogadro
      */
     void drawBox(const Eigen::Vector3d &corner1,
                  const Eigen::Vector3d &corner2);
+
+    /**
+     * @overload
+     *
+     * Draws the outline of a parallelpiped at \a offset with three
+     * vectors \a v1, \a v2, and \a v3 defining the edges.
+     *
+     * @verbatim
+       6------8  c1 = origin
+      /:     /|  c2 = origin + v1
+     / :    / |  c3 = origin + v2
+    /  4---/--7  c4 = origin + v3
+   /  /   /  /   c5 = origin + v1 + v2
+  3------5  /    c6 = origin + v2 + v3
+  | /    | /     c7 = origin + v1 + v3
+  |/     |/      c8 = origin + v1 + v2 + v3
+  1------2
+@endverbatim
+     *
+     * @param offset Corner of the box.
+     * @param v1 Edge of box, pointing relative to \a offset.
+     * @param v2 Edge of box, pointing relative to \a offset.
+     * @param v3 Edge of box, pointing relative to \a offset.
+     * @param linewidth The width of the line.
+     */
+    void drawBoxEdges(const Eigen::Vector3d &offset,
+                      const Eigen::Vector3d &v1,
+                      const Eigen::Vector3d &v2,
+                      const Eigen::Vector3d &v3,
+                      const double linewidth);
+
+    /**
+     * Draws the outline of a box with the given corners.
+     * @verbatim
+       6------8
+      /:     /|
+     / :    / |
+    /  4---/--7
+   /  /   /  /
+  3------5  /
+  | /    | /
+  |/     |/
+  1------2
+@endverbatim
+     *
+     * @warning The default implementaion of this function simply
+     * calls drawLine repeatedly to draw the specified shape. This may
+     * be very inefficent on certain paint devices and should be
+     * reimplemented in such cases.
+     *
+     * @param c1 Corner
+     * @param c2 Corner
+     * @param c3 Corner
+     * @param c4 Corner
+     * @param c5 Corner
+     * @param c6 Corner
+     * @param c7 Corner
+     * @param c8 Corner
+     * @param linewidth The width of the line.
+     */
+    void drawBoxEdges(const Eigen::Vector3d &c1,
+                      const Eigen::Vector3d &c2,
+                      const Eigen::Vector3d &c3,
+                      const Eigen::Vector3d &c4,
+                      const Eigen::Vector3d &c5,
+                      const Eigen::Vector3d &c6,
+                      const Eigen::Vector3d &c7,
+                      const Eigen::Vector3d &c8,
+                      const double linewidth);
 
     /**
      * Placeholder to draw a torus.
@@ -446,14 +534,14 @@ namespace Avogadro
      * Sets this color to be the one used by OpenGL for rendering
      * when lighting is disabled.
      */
-    void apply(const Color3f &color);
+    inline void apply(const Color3f &color);
 
     /**
      * Applies nice OpenGL materials using this color as the
      * diffuse color while using different shades for the ambient and
      * specular colors. This is only useful if lighting is enabled.
      */
-    void applyAsMaterials(const Color3f &color, float alpha = 1.0);
+    inline void applyAsMaterials(const Color3f &color, float alpha = 1.0);
   };
 } // end namespace Avogadro
 

@@ -29,21 +29,19 @@
 
 #include <avogadro/global.h>
 
+#include <Eigen/Core>
+
 #ifdef ENABLE_GLSL
   #include <GL/glew.h>
 #endif
-#include <QGLWidget>
 
-#include <avogadro/glhit.h>
+#include <QtOpenGL/QGLWidget>
 
-#include <QThread>
-
-#include <Eigen/Core>
-
-class QUndoStack;
-class QMouseEvent;
 class QGLContext;
+class QLabel;
+class QMouseEvent;
 class QSettings;
+class QUndoStack;
 
 namespace Avogadro {
 
@@ -55,10 +53,13 @@ namespace Avogadro {
   class Painter;
   class Tool;
   class ToolGroup;
+  class Extension;
   class Color;
   class Engine;
   class Painter;
   class PrimitiveList;
+
+  bool engineLessThan( const Engine* lhs, const Engine* rhs );
 
   /**
    * @class GLWidget glwidget.h <avogadro/glwidget.h>
@@ -78,6 +79,7 @@ namespace Avogadro {
    * one queue containing only the atoms which would allow bonds and atoms
    * to be rendered by two different engines.
    */
+  class GLHit;
   class GLThread;
   class GLWidgetPrivate;
   class GLPainterDevice;
@@ -118,6 +120,7 @@ namespace Avogadro {
        */
       ~GLWidget();
 
+      void renderText(double x, double y, double z, const QString &str, const QFont &font, int listBase=2000);
       /**
        * @param enabled True if quick render is desired when moving the view.
        */
@@ -302,6 +305,17 @@ namespace Avogadro {
       bool renderDebug();
 
       /**
+       * Set to render the modelview matrix along with the debugging overlay
+       */
+      void setRenderModelViewDebug(bool renderModelViewDebug);
+
+      /**
+       * @return true if the modelview matrix is to printed on the debug
+       * overlay
+       */
+      bool renderModelViewDebug() const;
+
+      /**
        * Set the ToolGroup of the GLWidget.
        */
       void setToolGroup(ToolGroup *toolGroup);
@@ -310,6 +324,11 @@ namespace Avogadro {
        * @return the ToolGroup of the GLWidget.
        */
       ToolGroup * toolGroup() const;
+
+      /**
+       * Set the extensions.
+       */
+      void setExtensions(QList<Extension*> extensions);
 
       /** Returns the Painter of this widget. For instance, to draw a sphere in this
         * widget, you could do:
@@ -428,6 +447,18 @@ namespace Avogadro {
       void setUnitCells(int a, int b, int c);
 
       /**
+       * Set the color of unit cells
+       * @param c color of unit cells
+       */
+       void setUnitCellColor(const QColor c);
+
+      /**
+         * @param b Whether to draw lattice edges for all repeated unit cells
+         * (false) or only the original one (true).
+         */
+       void setOnlyRenderOriginalUnitCell(bool b);
+
+       /**
        * Clear the unit cell data.
        */
       void clearUnitCell();
@@ -435,17 +466,49 @@ namespace Avogadro {
       /**
        * @return The number of unit cells to display along the a axis.
        */
-      int aCells();
+      int aCells() const;
 
       /**
        * @return The number of unit cells to display along the b axis.
        */
-      int bCells();
+      int bCells() const;
 
       /**
        * @return The number of unit cells to display along the c axis.
        */
-      int cCells();
+      int cCells() const;
+
+      /**
+       * @return The color of the rendered unit cell.
+       */
+      Color unitCellColor() const;
+
+      /**
+       * @return Whether to draw lattice edges for all repeated unit cells
+       * (false) or only the original one (true).
+       */
+      bool onlyRenderOriginalUnitCell();
+
+      /**
+       * The type of projection
+       */
+      enum ProjectionType
+      {
+        Perspective   = 1,
+        Orthographic  = 2
+      };
+
+      /**
+       * Set the type of projection
+       * @param type type of projection
+       */
+      void setProjection(ProjectionType type);
+
+      /**
+        * Get the type of projection
+        * @return type of projection
+        */
+      ProjectionType projection() const;
 
       /**
        * Static pointer to the current GLWidget.
@@ -539,6 +602,12 @@ namespace Avogadro {
       virtual void wheelEvent(QWheelEvent * event);
 
       /**
+       * Virtual function reaction to a mouse double-click while in the GL rendering area.
+       * @since version 1.1
+       */
+      virtual void mouseDoubleClickEvent(QMouseEvent *event);
+
+      /**
        * Response to key press events.
        * @param event the key event information
        */
@@ -574,14 +643,49 @@ namespace Avogadro {
       virtual void renderCrystalAxes();
 
       /**
+       * Renders a parallelepiped with defining edge vectors \a v1, \a
+       * v2, \a v3, with offset \a offset. If the cube intersects the
+       * viewing volume's near-plane, an appropriate line-loop is
+       * rendered at the intersection to prevent "missing corners"
+       * that are visually disturbing.
+       *
+       * See
+       * http://davidlonie.blogspot.com/2011/04/gracefully-clipping-parallelepiped-in.html
+       * for pictures of what this does.
+       *
+       * @param offset Origin for edge vectors
+       * @param v1 Vector defining one edge starting from \a offset
+       * @param v2 Vector defining a second edge starting from \a offset
+       * @param v3 Vector defining a third edge starting from \a offset
+       * @param lineWidth Width of the lines used to draw the edges
+       *
+       * @return True if the parallelepiped is clipped, false otherwise.
+       */
+      virtual bool renderClippedBox(const Eigen::Vector3d &offset,
+                                    const Eigen::Vector3d &v1,
+                                    const Eigen::Vector3d &v2,
+                                    const Eigen::Vector3d &v3,
+                                    double lineWidth );
+
+      /**
        * Render x, y, z axes as an overlay on the bottom left of the widget.
        */
       virtual void renderAxesOverlay();
 
       /**
-       * Render a debug overlay with extra debug information on the GLWidget.
+       * @deprecated Use renderTextOverlay instead.
+       * @sa addTextOverlay
+       * @sa setRenderDebug
        */
       virtual void renderDebugOverlay();
+
+      /**
+       * Render a text overlay. This renders all valid strings added
+       * by addTextOverlay, as well as debug info if needed.
+       * @sa addTextOverlay
+       * @sa setRenderDebug
+       */
+      virtual void renderTextOverlay();
 
       /**
        * This will return a painting condition that must be met each time
@@ -604,6 +708,9 @@ namespace Avogadro {
        * Compute the average frames per second over the last 200+ ms.
        */
       inline double computeFramesPerSecond();
+
+      /** Read settings and create required engines */
+      void loadEngines(QSettings &settings);
 
       bool              m_glslEnabled;
       Tool*             m_navigateTool; /// NavigateTool is a super tool
@@ -680,6 +787,38 @@ namespace Avogadro {
        */
       void toolsDestroyed();
 
+      /**
+       * Adds the QLabel @a label to the list of text drawn in the
+       * text overlay.
+       *
+       * @note The GLWidget does not take ownership of the label, but
+       * retains a QPointer to it. When the QLabel's text should no
+       * longer be rendered, simply delete the QLabel elsewhere and
+       * call render().
+       *
+       * @sa renderTextOverlay
+       */
+      void addTextOverlay(QLabel* label);
+
+      /**
+       * @overload
+       *
+       * Adds the QLabels in @a labels to the list of strings drawn in the
+       * text overlay.
+       *
+       * @note The GLWidget does not take ownership of the string, but
+       * retains a QPointer to it. When the QLabel's text should no
+       * longer be rendered, simply delete the QLabel elsewhere and
+       * call render().
+       *
+       * @note Call this functions instead of repeatedly calling
+       * addTextOverlay(QLabel*) guarantees that all the strings will
+       * be drawn consecutively.
+       *
+       * @sa renderTextOverlay
+       */
+      void addTextOverlay(const QList<QLabel*> &labels);
+
     Q_SIGNALS:
       /**
        * Signal for the mouse press event which is passed to the tools.
@@ -695,6 +834,11 @@ namespace Avogadro {
        * Signal for the mouse move event which is passed to the tools.
        */
       void mouseMove( QMouseEvent * event );
+
+      /**
+       * Signal for the mouse double-click event which is passed to the tools.
+       */
+      void mouseDoubleClick( QMouseEvent * event );
 
       /**
        * Signal for the mouse wheel event which is passed to the tools.
@@ -736,6 +880,7 @@ namespace Avogadro {
        * Signal that the unit cell axis display has changed
        */
       void unitCellAxesRenderChanged(bool enabled);
+
 
   };
 

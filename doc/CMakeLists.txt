@@ -1,3 +1,29 @@
+# Doxygen related code
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+
+  set(TAGFILES
+    "${QT_DOC_DIR}/html/qt.tags=http://doc.qt.nokia.com/4.${QT_VERSION_MINOR}")
+  set(TAGFILES
+    "${TAGFILES} ${CMAKE_CURRENT_BINARY_DIR}/openbabel.tags=http://openbabel.org/api")
+
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+
+  # Write out a cmake script to download the Open Babel tag file
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/DownloadOBTag.cmake
+"file(DOWNLOAD http://openbabel.org/api/openbabel.tags
+  ${CMAKE_CURRENT_BINARY_DIR}/openbabel.tags SHOW_PROGRESS)")
+
+  add_custom_target(download_ob_tagfile
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/DownloadOBTag.cmake)
+
+  add_custom_target(doxygen
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/api
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    DEPENDS download_ob_tagfile)
+endif()
+
 # find the required tools
 find_program(DOCBOOK2PDF_EXECUTABLE docbook2pdf)
 find_program(DOCBOOK2HTML_EXECUTABLE docbook2html)
@@ -28,6 +54,6 @@ endif( DOCBOOK2PDF_EXECUTABLE AND DOCBOOK2HTML_EXECUTABLE )
 
 # Manpages
 if(UNIX)
-  file(GLOB man_1 *.1)
-  install(FILES ${man_1} DESTINATION share/man/man1)
+   file(GLOB man_1 *.1)
+   install(FILES ${man_1} DESTINATION share/man/man1)
 endif(UNIX)

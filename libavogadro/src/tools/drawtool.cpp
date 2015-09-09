@@ -28,16 +28,18 @@
 #include "drawtool.h"
 #include "drawcommand.h"
 
-#include <avogadro/periodictableview.h>
 #include <avogadro/navigate.h>
 #include <avogadro/primitive.h>
 #include <avogadro/atom.h>
 #include <avogadro/bond.h>
 #include <avogadro/molecule.h>
 #include <avogadro/color.h>
+#include <avogadro/glhit.h>
 #include <avogadro/glwidget.h>
 #include <avogadro/undosequence.h>
+
 #include <avogadro/elementtranslator.h>
+#include <avogadro/periodictableview.h>
 
 #include <Eigen/Core>
 
@@ -47,6 +49,7 @@
 
 #include <QtPlugin>
 #include <QAction>
+#include <QApplication>
 #include <QLabel>
 #include <QCheckBox>
 #include <QVBoxLayout>
@@ -73,7 +76,7 @@ namespace Avogadro {
                                         m_prevAtomElement(0),
                                         m_prevBond(0),
                                         m_prevBondOrder(0),
-                                        m_addHydrogens(2),
+                                        m_addHydrogens(true),
                                         m_hydrogenCommand(0),
                                         m_comboElements(0),
                                         m_addHydrogensCheck(0),
@@ -84,7 +87,7 @@ namespace Avogadro {
     action->setIcon(QIcon(QString::fromUtf8(":/draw/draw.png")));
     action->setToolTip(tr("Draw Tool (F8)\n\n"
                           "Left Mouse: \tClick and Drag to create Atoms and Bonds\n"
-                          "Right Mouse: Delete Atom"));
+                          "Right Mouse: \tDelete Atom"));
     action->setShortcut(Qt::Key_F8);
 
     m_forceField = OBForceField::FindForceField("MMFF94");
@@ -496,8 +499,10 @@ namespace Avogadro {
       }
       else if (m_beginAtom) {
         if (m_hydrogenCommand) {
-          dynamic_cast<ChangeElementDrawCommand*>(m_hydrogenCommand)->setAdjustHydrogens(m_addHydrogens);
-          undo = m_hydrogenCommand;
+            ChangeElementDrawCommand* cmd = dynamic_cast<ChangeElementDrawCommand*>(m_hydrogenCommand);
+            if(cmd)
+              cmd->setAdjustHydrogens(m_addHydrogens);
+          undo = cmd;
         // beginAtom exists, but we have no bond, we change the element
         }
         else if (m_beginAtom->atomicNumber() != m_prevAtomElement) {
@@ -596,22 +601,30 @@ namespace Avogadro {
     int bondOrder = 0;
     switch (event->key()) {
     case Qt::Key_1:
+    case Qt::Key_hyphen: // -
+    case Qt::Key_AsciiTilde: // ~
       bondOrder = 1;
       break;
     case Qt::Key_2:
+    case Qt::Key_Equal: // =
       bondOrder = 2;
       break;
     case Qt::Key_3:
+    case Qt::Key_NumberSign: // #
       bondOrder = 3;
       break;
     case Qt::Key_4:
+    case Qt::Key_Dollar: // $
       bondOrder = 4;
       break;
     default:
       break;
     }
+
     if (bondOrder) {
       setBondOrder(bondOrder);
+      if (bondOrder < 4)
+        m_comboBondOrder->setCurrentIndex(bondOrder - 1);
       event->accept();
       return 0;
     }
@@ -692,6 +705,7 @@ namespace Avogadro {
                 this, SLOT(customElementChanged(int)));
       }
       m_periodicTable->show();
+      m_periodicTable->setFocus(Qt::PopupFocusReason); // give it keyboard focus
     }
   }
 
@@ -756,7 +770,7 @@ namespace Avogadro {
 
   void DrawTool::setAddHydrogens( int state )
   {
-    m_addHydrogens = state;
+    m_addHydrogens = (state == Qt::Checked);
   }
 
   int DrawTool::addHydrogens() const
@@ -822,7 +836,7 @@ namespace Avogadro {
       grid->addLayout(tmp2, 1, 1);
 
       m_addHydrogensCheck = new QCheckBox(tr("Adjust Hydrogens"), m_settingsWidget);
-      m_addHydrogensCheck->setCheckState((Qt::CheckState)m_addHydrogens);
+      m_addHydrogensCheck->setCheckState(m_addHydrogens ? Qt::Checked : Qt::Unchecked);
 
       m_layout = new QVBoxLayout();
       m_layout->addLayout(grid);
@@ -867,7 +881,7 @@ namespace Avogadro {
   void DrawTool::readSettings(QSettings &settings)
   {
     Tool::readSettings(settings);
-    setAddHydrogens(settings.value("addHydrogens", 2).toInt());
+    m_addHydrogens = settings.value("addHydrogens", true).toBool();
     setElement(settings.value("currentElement", 6).toInt());
     setBondOrder(settings.value("bondOrder", 1).toInt());
     if (m_comboElements)
@@ -878,7 +892,7 @@ namespace Avogadro {
       m_comboElements->setCurrentIndex(index);
     }
     if(m_addHydrogensCheck)
-      m_addHydrogensCheck->setCheckState((Qt::CheckState)m_addHydrogens);
+      m_addHydrogensCheck->setCheckState(m_addHydrogens ? Qt::Checked : Qt::Unchecked);
   }
 }
 

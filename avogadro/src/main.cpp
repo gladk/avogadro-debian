@@ -102,17 +102,20 @@ int main(int argc, char *argv[])
 #ifdef AVO_APP_BUNDLE
   // Set up the babel data and plugin directories for Mac - relocatable
   // This also works for the Windows package, but BABEL_LIBDIR is ignored
-  QByteArray babelDataDir(("BABEL_DATADIR="
-                           + QCoreApplication::applicationDirPath()
-                           + "/../share/openbabel/").toAscii());
-  QByteArray babelLibDir(("BABEL_LIBDIR="
-                          + QCoreApplication::applicationDirPath()
-                          + "/../lib/openbabel").toAscii());
-  int res1 = putenv(babelDataDir.data());
-  int res2 = putenv(babelLibDir.data());
+
+  // Make sure to enclose the environment variable in quotes, or spaces will cause problems
+  QString escapedAppPath = QCoreApplication::applicationDirPath().replace(' ', "\ ");
+  QByteArray babelDataDir((QCoreApplication::applicationDirPath()
+                          + "/../share/openbabel/").toAscii());
+  QByteArray babelLibDir((QCoreApplication::applicationDirPath()
+                         + "/../lib/openbabel").toAscii());
+  int res1 = setenv("BABEL_DATADIR", babelDataDir.data(), 1);
+  int res2 = setenv("BABEL_LIBDIR", babelLibDir.data(), 1);
+
+  qDebug() << "BABEL_LIBDIR" << babelLibDir.data();
 
   if (res1 != 0 || res2 != 0)
-    qDebug() << "Error: putenv failed." << res1 << res2;
+    qDebug() << "Error: setenv failed." << res1 << res2;
 
   // Override the Qt plugin search path too
   QStringList pluginSearchPaths;
@@ -194,50 +197,53 @@ int main(int argc, char *argv[])
     printVersion(arguments[0]);
     return 0;
   }
-  else if(arguments.contains("-h") || arguments.contains("--help")) {
+  else if(arguments.contains("-h") || arguments.contains("-help") 
+  	|| arguments.contains("--help")) {
     printHelp(arguments[0]);
     return 0;
   }
 
   if (!QGLFormat::hasOpenGL()) {
-    QMessageBox::information(0, QCoreApplication::translate("main.cpp", "Avogadro"),
-        QCoreApplication::translate("main.cpp", "This system does not support OpenGL."));
+  //  QMessageBox::information(0, QCoreApplication::translate("main.cpp", "Avogadro"),
+  //      QCoreApplication::translate("main.cpp", "This system does not support OpenGL."));
+      QMessageBox::information(0, "Avogadro", "This system does not support OpenGL.");
     return -1;
   }
-  qDebug() << QCoreApplication::translate("main.cpp", "System has OpenGL support.");
+  qDebug() << /*QCoreApplication::translate("main.cpp", */"System has OpenGL support."/*)*/;
 
   // Extra debug messages to check out where some init segfaults are happening
-  qDebug() << QCoreApplication::translate("main.cpp", "About to test OpenGL capabilities.");
+  qDebug() << /*QCoreApplication::translate("main.cpp", */"About to test OpenGL capabilities."/*)*/;
   // use multi-sample (anti-aliased) OpenGL if available
   QGLFormat defFormat = QGLFormat::defaultFormat();
   defFormat.setSampleBuffers(true);
   QGLFormat::setDefaultFormat(defFormat);
 
   // Test what capabilities we have
-  qDebug() << QCoreApplication::translate("main.cpp", "OpenGL capabilities found: ");
+  //qDebug() << /*QCoreApplication::translate("main.cpp", */"OpenGL capabilities found: "/*)*/;
+  std::cout << "OpenGL capabilities found: " << std::endl;
   if (defFormat.doubleBuffer())
-    qDebug() << "\t" << QCoreApplication::translate("main.cpp", "Double Buffering.");
+    std::cout << "\t" << "Double Buffering." << std::endl;
   if (defFormat.directRendering())
-    qDebug() << "\t" << QCoreApplication::translate("main.cpp", "Direct Rendering.");
+    std::cout << "\t" << "Direct Rendering." << std::endl;
   if (defFormat.sampleBuffers())
-    qDebug() << "\t" << QCoreApplication::translate("main.cpp", "Antialiasing.");
+    std::cout << "\t" << "Antialiasing." << std::endl;
 
-  // Now load any files supplied on the command-line or via launching a file
+  // Now load any files supplied on the command-line or via launching a file.
+  // Additionally, process and remove any command line arguments.
   MainWindow *window = new MainWindow();
   if (arguments.size() > 1) {
     QPoint p(100, 100), offset(40,40);
     QList<QString>::const_iterator i = arguments.constBegin();
     for (++i; i != arguments.constEnd(); ++i) {
-      if (QFile::exists(*i)) {
+      if (i->startsWith("--erase-config")) {
+        window->setIgnoreConfig(true);
+      }
+      else {
         window->openFile(*i);
         // this costs us a few more function calls
         // but makes our loading look nicer
         window->show();
         app.processEvents();
-      }
-      else {
-        std::cout << "Warning: file '" << (*i).toLocal8Bit().data()
-                  << "'' does not exist!\n";
       }
     }
   }
@@ -254,6 +260,7 @@ void printVersion(const QString &)
   std::wcout << QCoreApplication::translate("main.cpp", "Avogadro: \t%1 (Hash %2)\n"
       "LibAvogadro: \t%3 (Hash %4)\n"
       "Qt: \t\t%5\n").arg(VERSION, SCM_REVISION, Library::version(), Library::scmRevision(), qVersion()).toStdWString();
+  std::wcout << "OpenBabel: \t" << BABEL_VERSION << std::endl;
   #endif
 }
 
@@ -261,13 +268,13 @@ void printHelp(const QString &appName)
 {
   #ifdef WIN32
   std::cout << "Usage: avogadro [options] [files]" << std::endl << std::endl;
-  std::cout << "Advanced Molecular Editor (version " << VERSION << ')' << std::endl << std::endl;
+  std::cout << "Avogadro - Advanced Molecular Editor (version " << VERSION << ')' << std::endl << std::endl;
   std::cout << "Options:" << std::endl;
   std::cout << "  -h, --help\t\tShow help options (this)" << std::endl;
   std::cout << "  -v, --version\t\tShow version information" << std::endl;
   #else
   std::wcout << QCoreApplication::translate("main.cpp", "Usage: %1 [options] [files]\n\n"
-      "Advanced Molecular Editor (version %2)\n\n"
+      "Avogadro - Advanced Molecular Editor (version %2)\n\n"
       "Options:\n"
       "  -h, --help\t\tShow help options (this)\n"
       "  -v, --version\t\tShow version information\n"

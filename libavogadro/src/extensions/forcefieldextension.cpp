@@ -28,6 +28,7 @@
 #include <avogadro/primitivelist.h>
 
 #include <openbabel/obconversion.h>
+#include <openbabel/conformersearch.h>
 
 #include <QProgressDialog>
 #include <QWriteLocker>
@@ -187,8 +188,10 @@ namespace Avogadro
       mol = m_molecule->OBMol();
       if ( !m_forceField->Setup( mol, m_constraints->constraints() ) ) {
         QMessageBox::warning( widget, tr( "Avogadro" ),
-          tr( "Cannot set up the force field for this molecule." ));
-        break;
+          tr( "Cannot set up the currently selected force field for this molecule. Switching to UFF." ));
+        m_forceField = OBForceField::FindForceField("UFF");
+        m_forceField->SetLogFile( &buff );
+        m_forceField->SetLogLevel( OBFF_LOGLVL_HIGH );
       }
 
       energy = m_forceField->Energy();
@@ -210,9 +213,19 @@ namespace Avogadro
       mol = m_molecule->OBMol();
       if ( !m_forceField->Setup( mol, m_constraints->constraints() ) ) {
         QMessageBox::warning( widget, tr( "Avogadro" ),
-          tr( "Cannot set up the force field for this molecule." ));
-        break;
+          tr( "Cannot set up the currently selected force field for this molecule. Switching to UFF." ));
+        m_forceField = OBForceField::FindForceField("UFF");
+        m_forceField->SetLogFile( &buff );
+        m_forceField->SetLogLevel( OBFF_LOGLVL_LOW );
       }
+
+      // Set up some cutoffs for electrostatic and VDW interactions
+      // Only update them periodically
+      // For conformer search, exact geom not as important
+      m_forceField->EnableCutOff(true);
+      m_forceField->SetUpdateFrequency(10);
+      m_forceField->SetVDWCutOff(8.0);
+      m_forceField->SetElectrostaticCutOff(10.0);
 
       if (!m_conformerDialog)
         m_conformerDialog = new ConformerSearchDialog(static_cast<QWidget*>(parent()));
@@ -230,9 +243,19 @@ namespace Avogadro
       mol = m_molecule->OBMol();
       if ( !m_forceField->Setup( mol, m_constraints->constraints() ) ) {
         QMessageBox::warning( widget, tr( "Avogadro" ),
-          tr( "Cannot set up the force field for this molecule." ));
-        break;
+          tr( "Cannot set up the currently selected force field for this molecule. Switching to UFF." ));
+        m_forceField = OBForceField::FindForceField("UFF");
+        m_forceField->SetLogFile( &buff );
+        m_forceField->SetLogLevel( OBFF_LOGLVL_LOW );
       }
+
+      // Set up some cutoffs for electrostatic and VDW interactions
+      // Only update them periodically
+      // For conformer search, exact geom not as important
+      m_forceField->EnableCutOff(true);
+      m_forceField->SetUpdateFrequency(5);
+      m_forceField->SetVDWCutOff(10.0);
+      m_forceField->SetElectrostaticCutOff(25.0);
 
       undo = new ForceFieldCommand( m_molecule, m_forceField, m_constraints,
                                     0, m_dialog->nSteps(), m_dialog->algorithm(),
@@ -313,6 +336,26 @@ namespace Avogadro
     m_numConformers = numConformers;
   }
 
+  void ForceFieldThread::setNumChildren(int numChildren)
+  {
+    m_numChildren = numChildren;
+  }
+
+  void ForceFieldThread::setMutability(int mutability)
+  {
+    m_mutability = mutability;
+  }
+
+  void ForceFieldThread::setConvergence(int convergence)
+  {
+    m_convergence = convergence;
+  }
+
+  void ForceFieldThread::setMethod(int method)
+  {
+    m_method = method;
+  }
+
   void ForceFieldThread::copyConformers()
   {
     OBMol obmol = m_molecule->OBMol();
@@ -372,7 +415,7 @@ namespace Avogadro
           if (atom->atomicNumber() < 1)
             m_constraints->addIgnore(atom->index() + 1);
         }
-      
+
       m_forceField->SetConstraints(m_constraints->constraints());
     }
 
@@ -494,6 +537,38 @@ namespace Avogadro
       m_forceField->WeightedRotorSearch(m_numConformers, m_nSteps);
       m_forceField->ConjugateGradients(250);
       copyConformers();
+    } else if ( m_task == 4 ) {
+      OBConformerSearch cs;
+      if (m_method == 1)
+        cs.SetScore(new OBEnergyConformerScore);
+
+      if (cs.Setup(mol, m_numConformers, m_numChildren, m_mutability, m_convergence)) {
+        cs.Search();
+        cs.GetConformers(mol);
+      }
+
+      qDebug() << "Number of Conformers: " << mol.NumConformers();
+
+      // Copy conformer data from OBMol to Molecule
+      for (int i = 0; i < mol.NumConformers(); ++i) {
+        // set the current conformer
+        mol.SetConformer(i);
+        // copy the coordinates
+        double *coordPtr = mol.GetCoordinates();
+        std::vector<Eigen::Vector3d> conformer;
+        foreach (Atom *atom, m_molecule->atoms()) {
+          while (conformer.size() < atom->id())
+            conformer.push_back(Eigen::Vector3d(0.0, 0.0, 0.0));
+          conformer.push_back(Eigen::Vector3d(coordPtr));
+          coordPtr += 3;
+        }
+
+        // add the conformer to m_molecule
+        m_molecule->addConformer(conformer, i);
+        // set it to the current conformer
+        m_molecule->setConformer(i);
+      }
+
     }
 
     double energy = m_forceField->Energy();
@@ -563,6 +638,26 @@ namespace Avogadro
     m_numConformers = numConformers;
   }
 
+  void ForceFieldCommand::setNumChildren(int numChildren)
+  {
+    m_numChildren = numChildren;
+  }
+
+  void ForceFieldCommand::setMutability(int mutability)
+  {
+    m_mutability = mutability;
+  }
+
+  void ForceFieldCommand::setConvergence(int convergence)
+  {
+    m_convergence = convergence;
+  }
+
+  void ForceFieldCommand::setMethod(int method)
+  {
+    m_method = method;
+  }
+
   void ForceFieldCommand::redo()
   {
     if(!m_dialog) {
@@ -579,8 +674,11 @@ namespace Avogadro
         m_dialog = new QProgressDialog( QObject::tr( "Weighted Rotor Search" ),
                                         QObject::tr( "Cancel" ), 0,  0 );
         m_dialog->show();
+      } else if ( m_task == 4) {
+        m_dialog = new QProgressDialog( QObject::tr( "Genetic Algorithm Search" ),
+                                        QObject::tr( "Cancel" ), 0,  0 );
+        m_dialog->show();
       }
-
 
       QObject::connect( m_thread, SIGNAL( stepsTaken( int ) ), m_dialog, SLOT( setValue( int ) ) );
       QObject::connect( m_dialog, SIGNAL( canceled() ), m_thread, SLOT( stop() ) );
@@ -589,6 +687,10 @@ namespace Avogadro
 
     m_thread->setTask(m_task);
     m_thread->setNumConformers(m_numConformers);
+    m_thread->setNumChildren(m_numChildren);
+    m_thread->setMutability(m_mutability);
+    m_thread->setConvergence(m_convergence);
+    m_thread->setMethod(m_method);
     m_thread->start();
   }
 

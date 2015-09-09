@@ -6,6 +6,7 @@
 	Copyright (c) 2007 Carsten Niehaus
 	Copyright (c) 2007-2008 Marcus D. Hanwell
 	Copyright (c) 2007-2009 Geoff Hutchison
+        Copyright (C) 2011 David C. Lonie
 
   This file is part of the Avogadro molecular editor project.
   For more information, see <http://avogadro.openmolecules.net/>
@@ -108,13 +109,21 @@ namespace Avogadro {
         *         the camera orientation and position
         * @sa setModelview(), const Eigen::Transform3d & modelview() const */
       Eigen::Transform3d & modelview();
-      /** Calls gluPerspective() with parameters automatically chosen
+      /** Calls gluPerspective() or glOrtho() with parameters automatically chosen
+        * for rendering the GLWidget's molecule with this camera. Should be called
+        * only in GL_PROJECTION matrix mode. Example code is given
+        * in the class's comment.
+        * @deprecated Use applyProjection instead.
+        * @sa applyModelview(), initializeViewPoint()
+        */
+      void applyPerspective() const;
+      /** Calls gluPerspective() or glOrtho() with parameters automatically chosen
         * for rendering the GLWidget's molecule with this camera. Should be called
         * only in GL_PROJECTION matrix mode. Example code is given
         * in the class's comment.
         * @sa applyModelview(), initializeViewPoint()
         */
-      void applyPerspective() const;
+      void applyProjection() const;
       /** Calls glMultMatrix() with the camera's "modelview" matrix. Should be called
         * only in GL_MODELVIEW matrix mode. Example code is given
         * in the class's comment.
@@ -180,6 +189,20 @@ namespace Avogadro {
         *             axis.norm() must be close to 1.
         * @sa prerotate()*/
       void prerotate(const double &angle, const Eigen::Vector3d &axis);
+
+      /** For perspective projections, multiply the camera's "modelview"
+        * matrix by a scaling coefficient. It affects the linear part of the
+        * camera's "modelview" matrix only.
+        *
+        * For orthographic projections, this affects the width and height of
+        * the projection, scaling the eye coordinates isotropically.
+        *
+        * Use this method if you want to give the impression that the camera
+        * is zooming in or out.
+        *
+        * @param coefficient the scaling coefficient
+        */
+      void scale(double coefficient);
 
       /**
        * Performs an unprojection from window coordinates to space coordinates.
@@ -273,7 +296,21 @@ namespace Avogadro {
        * space coordinate system.
        */
       Eigen::Vector3d transformedZAxis() const;
-      
+
+      /**
+       * Obtain a normal vector and point defining the plane of the
+       * clipping plane nearest the camera.
+       *
+       * @param normal Overwritten with a normalized vector orthogonal
+       * to the plane. All planes have two normal vectors -- this
+       * vector is the one pointing into the viewing volume.
+       * @param point Overwritten with a point that lies within the
+       * plane. This is the point at (-1, -1, -1) in normalized device
+       * coordinates (i.e. the bottom left corner of the viewport).
+       * @return True if the clipping plane exists, false otherwise.
+       */
+      bool nearClippingPlane(Eigen::Vector3d *normal, Eigen::Vector3d *point);
+
       /** The linear component (ie the 3x3 topleft block) of the camera matrix must
         * always be a rotation. But after several hundreds of operations on it,
         * it can drift farther and farther away from being a rotation. This method
@@ -286,9 +323,25 @@ namespace Avogadro {
         */
       void normalize();
 
+      /**
+       * Calculate the isotropic scaling coefficient of the camera's "modelview" matrix. It
+       * assumes the intial volume of the camera's "modelview" space (determinant of the
+       * camera's "modelview" matrix linear component) is equal to unity.
+       * @return scaling coefficient
+       */
+      double scalingCoefficient();
+
     private:
       CameraPrivate * const d;
 
+      /**Given {x, y, z, w} returns {x, y, z} / w.
+       *
+       * @param v4 {x,y,z,x} vector
+       * @return {x/w, y/w, z/w} vector
+       */
+      Eigen::Vector3d V4toV3DivW(const Eigen::Vector4d & v4) {
+        return v4.start<3>()/v4.w();
+      }
   };
 
 } // end namespace Avogadro

@@ -1,7 +1,3 @@
-# The use file for Avogadro, distributed along with Avogadro
-include(CMakeImportBuildSettings)
-cmake_import_build_settings(${Avogadro_BUILD_SETTINGS_FILE})
-
 # Set up the include directories and link directories
 include_directories(${Avogadro_INCLUDE_DIRS})
 link_directories(${Avogadro_LIBRARY_DIRS})
@@ -22,7 +18,6 @@ if(Avogadro_ENABLE_GLSL)
   find_package(GLEW)
   if(GLEW_FOUND)
     include_directories(${GLEW_INCLUDE_DIR})
-    link_directories(${GLEW_LIBRARY_DIR})
     add_definitions(-DENABLE_GLSL)
   endif(GLEW_FOUND)
 endif(Avogadro_ENABLE_GLSL)
@@ -42,10 +37,31 @@ function(avogadro_plugin plugin_name src_list)
     # Process the RC file and add it to the plugin
     qt4_add_resources(plugin_RC_SRCS ${ARGV3})
   endif(NOT "${ARGV3}" STREQUAL "")
-  add_library(${plugin_name} MODULE ${src_list} ${plugin_UIS_H}
+  add_library(${plugin_name} SHARED ${src_list} ${plugin_UIS_H}
               ${plugin_RC_SRCS})
   target_link_libraries(${plugin_name} avogadro)
+
+  if(UNIX)
+    add_custom_target("${plugin_name}.mf"
+      COMMAND avopkg -wizard "${plugin_name}"
+    )
+    add_custom_target("${plugin_name}.manifest"
+      DEPENDS "${plugin_name}.mf"
+    )
+    add_custom_target("${plugin_name}.avo"
+      COMMAND avopkg -pack "${plugin_name}.mf"
+    )
+    add_custom_target("${plugin_name}.package"
+      DEPENDS "${plugin_name}.avo"
+    )
+    add_custom_target("${plugin_name}.install_package"
+      COMMAND avopkg "${plugin_name}.avo"
+      DEPENDS "${plugin_name}.avo"
+    )
+  endif(UNIX)
+    
   install(TARGETS ${plugin_name} DESTINATION "${Avogadro_PLUGIN_DIR}/contrib")
+
   set_target_properties(${plugin_name} PROPERTIES
                         OUTPUT_NAME ${plugin_name}
                         PREFIX "")

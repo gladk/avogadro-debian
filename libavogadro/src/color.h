@@ -32,13 +32,7 @@
 #include <avogadro/global.h>
 #include <avogadro/plugin.h>
 
-#ifdef ENABLE_GLSL
-  #include <GL/glew.h>
-#else
-  #include <QGLWidget>
-#endif
-
-#include <QColor> // for returning QColor
+#include <QtGui/QColor> // for returning QColor
 
 #define AVOGADRO_COLOR(i, t, d)                 \
   public: \
@@ -91,6 +85,23 @@ namespace Avogadro {
      * \sa set()
      */
     Color(float red, float green, float blue, float alpha = 1.0 );
+
+    /**
+     * This constructor sets the color to that of @a qcolor.
+     *
+     * @param qcolor The desired QColor
+     * \sa set()
+     */
+    explicit Color(const QColor &qcolor);
+
+
+    /**
+     * Copy constructor sets the color to that of @a c.
+     *
+     * @param c The desired Color
+     * \sa set()
+     */
+    Color(const Color &c);
 
     /**
      * Set the color based on the supplied Primitive.
@@ -174,11 +185,7 @@ namespace Avogadro {
      * Sets this color to be the one used by OpenGL for rendering
      * when lighting is disabled.
      */
-    virtual void apply()
-    {
-      glColor4fv(m_channels);
-    }
-
+    virtual void apply();
     /**
      * Applies nice OpenGL materials using this color as the
      * diffuse color while using different shades for the ambient and
