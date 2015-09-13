@@ -6,7 +6,7 @@ Uploaders: Michael Banck <mbanck@debian.org>
 Build-Depends: cmake (>> 2.6.0),
                debhelper (>> 7.0.50~),
                libboost-python-dev,
-               libeigen3-dev (>> 3.3),
+               libeigen3-dev (>= 3.3),
                libgl2ps-dev,
                libglew-dev,
                libopenbabel-dev (>> 2.2.0),
