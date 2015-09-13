@@ -1,3 +1,9 @@
+avogadro (1.1.1-1~exp3) experimental; urgency=medium
+
+  * [030ee70] Fix eigen3 dependency.
+
+ -- Anton Gladky <gladk@debian.org>  Sun, 13 Sep 2015 15:29:38 +0200
+
 avogadro (1.1.1-1~exp2) experimental; urgency=medium
 
   * [ff93007] Use eigen3 >>3.3.
